@@ -6,20 +6,20 @@ import SiteUsers from './site-users';
 import { fetchUserData } from '../../action';
 
 const AdminUsers = class extends Component {
-    componentWillMount() {
-        if(this.props.USERSIGNEDIN) {
-			Engine.dispatch(fetchUserData([{dataKey: 'profile'}, {dataKey: 'siteUsers'}]));
-        }
-    }
+	componentDidMount() {
+		if (this.props.USERSIGNEDIN) {
+			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'siteUsers' }]));
+		}
+	}
 
 	render() {
-        let {profile, users} = this.props;
+		let { profile, users } = this.props;
 		users = users || [];
 
 		return (
 			<section>
-				{Engine.component(UserTabs, {profile})}
-				{Engine.component(SiteUsers, {profile, users})}
+				{Engine.component(UserTabs, { profile })}
+				{Engine.component(SiteUsers, { profile, users })}
 			</section>
 		);
 	};

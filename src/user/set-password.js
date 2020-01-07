@@ -7,24 +7,24 @@ import { Engine } from '../common/engine';
 import { updateStateModelData } from '../action';
 
 class SetPassword extends Component {
-    componentWillMount() {
-        let accCode = Engine.param('accCode') || null;
+	componentDidMount() {
+		let accCode = Engine.param('accCode') || null;
 
-        if(accCode) {
-        	UserFunction.validateAccCode(accCode);
-		}else {
-            Engine.dispatch(updateStateModelData({
+		if (accCode) {
+			UserFunction.validateAccCode(accCode);
+		} else {
+			Engine.dispatch(updateStateModelData({
 				accCode: null
 			}));
 		}
-    }
+	}
 
 	render() {
-        const {ERRORS, MODELS} = this.props,
+		const { ERRORS, MODELS } = this.props,
 			accCode = MODELS['accCode'];
 
-        if(!accCode) {
-        	return (
+		if (!accCode) {
+			return (
 				<div className="page_error">
 					<div>{getLabel('c_reset_err_title')}:</div>
 					<div>
@@ -46,21 +46,21 @@ class SetPassword extends Component {
 					<div className="ad_inline_block">
 						<div className="account_box_label">{getLabel('c_new_pwd_title')}</div>
 					</div><div className="ad_inline_block_top">
-					<div className="account_box_field">
-						{ERRORS['new_password'] ? (<div className="error">{getLabel(ERRORS['new_password'])}</div>) : null}
-						<input type="password" name="new_password" maxLength="40" />
+						<div className="account_box_field">
+							{ERRORS['new_password'] ? (<div className="error">{getLabel(ERRORS['new_password'])}</div>) : null}
+							<input type="password" name="new_password" maxLength="40" />
+						</div>
 					</div>
-				</div>
 					<div className="ad_inline_block">
 						<div className="account_box_label">{getLabel('c_con_new_pwd_title')}</div>
 					</div><div className="ad_inline_block_top">
-					<div className="account_box_field">
-                        {ERRORS['confirm_new_password'] ? (<div className="error">{getLabel(ERRORS['confirm_new_password'])}</div>) : null}
-						<input type="password" name="confirm_new_password" maxLength="40" />
+						<div className="account_box_field">
+							{ERRORS['confirm_new_password'] ? (<div className="error">{getLabel(ERRORS['confirm_new_password'])}</div>) : null}
+							<input type="password" name="confirm_new_password" maxLength="40" />
+						</div>
 					</div>
-				</div>
 					<div className="account_box_label">
-                        {Helper.submitButton('c_submit', 'reset_password')}
+						{Helper.submitButton('c_submit', 'reset_password')}
 						<input type="hidden" name="acc_code" value={accCode} />
 					</div>
 				</form>

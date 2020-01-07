@@ -6,20 +6,20 @@ import Permission from './permission';
 import { fetchUserData } from '../../action';
 
 const AdminUsers = class extends Component {
-    componentWillMount() {
-        if(this.props.USERSIGNEDIN) {
-			Engine.dispatch(fetchUserData([{dataKey: 'profile'}, {dataKey: 'files'}]));
-        }
-    }
+	componentDidMount() {
+		if (this.props.USERSIGNEDIN) {
+			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'files' }]));
+		}
+	}
 
 	render() {
-        let {profile, files, USERSIGNEDIN} = this.props;
+		let { profile, files, USERSIGNEDIN } = this.props;
 		files = files || [];
 
 		return (
 			<section>
-				{Engine.component(UserTabs, {profile})}
-				{Engine.component(Permission, {profile, files, USERSIGNEDIN})}
+				{Engine.component(UserTabs, { profile })}
+				{Engine.component(Permission, { profile, files, USERSIGNEDIN })}
 			</section>
 		);
 	};

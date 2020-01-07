@@ -1,7 +1,6 @@
 import { combineReducers } from 'redux';
 import * as Action from '../action';
 import { Engine } from '../common/engine';
-import { startColumnNumber } from '../common/config';
 
 const advertiseList = (state = {}, action) => {
 	switch (action.type) {
@@ -184,15 +183,6 @@ const userDataSet = (state = {}, action) => {
 	}
 };
 
-const setColumnNumber = (state = startColumnNumber, action) => {
-	switch (action.type) {
-		case Action.CHANGE_COLUMN_NUMBER:
-			return state + action.numberValue;
-		default:
-			return state;
-	}
-};
-
 const stateObjects = (state = {}, action) => {
 	switch (action.type) {
 		case Action.SAVE_STATE_OBJECTS:
@@ -239,7 +229,6 @@ const RootReducer = combineReducers({
 	POSTERRORS: setPostErrors,
 	ERRORS: setErrors,
 	USER: userDataSet,
-	NAVIGATIONCOLUMN: setColumnNumber,
 	OBJECTS: stateObjects,
 	IMAGES: asyncLoadedImages,
 	loadingImagesMessage

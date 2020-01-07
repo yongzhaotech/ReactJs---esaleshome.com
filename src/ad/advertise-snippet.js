@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Badge, Image, Col } from 'react-bootstrap';
 import { getLabel } from '../common/label';
 import { AdInfo } from '../common/ad-info';
@@ -9,7 +9,7 @@ import Glyphicon from './ad-glyphicon';
 
 class AdvertiseSnippet extends Component {
 	render() {
-        const {ad, OBJECTS, LANGUAGE, IMAGES} = this.props,
+		const { ad, OBJECTS, LANGUAGE, IMAGES } = this.props,
 			photo = +ad.picture_id ? 'photo' : '',
 			image = !!IMAGES[ad.picture_id] ? ad.picture_id : '00';
 
@@ -17,7 +17,7 @@ class AdvertiseSnippet extends Component {
 			<Col xs={6} sm={4} md={3}>
 				<div className={`ad_block ${OBJECTS.DETAILFLAG === ad.id ? 'dtl_bk' : ''}`}>
 					<div className={`block_icon ${photo}`}>
-						<a href="" onClick={e => {e.preventDefault(); AdInfo.largeImageOnList(ad)}}>
+						<a href="" onClick={e => { e.preventDefault(); AdInfo.largeImageOnList(ad) }}>
 							<Image src={`${smallImageSrc}${image}.jpg`} thumbnail className="ad_image" alt={ad.name} />
 						</a>
 					</div>

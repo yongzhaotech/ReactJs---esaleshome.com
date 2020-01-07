@@ -6,20 +6,20 @@ import Categories from './categories';
 import { fetchUserData } from '../../action';
 
 class SaveCategory extends Component {
-    componentWillMount() {
-        if(this.props.USERSIGNEDIN) {
- 			Engine.dispatch(fetchUserData([{dataKey: 'profile'}, {dataKey: 'categories'}]));
-        }
-    }
+	componentDidMount() {
+		if (this.props.USERSIGNEDIN) {
+			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'categories' }]));
+		}
+	}
 
 	render() {
-        let {profile, categories} = this.props;
-			categories = categories || [];
+		let { profile, categories } = this.props;
+		categories = categories || [];
 
 		return (
 			<section>
-				{Engine.component(UserTabs, {profile})}
-				{Engine.component(Categories, {profile, categories})}
+				{Engine.component(UserTabs, { profile })}
+				{Engine.component(Categories, { profile, categories })}
 			</section>
 		);
 	};

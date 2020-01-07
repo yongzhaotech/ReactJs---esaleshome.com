@@ -6,22 +6,22 @@ import SiteAds from './site-ads';
 import { fetchUserData } from '../../action';
 
 const AdminAds = class extends Component {
-    componentWillMount() {
-        if(this.props.USERSIGNEDIN) {
-			Engine.dispatch(fetchUserData([{dataKey: 'profile'}, {dataKey: 'siteAds'}]));
-        }
-    }
+	componentDidMount() {
+		if (this.props.USERSIGNEDIN) {
+			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'siteAds' }]));
+		}
+	}
 
 	render() {
-        const {profile, siteAds, USERSIGNEDIN} = this.props,
+		const { profile, siteAds, USERSIGNEDIN } = this.props,
 			ads = (siteAds && siteAds.ads) || [],
 			pages = (siteAds && siteAds.pages && siteAds.pages.p) || [],
 			currentPage = (siteAds && siteAds.pages && siteAds.pages.c) || 0;
 
 		return (
 			<section>
-				{Engine.component(UserTabs, {profile})}
-				{Engine.component(SiteAds, {profile, ads, pages, currentPage, USERSIGNEDIN})}
+				{Engine.component(UserTabs, { profile })}
+				{Engine.component(SiteAds, { profile, ads, pages, currentPage, USERSIGNEDIN })}
 			</section>
 		);
 	};

@@ -6,18 +6,18 @@ import UserAdvertiseSnippets from './user-advertise-snippets';
 import { fetchUserData } from '../action';
 
 const UserAdvertise = class extends Component {
-    componentWillMount() {
-        if(this.props.USERSIGNEDIN) {
-			Engine.dispatch(fetchUserData([{dataKey: 'profile'}, {dataKey: 'ads'}]));
-        }
-    }
+	componentDidMount() {
+		if (this.props.USERSIGNEDIN) {
+			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'ads' }]));
+		}
+	}
 
 	render() {
-        const {profile,	ads} = this.props;
+		const { profile, ads } = this.props;
 		return (
 			<section>
-				{Engine.component(UserTabs, {profile})}
-				{Engine.component(UserAdvertiseSnippets, {profile, ads})}
+				{Engine.component(UserTabs, { profile })}
+				{Engine.component(UserAdvertiseSnippets, { profile, ads })}
 			</section>
 		);
 	};

@@ -6,23 +6,23 @@ import VisitorHits from './visitor-hits';
 import { fetchUserData } from '../../action';
 
 const AdminVisitorHits = class extends Component {
-    componentWillMount() {
-        if(this.props.USERSIGNEDIN) {
- 			Engine.dispatch(fetchUserData([{dataKey: 'profile'}, {dataKey: 'visitorHits'}]));
-       }
-    }
+	componentDidMount() {
+		if (this.props.USERSIGNEDIN) {
+			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'visitorHits' }]));
+		}
+	}
 
 	render() {
-        let {profile, visitorHits} = this.props;
+		let { profile, visitorHits } = this.props;
 		visitorHits = visitorHits || {};
-		let	hits = visitorHits.hits || [],
+		let hits = visitorHits.hits || [],
 			pages = (visitorHits.pages && visitorHits.pages.p) || [],
 			currentPage = (visitorHits.pages && visitorHits.pages.c) || 0;
 
 		return (
 			<section>
-				{Engine.component(UserTabs, {profile})}
-				{Engine.component(VisitorHits, {profile, hits, pages, currentPage})}
+				{Engine.component(UserTabs, { profile })}
+				{Engine.component(VisitorHits, { profile, hits, pages, currentPage })}
 			</section>
 		);
 	};

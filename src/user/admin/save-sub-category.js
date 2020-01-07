@@ -6,20 +6,20 @@ import SubCategories from './sub-categories';
 import { fetchUserData } from '../../action';
 
 class SaveSubCategory extends Component {
-    componentWillMount() {
-        if(this.props.USERSIGNEDIN) {
- 			Engine.dispatch(fetchUserData([{dataKey: 'profile'}, {dataKey: 'subCategories'}]));
+	componentDidMount() {
+		if (this.props.USERSIGNEDIN) {
+			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'subCategories' }]));
 		}
-    }
+	}
 
 	render() {
-        let {profile, subCategories} = this.props;
+		let { profile, subCategories } = this.props;
 		subCategories = subCategories || [];
 
 		return (
 			<section>
-				{Engine.component(UserTabs, {profile})}
-				{Engine.component(SubCategories, {profile, subCategories})}
+				{Engine.component(UserTabs, { profile })}
+				{Engine.component(SubCategories, { profile, subCategories })}
 			</section>
 		);
 	};
