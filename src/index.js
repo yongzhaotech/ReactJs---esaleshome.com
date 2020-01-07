@@ -4,15 +4,23 @@ import { createStore, applyMiddleware } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { Provider } from 'react-redux';
 import { CookiesProvider } from 'react-cookie';
+import { persistStore, persistReducer } from "redux-persist";
+import { PersistGate } from "redux-persist/integration/react";
+import storage from "redux-persist/lib/storage"
 import RootReducer from './reducer';
 import RootSaga from './saga';
 import Advertise from './main/advertise';
 import { Engine } from './common/engine';
 import registerServiceWorker from './registerServiceWorker';
 
-const sagaMiddleware = createSagaMiddleware(),
+const config = {
+	key: "esaleshome-app",
+	storage,
+	whitelist: ["language"]
+},
+	sagaMiddleware = createSagaMiddleware(),
 	store = createStore(
-		RootReducer,
+		persistReducer(config, RootReducer),
 		applyMiddleware(sagaMiddleware)
 	);
 
@@ -23,7 +31,9 @@ sagaMiddleware.run(RootSaga);
 ReactDOM.render((
 	<Provider store={store}>
 		<CookiesProvider>
-			<Advertise />
+			<PersistGate loading={null} persistor={persistStore(store)}>
+				<Advertise />
+			</PersistGate>
 		</CookiesProvider>
 	</Provider>
 ), document.getElementById('esaleshome-root')
