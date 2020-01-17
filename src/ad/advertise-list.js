@@ -21,9 +21,9 @@ export class AdvertiseList extends Component {
 			sorting: 'create_date,des'
 		};
 	};
-	
+
 	componentDidMount() {
-		if(!this.props.performSearch) {
+		if (!this.props.performSearch) {
 			Engine.dispatch(fetchAdvertises());
 		}
 	};
@@ -33,49 +33,49 @@ export class AdvertiseList extends Component {
 			sorting: eventKey
 		});
 	};
-	
+
 	applySorting = (a, b) => {
-		if(!this.state.sorting) {
+		if (!this.state.sorting) {
 			return 0;
 		}
 		const [by, type] = this.state.sorting.split(','),
 			[A, B] = [a[by], b[by]];
-		if(type === 'asc') {
-			if(A < B) {
+		if (type === 'asc') {
+			if (A < B) {
 				return -1;
 			}
-			if(A > B) {
+			if (A > B) {
 				return 1;
 			}
 			return 0;
-		}else if(type === 'des') {
-			if(A < B) {
+		} else if (type === 'des') {
+			if (A < B) {
 				return 1;
 			}
-			if(A > B) {
+			if (A > B) {
 				return -1;
 			}
-			return 0;			
+			return 0;
 		}
 	};
-	
+
 	render() {
-        let resultSets = this.props.resultSets || {},
+		let resultSets = this.props.resultSets || {},
 			pages = resultSets.pages || [],
 			currentPage = resultSets.currentPage || 0,
 			searchAd = resultSets.searchAd || false,
 			ads = (resultSets.ads || []).sort(this.applySorting);
-			
+
 		return (ads.length && (
 			<React.Fragment>
 				{Engine.component(SearchTerms)}
 				<div className="page-list">
-					{Engine.component(PagesList, {pages, searchAd, currentPage, ads})}
+					{Engine.component(PagesList, { pages, searchAd, currentPage, ads })}
 					{
 						ads.length > 1 ? (<SortAds onSort={this.sortAds} sort={this.state.sorting} />) : null
 					}
 				</div>
-				{Engine.component(AdvertiseSnippets, {ads, pageTitle: this.pageTitle})}
+				{Engine.component(AdvertiseSnippets, { ads, pageTitle: this.pageTitle })}
 			</React.Fragment>
 		)) || (<ReactLoader />);
 	};

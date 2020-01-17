@@ -219,7 +219,7 @@ const searchSequence = {
 	},
 	AdInfo = {
 		safeHtml: html => //(<SanitizedHTML html={html.replace(/[\n]/g, '<br />')} />),
-			(<div contentEditable='true' dangerouslySetInnerHTML={{ __html: html }} />),
+			(<div dangerouslySetInnerHTML={{ __html: html.replace(/[\n]/g, '<br />') }} />),
 
 		byMail: ad => {
 			return ad && ad.contact_method && ad.contact_method.match(/\b(contact_)?email\b/) ? true : false;
