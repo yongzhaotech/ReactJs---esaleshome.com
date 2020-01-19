@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { Provider } from 'react-redux';
 import { CookiesProvider } from 'react-cookie';
@@ -13,15 +13,18 @@ import Advertise from './main/advertise';
 import { Engine } from './common/engine';
 import registerServiceWorker from './registerServiceWorker';
 
-const config = {
-	key: "esaleshome-app",
-	storage,
-	whitelist: ["language"]
-},
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose,
+	config = {
+		key: "esaleshome-app",
+		storage,
+		whitelist: ["language"]
+	},
 	sagaMiddleware = createSagaMiddleware(),
 	store = createStore(
 		persistReducer(config, RootReducer),
-		applyMiddleware(sagaMiddleware)
+		composeEnhancers(
+			applyMiddleware(sagaMiddleware)
+		)
 	);
 
 Engine.register(store);
