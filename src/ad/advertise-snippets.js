@@ -1,19 +1,11 @@
-import React, { Component } from 'react';
-import { Grid } from 'react-bootstrap';
-import AdvertiseSnippet from './advertise-snippet';
+import React from "react";
+import { Grid } from "react-bootstrap";
+import AdvertiseSnippet from "./advertise-snippet";
 
-class AdvertiseSnippets extends Component {
-	render() {
-		const { ads } = this.props;
+const AdvertiseSnippets = ({ ads }) => (
+	<Grid>
+		{ads.map(ad => (<AdvertiseSnippet key={ad.id} ad={ad} />))}
+	</Grid>
+);
 
-		let output = ads.map(ad => (<AdvertiseSnippet key={ad.id} ad={ad} />));
-
-		return (
-			<Grid>
-				{output}
-			</Grid>
-		);
-	};
-}
-
-export default AdvertiseSnippets;
+export default React.memo(AdvertiseSnippets);

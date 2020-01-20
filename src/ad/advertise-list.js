@@ -1,7 +1,6 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchAdvertises } from "../action";
-import { Engine } from "../common/engine";
 import SearchTerms from "./search-terms";
 import PagesList from "./pages-list"
 import AdvertiseSnippets from "./advertise-snippets";
@@ -59,14 +58,14 @@ const AdvertiseList = () => {
 
 	return (ads.length && (
 		<React.Fragment>
-			{Engine.component(SearchTerms)}
+			<SearchTerms />
 			<div className="page-list">
-				{Engine.component(PagesList, { pages, searchAd, currentPage, ads })}
+				<PagesList {...{ pages, searchAd, currentPage, ads }} />
 				{
 					ads.length > 1 ? (<SortAds onSort={sortAds(setSorting)} sort={sorting} />) : null
 				}
 			</div>
-			{Engine.component(AdvertiseSnippets, { ads })}
+			<AdvertiseSnippets ads={[...ads]} />
 		</React.Fragment>
 	)) || (<ReactLoader />);
 };
