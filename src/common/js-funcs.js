@@ -251,6 +251,7 @@ Helper = {
 		AdFuncs.clearScreen();
 	},
 	
+	/** @param {string | null} name */
 	title: (name = null) => {
 		document.title = name ? `${name} - ${title}` : title;
 	}	
