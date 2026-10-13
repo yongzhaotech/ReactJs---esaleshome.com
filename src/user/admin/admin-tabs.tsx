@@ -1,12 +1,18 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { getLabel } from '../../common/label';
 import {UserFunction} from '../user-function';
 
-class AdminTabs extends Component {
+interface AdminTabsProps {
+	profile?: {
+		access_level?: string | number;
+	};
+}
+
+class AdminTabs extends React.Component<AdminTabsProps> {
 	render() {
         let {profile} = this.props;
 
-        return profile && +profile.access_level > 1 ? (
+        return profile && Number(profile.access_level) > 1 ? (
 			<section>
 				<div className="block_spacer"></div>
 				<span className='wide_button' onClick={() => {UserFunction.userPage('save-category')}}>{getLabel('c_category')}</span>
