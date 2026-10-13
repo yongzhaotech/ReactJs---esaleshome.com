@@ -47,47 +47,50 @@ export const SELECT_CITY = 'SELECT_CITY';
 /*
  * @description action creators
  */
-export const loadingLargeImageCount = (message = '') => ({
+type Identifier = string | number;
+type SearchSuffix = '' | 'Search';
+
+export const loadingLargeImageCount = (message: string = '') => ({
 	type: LOADING_LARGE_IMAGE_COUNT,
 	message
 });	
  
-export const asyncImageLoaded = images => ({
+export const asyncImageLoaded = (images: Identifier[]) => ({
 	type: ASYNC_IMAGE_LOADED,
 	images
 });	
  
-export const viewLargeImages = currentImageId => ({
+export const viewLargeImages = (currentImageId: Identifier | undefined) => ({
 	type: VIEW_LARGE_IMAGES,
 	currentImageId
 });
  
-export const fetchAdvertises = (start = 0) => ({
+export const fetchAdvertises = (start: number = 0) => ({
 	type: FETCH_ADVERTISES,
 	start
 });
 
-export const fetchAdvertisesSuccess = resultSets => ({
+export const fetchAdvertisesSuccess = (resultSets: Record<string, unknown>) => ({
 	type: FETCH_ADVERTISES_SUCCESS,
 	resultSets
 });
 
-export const fetchAdvertiseSuccess = advertiseDetail => ({
+export const fetchAdvertiseSuccess = (advertiseDetail: Record<string, unknown>) => ({
 	type: FETCH_ADVERTISE_SUCCESS,
 	advertiseDetail
 });
 
-export const searchAdvertise = (start = 0) => ({
+export const searchAdvertise = (start: number = 0) => ({
 	type: SEARCH_ADVERTISE,
 	start
 });
 
-export const fetchAdvertise = advertiseId => ({
+export const fetchAdvertise = (advertiseId: Identifier) => ({
 	type: FETCH_ADVERTISE,
 	advertiseId
 });
 
-export const selectSearchTerm = term => ({
+export const selectSearchTerm = (term: Record<string, unknown>) => ({
 	type: SELECT_SEARCH_TERM,
 	term
 });
@@ -96,83 +99,83 @@ export const performSearch = () => ({
 	type: PERFORM_SEARCH
 });
 
-export const messageCenter = (type, message = '', error = false, callbacks = null) => ({
+export const messageCenter = (type: string, message: unknown = '', error: boolean = false, callbacks: unknown = null) => ({
 	type,
 	message,
 	error,
 	callbacks
 });
 
-export const searchTerms = (type, terms = []) => ({
+export const searchTerms = (type: string, terms: unknown[] = []) => ({
 	type,
 	terms
 }); 
 
-export const loadingData = (flag = false, hideTitle = false, loadingLargeImages = false) => ({
+export const loadingData = (flag: boolean = false, hideTitle: boolean = false, loadingLargeImages: boolean = false) => ({
 	type: LOADING_DATA,
 	flag,
 	hideTitle,
 	loadingLargeImages
 });
 
-export const selectCity = (cityId, cityObj, search = '') => ({
+export const selectCity = (cityId: Identifier, cityObj: unknown, search: SearchSuffix = '') => ({
 	type: search ? 'SELECT_CITY_SEARCH' : 'SELECT_CITY',
 	[`cityId${search}`]: cityId,
 	[`cityObj${search}`]: cityObj,
 	search
 });
 
-export const selectProv = (provId, provObj, search = '') => ({
+export const selectProv = (provId: Identifier, provObj: unknown, search: SearchSuffix = '') => ({
 	type: search ? 'SELECT_PROVINCE_SEARCH' : 'SELECT_PROVINCE',
 	[`provId${search}`]: provId,
 	[`provObj${search}`]: provObj,
 	search
 });
 
-export const selectItem = (itemId, itemObj, search = '') => ({
+export const selectItem = (itemId: Identifier, itemObj: unknown, search: SearchSuffix = '') => ({
 	type: search ? 'SELECT_ITEM_SEARCH' : 'SELECT_ITEM',
 	[`itemId${search}`]: itemId,
 	[`itemObj${search}`]: itemObj,
 	search
 });
 
-export const selectCat = (catId, catObj, search = '') => ({
+export const selectCat = (catId: Identifier, catObj: unknown, search: SearchSuffix = '') => ({
 	type: search ? 'SELECT_CATEGORY_SEARCH' : 'SELECT_CATEGORY',
 	[`catId${search}`]: catId,
 	[`catObj${search}`]: catObj,
 	search
 });
 
-export const expandCity = (expandCity, search = '') => ({
+export const expandCity = (expandCity: boolean, search: SearchSuffix = '') => ({
 	type: search ? 'EXPAND_CITY_SEARCH' : 'EXPAND_CITY',
 	[`expandCity${search}`]: expandCity,
 	search
 });
 
-export const expandProv = (expandProv, search = '') => ({
+export const expandProv = (expandProv: boolean, search: SearchSuffix = '') => ({
 	type: search ? 'EXPAND_PROVINCE_SEARCH' : 'EXPAND_PROVINCE',
 	[`expandProv${search}`]: expandProv,
 	search
 });
 
-export const expandItem = (expandItem, search = '') => ({
+export const expandItem = (expandItem: boolean, search: SearchSuffix = '') => ({
 	type: search ? 'EXPAND_ITEM_SEARCH' : 'EXPAND_ITEM',
 	[`expandItem${search}`]: expandItem,
 	search
 });
 
-export const expandCat = (expandCat, search = '') => ({
+export const expandCat = (expandCat: boolean, search: SearchSuffix = '') => ({
 	type: search ? 'EXPAND_CATEGORY_SEARCH' : 'EXPAND_CATEGORY',
 	[`expandCat${search}`]: expandCat,
 	search
 });
 
-export const changeAdKeyword = adKeyword => ({
+export const changeAdKeyword = (adKeyword: string) => ({
 	type: 'CHANGE_AD_KEY_WORD',
 	adKeyword
 });
 
-export const updateStateModelData = modelData => ({
+export const updateStateModelData = (modelData: Record<string, unknown>) => ({
 	type: UPDATE_STATE_MODEL_DATA,
 	modelData
 });
@@ -189,32 +192,32 @@ export const setDropDownMenus = () => ({
 	type: SET_DROP_DWON_MENUS
 });
 
-export const setMenuBoxReference = menuBoxReference => ({
+export const setMenuBoxReference = (menuBoxReference: HTMLElement | null) => ({
 	type: SET_MENU_BOX_REFERENCE,
 	menuBoxReference
 });
 
-export const setActionBoxReference = actionBoxReference => ({
+export const setActionBoxReference = (actionBoxReference: HTMLElement | null) => ({
 	type: SET_ACTION_BOX_REFERENCE,
 	actionBoxReference
 });
 
-export const setMessageBoxReference = messageBoxReference => ({
+export const setMessageBoxReference = (messageBoxReference: HTMLElement | null) => ({
 	type: SET_MESSAGE_BOX_REFERENCE,
 	messageBoxReference
 });
 
-export const setActionBox = box => ({
+export const setActionBox = (box: Record<string, unknown>) => ({
 	type: SET_ACTION_BOX,
 	box
 });
 
-export const addErrors = (errors = {}) => ({
+export const addErrors = (errors: Record<string, string> = {}) => ({
 	type: ADD_ERRORS,
 	errors
 });
 
-export const addPostErrors = (errors = {}) => ({
+export const addPostErrors = (errors: Record<string, string> = {}) => ({
 	type: ADD_POSTERRORS,
 	errors
 });
@@ -231,7 +234,7 @@ export const userSignedOut = () => ({
 	type: USER_SIGNED_OUT
 });
 
-export const fetchUserAdvertise = advertiseId => ({
+export const fetchUserAdvertise = (advertiseId: Identifier) => ({
 	type: FETCH_USER_ADVERTISE,
 	advertiseId
 });
@@ -240,32 +243,32 @@ export const fetchVisitorAdvertise = () => ({
 	type: FETCH_VISITOR_ADVERTISE
 });
 
-export const fetchUserData = args => ({
+export const fetchUserData = (args: Record<string, unknown>[]) => ({
 	type: FETCH_USER_DATA,
 	args
 });
 
-export const fetchUserDataSuccess = dataSets => ({
+export const fetchUserDataSuccess = (dataSets: Record<string, unknown>[]) => ({
 	type: FETCH_USER_DATA_SUCCESS,
 	dataSets
 });
 
-export const changeColumnNumber = numberValue => ({
+export const changeColumnNumber = (numberValue: number) => ({
 	type: CHANGE_COLUMN_NUMBER,
 	numberValue
 });
 
-export const saveStateObjects = objects => ({
+export const saveStateObjects = (objects: Record<string, unknown>) => ({
 	type: SAVE_STATE_OBJECTS,
 	objects
 });
 
-export const keyWordSearch = keyWord => ({
+export const keyWordSearch = (keyWord: string) => ({
 	type: KEY_WORD_SEARCH,
 	keyWord
 });
 
-export const selectPaymentOption = (option, selected = false) => ({
+export const selectPaymentOption = (option: string, selected: boolean = false) => ({
 	type: SELECT_PAYMENT_OPTION,
 	option,
 	selected
@@ -279,7 +282,7 @@ export const increaseSubscriber = () => ({
 	type: INCREASE_SUBSCRIBER
 });
 
-export const setCurrentSubscriber = (currentSubscriberNumber = 1) => ({
+export const setCurrentSubscriber = (currentSubscriberNumber: number = 1) => ({
 	type: SET_CURRENT_SUBSCRIBER,
 	currentSubscriberNumber
 });
@@ -288,25 +291,25 @@ export const unSetCurrentSubscriber = () => ({
 	type: UNSET_CURRENT_SUBSCRIBER
 });
 
-export const changeSubscriberName = (number, name) => ({
+export const changeSubscriberName = (number: number, name: string) => ({
 	type: CHANGE_SUBSCRIBER_NAME,
 	number,
 	name
 });
 
-export const changeSubscriberPhone = (number, phone) => ({
+export const changeSubscriberPhone = (number: number, phone: string) => ({
 	type: CHANGE_SUBSCRIBER_PHONE,
 	number,
 	phone
 });
 
-export const keepCurrentPhone = (number, keep) => ({
+export const keepCurrentPhone = (number: number, keep: boolean) => ({
 	type: KEEP_CURRENT_PHONE,
 	number,
 	keep
 });
 
-export const selectSubscriberCity = (number, cityId) => ({
+export const selectSubscriberCity = (number: number, cityId: Identifier) => ({
 	type: SELECT_CITY,
 	number,
 	cityId
