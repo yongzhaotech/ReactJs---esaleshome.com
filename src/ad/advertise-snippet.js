@@ -13,7 +13,7 @@ const AdvertiseSnippet = ({ ad }) => {
 		OBJECTS = useSelector(state => state.OBJECTS),
 		IMAGES = useSelector(state => state.IMAGES),
 		photo = +ad.picture_id ? "photo" : "",
-		image = !!IMAGES[ad.picture_id] ? ad.picture_id : "00";
+		image = !!IMAGES[ad.picture_id] ? ad.picture_id : "0";
 
 	return (
 		<Col xs={6} sm={4} md={3}>

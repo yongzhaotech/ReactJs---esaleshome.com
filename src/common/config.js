@@ -1,8 +1,6 @@
 export const host = 'http://localhost:88';
-export const largeImageSrc = '/ads/src/image/ad/large/';
-export const smallImageSrc = '/ads/src/image/ad/small/';
-//export const largeImageSrc = 'http://esaleshome.com/ads/src/image/ad/large/';
-//export const smallImageSrc = 'http://esaleshome.com/ads/src/image/ad/small/';
+export const largeImageSrc = `${host}/image/ad/large/`;
+export const smallImageSrc = `${host}/image/ad/small/`;
 export const optionHeight = '33.5px';
 export const connection = {
 	'-1': '',
