@@ -18,7 +18,7 @@ class Footer extends Component {
 			<footer>
 				<div className="footer">
 					{this.props.USERSIGNEDIN ? (<Button bsSize="small" className="custom-button-white" onClick={() => { UserFunction.signOut() }}>{getLabel('c_sign_out')}</Button>) : (<Button bsSize="small" className="custom-button-white" onClick={() => Helper.launchMenu('login')}>{getLabel('c_sign_in')}</Button>)}
-					<a href="" onClick={e => { e.preventDefault(); Helper.launchMenu('search') }}><img alt='' title={getLabel('c_search')} className={`svg-icon ${off}`} src={browser} /></a>
+					<button type="button" className="action-button" aria-label={getLabel('c_search')} onClick={() => Helper.launchMenu('search')}><img alt='' title={getLabel('c_search')} className={`svg-icon ${off}`} src={browser} /></button>
 					<div className="fb-like" data-href="http://esaleshome.com" data-layout="button" data-action="like" data-show-faces="true" data-share="true"></div>
 				</div>
 				<section className={siteMsg}>

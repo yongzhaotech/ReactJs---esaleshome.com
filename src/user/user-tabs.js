@@ -25,7 +25,7 @@ let UserTabs = class extends Component {
 					<Alert bsStyle="warning">
 						<strong>{getLabel('not_sign_in')}</strong>.
 						{' '}
-						<a href="" onClick={e => {e.preventDefault(); Helper.launchMenu('login')}}>{getLabel('c_sign_in')}</a>
+						<button type="button" className="action-button" onClick={() => Helper.launchMenu('login')}>{getLabel('c_sign_in')}</button>
 					</Alert>
 				</section>)
 			}

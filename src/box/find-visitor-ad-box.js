@@ -39,9 +39,9 @@ class FindVisitorAdBox extends Component {
 						{getLabel('c_retrieve_hint')}
 						{
 							this.props.USERSIGNEDIN ? (
-								<a href="" onClick={(e) => {e.preventDefault(); Helper.clearScreen(); Helper.location('user-account')}}>{getLabel('c_account')}</a>
+								<button type="button" className="action-button" onClick={() => {Helper.clearScreen(); Helper.location('user-account')}}>{getLabel('c_account')}</button>
 							) : (
-								<a href="" onClick={e => {e.preventDefault(); Helper.launchMenu('login')}}>{getLabel('c_account')}</a>
+								<button type="button" className="action-button" onClick={() => Helper.launchMenu('login')}>{getLabel('c_account')}</button>
 							)
 						}
 					</div>

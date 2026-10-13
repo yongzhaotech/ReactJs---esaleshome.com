@@ -54,7 +54,7 @@ const AdvertiseList = () => {
 		if (!performSearch) {
 			dispatch(fetchAdvertises());
 		}
-	}, []);
+	}, [dispatch, performSearch]);
 
 	return (ads.length && (
 		<React.Fragment>

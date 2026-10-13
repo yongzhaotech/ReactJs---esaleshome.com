@@ -33,9 +33,9 @@ let AdvertiseDetail = class extends Component {
 				</div>
 				<div className="ad_detail_wrapper" id="big_picture">
 					<div className={`ad_detail_img ${photo}`}>
-						<a href="" onClick={e => {e.preventDefault(); AdInfo.largeImageOnDetail(advertise, {i:advertise.main_picture})}}>
+						<button type="button" className="action-button" aria-label="View larger image" onClick={() => AdInfo.largeImageOnDetail(advertise, {i:advertise.main_picture})}>
 							<img className="ad_image" alt='' id="advertise_main_picture" src={`${smallImageSrc}${advertise.main_picture}.jpg`}/>
-						</a>
+						</button>
 					</div>
 				</div><div className="ad_detail_wrapper">
 				<div className="ad_detail_tab">
@@ -94,9 +94,9 @@ let AdvertiseDetail = class extends Component {
 							return (
 								<div key={picture.i} className="ad_detail_picture_wrapper">
 									<div className="ad_detail_picture" title="click to view large picture">
-										<a href="" onClick={e => {e.preventDefault(); AdInfo.largeImageOnDetail(advertise, {i:picture.i})}}>
+										<button type="button" className="action-button" aria-label="View larger image" onClick={() => AdInfo.largeImageOnDetail(advertise, {i:picture.i})}>
 											<img className="ad_image" src={`${smallImageSrc}${picture.i}.jpg`} alt='' />
-										</a>
+										</button>
 									</div>
 								</div>
 							)

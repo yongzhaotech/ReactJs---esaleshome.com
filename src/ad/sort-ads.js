@@ -2,7 +2,7 @@ import React from 'react';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 import { getLabel } from '../common/label';
 
-export default ({onSort, sort}) => {
+const SortAds = ({onSort, sort}) => {
 	const menuData = {
 		'create_date,asc': 'sort_date_AZ',
 		'create_date,des': 'sort_date_ZA',
@@ -23,3 +23,5 @@ export default ({onSort, sort}) => {
 		</div>
 	);
 };
+
+export default SortAds;

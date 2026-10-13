@@ -7,7 +7,7 @@ import { AdInfo } from "../common/ad-info";
 import { smallImageSrc } from "../common/config";
 import Glyphicon from "./ad-glyphicon";
 
-export default ({ ad }) => {
+const AdvertiseSnippet = ({ ad }) => {
 
 	const LANGUAGE = useSelector(state => state.language),
 		OBJECTS = useSelector(state => state.OBJECTS),
@@ -19,9 +19,9 @@ export default ({ ad }) => {
 		<Col xs={6} sm={4} md={3}>
 			<div className={`ad_block ${OBJECTS.DETAILFLAG === ad.id ? "dtl_bk" : ""}`}>
 				<div className={`block_icon ${photo}`}>
-					<a href="" onClick={e => { e.preventDefault(); AdInfo.largeImageOnList(ad) }}>
+					<button type="button" className="action-button" aria-label="View larger image" onClick={() => AdInfo.largeImageOnList(ad)}>
 						<Image src={`${smallImageSrc}${image}.jpg`} thumbnail className="ad_image" alt={ad.name} />
-					</a>
+					</button>
 				</div>
 				<div className="block_spacer"></div>
 				<div className="block_price"><Badge>{ad.price_display[LANGUAGE]}</Badge></div>
@@ -48,3 +48,5 @@ export default ({ ad }) => {
 	);
 
 };
+
+export default AdvertiseSnippet;
