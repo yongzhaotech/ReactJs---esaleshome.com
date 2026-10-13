@@ -3,7 +3,7 @@ import { DropdownButton, MenuItem } from "react-bootstrap";
 import { AdInfo } from "../common/ad-info";
 import { getLabel } from "../common/label";
 
-export default ({ pages, searchAd, currentPage, ads }) => {
+const PagesList = ({ pages, searchAd, currentPage, ads }) => {
 	const functionRef = searchAd ? AdInfo.selectSearchPage : AdInfo.selectHomePage,
 		adsCount = ads.length,
 		currentPageObject = pages.find(page => +page.i === +currentPage),
@@ -33,3 +33,5 @@ export default ({ pages, searchAd, currentPage, ads }) => {
 		</div>
 	);
 };
+
+export default PagesList;

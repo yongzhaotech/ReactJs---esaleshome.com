@@ -28,7 +28,7 @@ let SearchTerms = class extends Component {
 									{
 										diff === 0 ?
 											(<span>{term.text[this.props.LANGUAGE]}</span>) :
-											(<a href="" onClick={e => {e.preventDefault(); Engine.dispatch(selectSearchTerm(term))}}>{term.text[this.props.LANGUAGE]}</a>)
+											(<button type="button" className="action-button" onClick={() => Engine.dispatch(selectSearchTerm(term))}>{term.text[this.props.LANGUAGE]}</button>)
 									}
 								</React.Fragment>
 							</span>
