@@ -7,11 +7,41 @@ import {
 	expandCat
 } from '../action';
 
-let reduxStore = null,
-	reactCookie = null,
-	routeParams = null,
-	routeHistory = null,
-	timeOutId = null;
+interface StoreLike {
+	getState(): Record<string, any>;
+	dispatch(action: any): any;
+}
+
+interface CookieLike {
+	get(name: string, options: { path: string }): string | undefined;
+	set(name: string, value: string, options: { path: string }): void;
+}
+
+interface HistoryLike {
+	location: { pathname: string };
+	push(location: { pathname: string }): void;
+	goBack(): void;
+}
+
+type SearchListLabel =
+	| 'category-for-search'
+	| 'category-not-search'
+	| 'province-for-search'
+	| 'province-not-search';
+
+type ItemListLabel =
+	| 'item-for-search'
+	| 'item-not-search'
+	| 'city-for-search'
+	| 'city-not-search';
+
+type MenuIndexKey = 'currentButtonIndex' | 'currentMenuItemIndex';
+
+let reduxStore: StoreLike | null = null,
+	reactCookie: CookieLike | null = null,
+	routeParams: Record<string, string> = {},
+	routeHistory: HistoryLike | null = null,
+	timeOutId: ReturnType<typeof setTimeout> | null = null;
 
 const keys = {
 	tab:    9,
@@ -23,69 +53,99 @@ const keys = {
 	right:  39,
 	down:   40
 },
-getCookie = name => reactCookie && reactCookie.get(name, { path: '/' }),
-findAncestor = (node, token) => {
-	const types = {'#': 'id', '.': 'className'},
-		[type, match] = [token.charAt(0), token.substring(1)];
-	while(node !== null) {
-		if(match === node[types[type]]) { return true; }
+getCookie = (name: string): string | undefined => reactCookie ? reactCookie.get(name, { path: '/' }) : undefined,
+findAncestor = (node: Node | null, token: string): boolean => {
+	const [type, match] = [token.charAt(0), token.substring(1)];
+	while (node !== null) {
+		if (node instanceof Element && match === node.getAttribute(type === '#' ? 'id' : 'class')) {
+			return true;
+		}
 		node = node.parentNode;
 	}
 	return false;
 },
 Engine = {
-	register: (store = null) => {
-		if(store !== null) {
+	register: (store?: StoreLike) => {
+		if(store) {
 			reduxStore = store;
 		}else {
 			return reduxStore;
 		}
 	},
 	
-	cookie: (cookie = null) => {
-		if(cookie !== null) {
+	cookie: (cookie?: CookieLike) => {
+		if(cookie) {
 			reactCookie = cookie;
 		}else {
 			return reactCookie;
 		}
 	},
 	
-	route: (...args) => {
-		[routeParams, routeHistory] = args;
+	route: (params: Record<string, string>, history: HistoryLike) => {
+		routeParams = params;
+		routeHistory = history;
 	},
 	
-	store: () => reduxStore.getState(),
+	store: () => {
+		if (!reduxStore) {
+			throw new Error('Redux store has not been registered');
+		}
+		return reduxStore.getState();
+	},
 	
-	dispatch: arg => reduxStore.dispatch(arg),
+	dispatch: (arg: any) => {
+		if (!reduxStore) {
+			throw new Error('Redux store has not been registered');
+		}
+		return reduxStore.dispatch(arg);
+	},
 	
-	setCookie: (name, value) => {
+	setCookie: (name: string, value: string) => {
 		reactCookie && reactCookie.set(name, value, { path: '/' });
 	},
 
 	userSignedIn: () => !!getCookie('user_is_signed_in'),
 	
-	param: name => routeParams[name],
+	param: (name: string) => routeParams[name],
 	
-	path: () => routeHistory.location.pathname,
+	path: () => {
+		if (!routeHistory) {
+			throw new Error('Router history has not been registered');
+		}
+		return routeHistory.location.pathname;
+	},
 	
-	pathName: () => routeHistory.location.pathname || 'unknown',
+	pathName: () => routeHistory ? routeHistory.location.pathname || 'unknown' : 'unknown',
 	
-	location: path => {
+	location: (path?: string) => {
+		if (!routeHistory) {
+			throw new Error('Router history has not been registered');
+		}
 		routeHistory.push({
 			pathname: path ? `/ads/${path}` : `/ads`
 		});		
 	},
 
 	goBack: () => {
+		if (!routeHistory) {
+			throw new Error('Router history has not been registered');
+		}
 		routeHistory.goBack();
 	},
 	
-    component: (Comp, props = {}) => (<Comp {...props} />),
+	component: <P extends object>(Comp: React.ComponentType<P>, props?: P) => <Comp {...props as P} />,
 	
 	getCookie: getCookie,
 
 	registerEvents: () => {
-		const expands = {
+		const store = reduxStore;
+		if (!store) {
+			throw new Error('Redux store has not been registered');
+		}
+		const expands: Record<string, {
+			fn: (expanded: boolean, search?: 'Search') => unknown;
+			args: [expanded: boolean, search?: 'Search'];
+		}> = {
 			expandProv: { fn: expandProv, args: [false] },
 			expandCity: { fn: expandCity, args: [false] },
 			expandCat: { fn: expandCat, args: [false] },
@@ -95,12 +155,13 @@ Engine = {
 			expandCatSearch: { fn: expandCat, args: [false, 'Search'] },
 			expandItemSearch: { fn: expandItem, args: [false, 'Search'] },
 		},
-		screenClicked = (e) => {
-            if(reduxStore.getState().messageCenter.MESSAGEFLAG && !document.querySelector('.message_wrapper').contains(e.target)) { Helper.clearMessage(); }
-            if(reduxStore.getState().MENUS && !document.querySelector('#menu_launcher').contains(e.target)) { Helper.clearDropDownMenus(); }
+		screenClicked = (e: MouseEvent) => {
+            if(store.getState().messageCenter.MESSAGEFLAG && !document.querySelector('.message_wrapper')?.contains(e.target as Node)) { Helper.clearMessage(); }
+            if(store.getState().MENUS && !document.querySelector('#menu_launcher')?.contains(e.target as Node)) { Helper.clearDropDownMenus(); }
 			Object.keys(expands).forEach(item => {
-				if(reduxStore.getState().MODELS[item] && !findAncestor(e.target, '.dp_wrapper')) {
-					reduxStore.dispatch(expands[item].fn.apply(null, expands[item].args));
+				if(store.getState().MODELS[item] && !findAncestor(e.target as Node, '.dp_wrapper')) {
+					const expand = expands[item];
+					expand.fn(expand.args[0], expand.args[1]);
 				}
 			});
         };
@@ -108,10 +169,10 @@ Engine = {
         window.addEventListener('click', screenClicked);
 	},
 	
-	keyboardCategoryList: ariaLabel => {
-		let categoryOptions = document.querySelectorAll(`div[aria-label=${ariaLabel}] .dp_option`),
+	keyboardCategoryList: (ariaLabel: SearchListLabel) => {
+		let categoryOptions = document.querySelectorAll<HTMLElement>(`div[aria-label=${ariaLabel}] .dp_option`),
 			categoryOptionsCount = categoryOptions.length,
-			replacer = {
+			replacer: Record<SearchListLabel, ItemListLabel> = {
 				'category-for-search': 'item-for-search',
 				'category-not-search': 'item-not-search',
 				'province-for-search': 'city-for-search',
@@ -119,7 +180,7 @@ Engine = {
 			};
 			
 		if(ariaLabel === 'category-for-search' || ariaLabel === 'category-not-search') {
-			document.querySelector(`div[aria-label=${ariaLabel}] button[aria-label='show']`).focus();
+			document.querySelector<HTMLElement>(`div[aria-label=${ariaLabel}] button[aria-label='show']`)?.focus();
 		}		
 			
 		categoryOptions.forEach((option, index) => {
@@ -158,44 +219,44 @@ Engine = {
 					case keys.tab:
 						if(evt.shiftKey) {
 							if(ariaLabel === 'category-not-search' || ariaLabel === 'category-for-search') {
-								document.querySelector('.key-word-search').focus();
+								document.querySelector<HTMLElement>('.key-word-search')?.focus();
 							}else if(ariaLabel === 'province-not-search') {
-								const email = document.querySelector(`input[name='email']`);
+								const email = document.querySelector<HTMLElement>(`input[name='email']`);
 								if(email) {
 									email.focus();
 								}else {
-									const phone = document.querySelector(`input[name='contact_phone']`);
+									const phone = document.querySelector<HTMLElement>(`input[name='contact_phone']`);
 									if(phone) {
 										phone.focus();
 									}else {
-										const contactEmailTab = document.querySelector(`button[aria-label='contact-email-tab']`);
+										const contactEmailTab = document.querySelector<HTMLElement>(`button[aria-label='contact-email-tab']`);
 										if(contactEmailTab) {
 											contactEmailTab.focus();
 										}else {
-											const emailTab = document.querySelector(`button[aria-label='email-tab']`);
+											const emailTab = document.querySelector<HTMLElement>(`button[aria-label='email-tab']`);
 											emailTab && emailTab.focus();
 										}
 									}
 								}
 							}else if(ariaLabel === 'province-for-search') {
-								const itemButton = document.querySelector(`div[aria-label='item-for-search'] button[aria-label='show']`);
+								const itemButton = document.querySelector<HTMLElement>(`div[aria-label='item-for-search'] button[aria-label='show']`);
 								if(itemButton) {
 									itemButton.focus();
 								}else {
-									document.querySelector(`div[aria-label='category-for-search'] button[aria-label='show']`).focus();
+									document.querySelector<HTMLElement>(`div[aria-label='category-for-search'] button[aria-label='show']`)?.focus();
 								}
 							}
 						}else {
 							if(document.querySelectorAll(`div[aria-label=${ariaLabel}] button[aria-label='show']`).length > 1) {
 								option.click();
 							}
-							const itemButton = document.querySelector(`div[aria-label=${replacer[ariaLabel]}] button[aria-label='show']`);
+							const itemButton = document.querySelector<HTMLElement>(`div[aria-label=${replacer[ariaLabel]}] button[aria-label='show']`);
 							if(itemButton) {
 								itemButton.focus();
 							}else if(ariaLabel === 'category-for-search') {
-								document.querySelector(`div[aria-label='province-for-search'] button[aria-label='show']`).focus();
+								document.querySelector<HTMLElement>(`div[aria-label='province-for-search'] button[aria-label='show']`)?.focus();
 							}else if(ariaLabel === 'province-for-search') {
-								document.querySelector(`input[name='ad_keyword']`).focus();
+								document.querySelector<HTMLElement>(`input[name='ad_keyword']`)?.focus();
 							}
 						}
 						preventDefault = true;
@@ -211,10 +272,10 @@ Engine = {
 		});
 	},	
 	
-	keyboardItemList: ariaLabel => {
-		let itemOptions = document.querySelectorAll(`div[aria-label=${ariaLabel}] .dp_option`),
+	keyboardItemList: (ariaLabel: ItemListLabel) => {
+		let itemOptions = document.querySelectorAll<HTMLElement>(`div[aria-label=${ariaLabel}] .dp_option`),
 			itemOptionsCount = itemOptions.length,
-			replacer = {
+			replacer: Record<ItemListLabel, SearchListLabel> = {
 				'item-for-search': 'category-for-search',
 				'item-not-search': 'category-not-search',
 				'city-for-search': 'province-for-search',
@@ -250,20 +311,20 @@ Engine = {
 						break;
 					case keys.tab:
 						if(evt.shiftKey) {
-							document.querySelector(`div[aria-label=${replacer[ariaLabel]}] button[aria-label='show']`).focus();
+							document.querySelector<HTMLElement>(`div[aria-label=${replacer[ariaLabel]}] button[aria-label='show']`)?.focus();
 						}else {
 							if(ariaLabel in replacer) {
 								if(document.querySelectorAll(`div[aria-label=${ariaLabel}] button[aria-label='show']`).length > 1) {
 									option.click();
 								}
 								if(ariaLabel === 'item-not-search') {
-									document.querySelector(`input[name='ad_name']`).focus();
+									document.querySelector<HTMLElement>(`input[name='ad_name']`)?.focus();
 								}else if(ariaLabel === 'city-not-search') {
-									document.querySelector(`input[name='address']`).focus();
+									document.querySelector<HTMLElement>(`input[name='address']`)?.focus();
 								}else if(ariaLabel === 'item-for-search') {
-									document.querySelector(`div[aria-label='province-for-search'] button[aria-label='show']`).focus();
+									document.querySelector<HTMLElement>(`div[aria-label='province-for-search'] button[aria-label='show']`)?.focus();
 								}else if(ariaLabel === 'city-for-search') {
-									document.querySelector(`input[name='ad_keyword']`).focus();
+									document.querySelector<HTMLElement>(`input[name='ad_keyword']`)?.focus();
 								}
 							}
 						}
@@ -287,18 +348,18 @@ Engine = {
 	},
 	
 	registerMenuItems: () => {
-		let currentIndex = {
+		let currentIndex: Record<MenuIndexKey, number> = {
 				currentButtonIndex: 0,
 				currentMenuItemIndex: 0
 			},
-			navButtons = document.querySelectorAll('#ad_title_bar > .btn_list > .nav_btn'),
-			dropMenuItemsContainer = document.querySelector('.dp_menu'),
-			dropMenuItems = document.querySelectorAll('.dp_menu > .menu'),
-			keyWordSearch = document.querySelector('.key-word-search'),
+			navButtons = document.querySelectorAll<HTMLElement>('#ad_title_bar > .btn_list > .nav_btn'),
+			dropMenuItemsContainer = document.querySelector<HTMLElement>('.dp_menu'),
+			dropMenuItems = document.querySelectorAll<HTMLElement>('.dp_menu > .menu'),
+			keyWordSearch = document.querySelector<HTMLElement>('.key-word-search'),
 			navButtonsCount = navButtons.length,
 			dropMenuItemsCount = dropMenuItems.length;
 			
-		const nextIndex = (index, itemsCount, indexType) => {
+		const nextIndex = (index: number, itemsCount: number, indexType: MenuIndexKey): number => {
 			if(index < 0) {
 				currentIndex[indexType] = itemsCount - 1;
 			}else if(index >= itemsCount) {
@@ -311,10 +372,10 @@ Engine = {
 			
 		navButtons.forEach((button, index) => {
 			if(index === 0) {
-				button.setAttribute('tabindex', 0);
+				button.setAttribute('tabindex', '0');
 				button.focus();
 			}else {
-				button.setAttribute('tabindex', -1);
+				button.setAttribute('tabindex', '-1');
 			}
 			button.onkeydown = evt => {
 				let preventDefault = false;
@@ -324,20 +385,20 @@ Engine = {
 						button.click();
 						preventDefault = true;
 						if(button.getAttribute('aria-haspopup') === 'true') {
-							dropMenuItems[nextIndex(0, dropMenuItemsCount, 'currentButtonIndex')].focus();
+							dropMenuItems[nextIndex(0, dropMenuItemsCount, 'currentButtonIndex')]?.focus();
 						}
 						break;
 					case keys.right:
-						navButtons[nextIndex(index + 1, navButtonsCount, 'currentButtonIndex')].focus();
+						navButtons[nextIndex(index + 1, navButtonsCount, 'currentButtonIndex')]?.focus();
 						break;
 					case keys.tab:
 						if(!evt.shiftKey) {
-							keyWordSearch.focus();
+							keyWordSearch?.focus();
 						}
 						preventDefault = true;
 						break;
 					case keys.left:
-						navButtons[nextIndex(index - 1, navButtonsCount, 'currentButtonIndex')].focus();
+						navButtons[nextIndex(index - 1, navButtonsCount, 'currentButtonIndex')]?.focus();
 						break;
 					default:
 						break;
@@ -347,7 +408,7 @@ Engine = {
 		});
 		
 		dropMenuItems.forEach((item, index) => {
-			item.setAttribute('tabindex', -1);
+			item.setAttribute('tabindex', '-1');
 			item.onkeydown = evt => {
 				let preventDefault = false;
 				switch (evt.keyCode) {
@@ -361,23 +422,23 @@ Engine = {
 						}
 						break;
 					case keys.right:
-						navButtons[nextIndex(currentIndex.currentButtonIndex + 1, navButtonsCount, 'currentButtonIndex')].focus();
+						navButtons[nextIndex(currentIndex.currentButtonIndex + 1, navButtonsCount, 'currentButtonIndex')]?.focus();
 						break;
 					case keys.left:
-						navButtons[nextIndex(currentIndex.currentButtonIndex - 1, navButtonsCount, 'currentButtonIndex')].focus();
+						navButtons[nextIndex(currentIndex.currentButtonIndex - 1, navButtonsCount, 'currentButtonIndex')]?.focus();
 						break;
 					case keys.up:
-						dropMenuItems[nextIndex(currentIndex.currentMenuItemIndex - 1, dropMenuItemsCount, 'currentMenuItemIndex')].focus();
+						dropMenuItems[nextIndex(currentIndex.currentMenuItemIndex - 1, dropMenuItemsCount, 'currentMenuItemIndex')]?.focus();
 						preventDefault = true;
 						break;
 					case keys.down:
-						dropMenuItems[nextIndex(currentIndex.currentMenuItemIndex + 1, dropMenuItemsCount, 'currentMenuItemIndex')].focus();
+						dropMenuItems[nextIndex(currentIndex.currentMenuItemIndex + 1, dropMenuItemsCount, 'currentMenuItemIndex')]?.focus();
 						preventDefault = true;
 						break;
 					case keys.esc:
-						if(dropMenuItemsContainer.getAttribute('aria-expanded') === 'true') {
-							navButtons[0].click();
-							navButtons[0].focus();
+						if(dropMenuItemsContainer?.getAttribute('aria-expanded') === 'true') {
+							navButtons[0]?.click();
+							navButtons[0]?.focus();
 						}
 						preventDefault = true;
 						break;
@@ -389,13 +450,13 @@ Engine = {
 		});		
 	},
 	
-	dropMenuBlur: evt => {
+	dropMenuBlur: (_evt: React.FocusEvent<HTMLElement>) => {
 		timeOutId = setTimeout(() => {
 			Helper.clearDropDownMenus();
 		});
 	},
 	
-	dropMenuFocus: evt => {
+	dropMenuFocus: (_evt: React.FocusEvent<HTMLElement>) => {
 		if(timeOutId) {
 			clearTimeout(timeOutId);
 			timeOutId = null;

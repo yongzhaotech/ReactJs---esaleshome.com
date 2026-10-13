@@ -1,11 +1,29 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { Engine } from '../common/engine';
 import UserTabs from './user-tabs';
 import UserProfile from './user-profile';
 import { fetchUserData } from '../action';
 
-const UserAccount = class extends Component {
+interface UserProfileData {
+	first_name?: string;
+	last_name?: string;
+	email?: string;
+}
+
+interface UserAccountProps {
+	USERSIGNEDIN: boolean;
+	profile?: UserProfileData;
+}
+
+interface UserAccountState {
+	language: string;
+	USER: {
+		profile?: UserProfileData;
+	};
+}
+
+const UserAccount = class extends React.Component<UserAccountProps> {
 	/*
 	 * @description user is already signed in and is now on the account page, he/she presses the F5 key
 	 */
@@ -27,7 +45,7 @@ const UserAccount = class extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: UserAccountState) => ({
 	LANGUAGE: state.language,
 	USERSIGNEDIN: Engine.userSignedIn(),
 	profile: state.USER.profile

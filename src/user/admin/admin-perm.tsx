@@ -1,11 +1,32 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { Engine } from '../../common/engine';
 import UserTabs from '../user-tabs';
 import Permission from './permission';
 import { fetchUserData } from '../../action';
 
-const AdminUsers = class extends Component {
+interface PermissionFile {
+	page: string;
+	access_level: string | number;
+	check_ad: string | number;
+}
+
+interface AdminPermProps {
+	USERSIGNEDIN: boolean;
+	profile?: {
+		access_level?: string | number;
+	};
+	files?: PermissionFile[];
+}
+
+interface AdminPermState {
+	USER: {
+		profile?: AdminPermProps['profile'];
+		files?: PermissionFile[];
+	};
+}
+
+const AdminPerm = class extends React.Component<AdminPermProps> {
 	componentDidMount() {
 		if (this.props.USERSIGNEDIN) {
 			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'files' }]));
@@ -25,7 +46,7 @@ const AdminUsers = class extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: AdminPermState) => ({
 	USERSIGNEDIN: Engine.userSignedIn(),
 	profile: state.USER.profile,
 	files: state.USER.files
@@ -33,4 +54,4 @@ const mapStateToProps = state => ({
 
 export default connect(
 	mapStateToProps
-)(AdminUsers);
+)(AdminPerm);
