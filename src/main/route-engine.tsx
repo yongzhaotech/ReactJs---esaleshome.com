@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import { Helper } from '../common/js-funcs';
 import { Config } from './route-config';
 
-class RouteEngine extends Component {
+class RouteEngine extends React.Component {
 	render() {
 		return (
 			<Router>
