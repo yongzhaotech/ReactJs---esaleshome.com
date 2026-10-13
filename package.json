@@ -16,9 +16,14 @@
   },
   "devDependencies": {
     "@craco/craco": "^7.1.0",
+    "@types/node": "18.19.120",
+    "@types/react": "^16.14.0",
+    "@types/react-bootstrap": "^0.32.37",
+    "@types/react-dom": "^16.9.0",
     "craco-less": "^3.0.1",
     "eslint-config-react-app": "^7.0.1",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "typescript": "4.9.5"
   },
   "scripts": {
     "start": "craco start",

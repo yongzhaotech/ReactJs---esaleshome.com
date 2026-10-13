@@ -18,7 +18,36 @@ import {
 } from '../action';
 import { Cache } from './cache';
 
-let timeOutId = null;
+type Identifier = string | number;
+
+interface ImageItem {
+	i: Identifier;
+}
+
+interface ListAdvertise {
+	id: Identifier;
+	picture_ids: Identifier[];
+	main_picture_id?: Identifier;
+	picture_id?: Identifier;
+	contact_method?: string;
+}
+
+interface DetailAdvertise {
+	picture_ids: ImageItem[];
+	contact_method?: string;
+}
+
+interface SearchTerm {
+	key: keyof typeof searchSequence;
+	id: Identifier;
+}
+
+type EditableAdvertise = Record<string, any> & {
+	images: number[];
+	contact_method: string;
+};
+
+let timeOutId: ReturnType<typeof setTimeout> | null = null;
 const searchSequence = {
 	province: 1,
 	city: 2,
@@ -35,7 +64,7 @@ const searchSequence = {
 		start: 'start',
 		searchByKeyword: 'searchByKeyword'
 	},
-	loadImages = (imgs, imageCount, count) => {
+	loadImages = (imgs: ImageItem[], imageCount: number, count: number): Promise<boolean>[] => {
 		let init = 0;
 		return imgs.map(imageObject => {
 			return new Promise((res, rej) => {
@@ -53,7 +82,7 @@ const searchSequence = {
 			});
 		});
 	},
-	viewImages = n => {
+	viewImages = (n: Identifier) => {
 		let images = Engine.store().MODELS['listImages'] || [],
 			imageCount = images.length,
 			count = 0;
@@ -61,7 +90,7 @@ const searchSequence = {
 			Engine.dispatch(loadingData(true, false, true));
 			Engine.dispatch(loadingLargeImageCount(`${++count} / ${imageCount}`));
 			Promise.all(loadImages(images, imageCount, count)).then(() => {
-				if (!!timeOutId) {
+				if (timeOutId) {
 					clearTimeout(timeOutId);
 					timeOutId = null;
 				}
@@ -74,7 +103,7 @@ const searchSequence = {
 			}).catch(e => { Engine.dispatch(loadingLargeImageCount()); });
 		}
 	},
-	imageIndex = (listImages, currentImage) => {
+	imageIndex = (listImages: ImageItem[], currentImage: Identifier) => {
 		let len = listImages.length;
 
 		for (let i = 0; i < len; i++) {
@@ -84,9 +113,9 @@ const searchSequence = {
 		}
 		return 0;
 	},
-	searchAdvertise = (requestData) => {
-		let data = {},
-			criteria = { ...swapper };
+	searchAdvertise = (requestData: Record<string, any>) => {
+		let data: Record<string, any> = {},
+			criteria: Record<string, string> = { ...swapper };
 
 		for (let key in criteria) {
 			data[key] = requestData[criteria[key]] || '';
@@ -113,7 +142,7 @@ const searchSequence = {
 			}
 		}).catch(errorData => errorData.error);
 	},
-	fetchAdvertises = (start) => {
+	fetchAdvertises = (start: Identifier) => {
 		let data = { start };
 
 		return Http.Fetch('advertise', data).then(promise => {
@@ -129,7 +158,7 @@ const searchSequence = {
 			}
 		}).catch(reason => reason.error);
 	},
-	fetchAdvertise = advertiseId => {
+	fetchAdvertise = (advertiseId: Identifier) => {
 		return Http.Fetch('advertise-detail', { advertise_id: advertiseId }).then(promise => {
 			let provObj = AdFuncs.province().find(prov => +prov.i === +promise.data.item.pr),
 				cityObj = ((provObj && provObj.c) || []).find(city => +city.i === +promise.data.item.ct),
@@ -157,7 +186,7 @@ const searchSequence = {
 			} : null;
 		}).catch(reason => reason.error);
 	},
-	createUserAdvertiseSet = ad => {
+	createUserAdvertiseSet = (ad: EditableAdvertise) => {
 		const provObj = AdFuncs.province().find(prov => +prov.i === +ad.province_id),
 			catObj = AdFuncs.category().find(cat => +cat.i === +ad.category_id),
 			cityObj = ((provObj && provObj.c) || []).find(city => +city.i === +ad.city_id),
@@ -190,18 +219,18 @@ const searchSequence = {
 					contact_email: ad.contact_email,
 					contact_phone: ad.contact_phone
 				},
-				_contactMethods: ad.contact_method.split(',').reduce((current, next) => {
+				_contactMethods: ad.contact_method.split(',').reduce<Record<string, number>>((current, next) => {
 					current[next] = 1;
 					return current;
 				}, {}),
-				adImages: ad.images.reduce((current, next) => {
+				adImages: ad.images.reduce<Record<string, number>>((current, next) => {
 					current[next] = 1;
 					return current;
 				}, {})
 			};
 		return { ...userAdvertiseSet, ...uiModelSet };
 	},
-	fetchUserAdvertiseForEdit = (script, requestData) => {
+	fetchUserAdvertiseForEdit = (script: string, requestData: Record<string, any>) => {
 		return Http.ServerRequest(script, requestData).then(promise => {
 			if (promise.data.angular_ad) {
 				let ad = promise.data.angular_ad;
@@ -214,22 +243,22 @@ const searchSequence = {
 			}
 		}).catch(() => getLabel('unknown_error'));
 	},
-	listAdvertise = (start = 0) => {
+	listAdvertise = (start: number = 0) => {
 		Engine.dispatch(fetchAdvertisesAction(start));
 	},
 	AdInfo = {
-		safeHtml: html => //(<SanitizedHTML html={html.replace(/[\n]/g, '<br />')} />),
+		safeHtml: (html: string) => //(<SanitizedHTML html={html.replace(/[\n]/g, '<br />')} />),
 			(<div dangerouslySetInnerHTML={{ __html: html.replace(/[\n]/g, '<br />') }} />),
 
-		byMail: ad => {
+		byMail: (ad: { contact_method?: string } | null | undefined): boolean => {
 			return ad && ad.contact_method && ad.contact_method.match(/\b(contact_)?email\b/) ? true : false;
 		},
 
-		byPhone: ad => {
+		byPhone: (ad: { contact_method?: string } | null | undefined): boolean => {
 			return ad && ad.contact_method && ad.contact_method.match(/\bcontact_phone\b/) ? true : false;
 		},
 
-		largeImageOnList: ad => {
+		largeImageOnList: (ad: ListAdvertise) => {
 			if (!ad.picture_ids.length) {
 				return;
 			}
@@ -241,7 +270,7 @@ const searchSequence = {
 			}, 0);
 		},
 
-		largeImageOnDetail: (ad, p) => {
+		largeImageOnDetail: (ad: DetailAdvertise, p: ImageItem) => {
 			if (!ad.picture_ids.length) {
 				return;
 			}
@@ -253,7 +282,7 @@ const searchSequence = {
 			}, 0);
 		},
 
-		clearLargeImage: (currentImageRef = null) => {
+		clearLargeImage: (currentImageRef: HTMLElement | null = null) => {
 			if (currentImageRef) {
 				currentImageRef.className = 'fade-out';
 			}
@@ -266,15 +295,15 @@ const searchSequence = {
 			}, 1201);
 		},
 
-		hasNextImage: (listImages, currentImage) => {
+		hasNextImage: (listImages: ImageItem[], currentImage: Identifier) => {
 			return imageIndex(listImages, currentImage) < listImages.length - 1;
 		},
 
-		hasPrevImage: (listImages, currentImage) => {
+		hasPrevImage: (listImages: ImageItem[], currentImage: Identifier) => {
 			return imageIndex(listImages, currentImage) > 0;
 		},
 
-		nextImage: (listImages, currentImage, currentImageRef) => {
+		nextImage: (listImages: ImageItem[], currentImage: Identifier, currentImageRef: HTMLElement) => {
 			currentImageRef.className = 'fade-out';
 			setTimeout(() => {
 				Engine.dispatch(updateStateModelData({
@@ -283,7 +312,7 @@ const searchSequence = {
 			}, 1201);
 		},
 
-		prevImage: (listImages, currentImage, currentImageRef) => {
+		prevImage: (listImages: ImageItem[], currentImage: Identifier, currentImageRef: HTMLElement) => {
 			currentImageRef.className = 'fade-out';
 			setTimeout(() => {
 				Engine.dispatch(updateStateModelData({
@@ -296,11 +325,11 @@ const searchSequence = {
 			return searchSequence;
 		},
 
-		searchTerm: term => {
+		searchTerm: (term: SearchTerm) => {
 			let searchTerms = [...Engine.store().searchTerms],
 				selectedSequence = searchSequence[term.key],
 				loopCount = searchTerms.length - selectedSequence,
-				searchData = {
+				searchData: Record<string, any> = {
 					start: '',
 					adKeyword: '',
 					provObjSearch: null,
@@ -323,14 +352,14 @@ const searchSequence = {
 					searchData.provObjSearch = AdFuncs.province().find(prov => +prov.i === +thisTerm.id);
 				} else if (thisTerm.key === 'city') {
 					searchData.cityIdSearch = thisTerm.id.toString();
-					searchData.cityObjSearch = ((searchData.provObjSearch && searchData.provObjSearch.c) || []).find(city => +city.i === +thisTerm.id);
+					searchData.cityObjSearch = ((searchData.provObjSearch && searchData.provObjSearch.c) || []).find((city: ImageItem) => +city.i === +thisTerm.id);
 					AdFuncs.initCity(thisTerm.id.toString(), true);
 				} else if (thisTerm.key === 'category') {
 					searchData.catIdSearch = thisTerm.id.toString();
 					searchData.catObjSearch = AdFuncs.category().find(cat => +cat.i === +thisTerm.id);
 				} else if (thisTerm.key === 'item') {
 					searchData.itemIdSearch = thisTerm.id.toString();
-					searchData.itemObjSearch = ((searchData.catObjSearch && searchData.catObjSearch.c) || []).find(item => +item.i === +thisTerm.id);
+					searchData.itemObjSearch = ((searchData.catObjSearch && searchData.catObjSearch.c) || []).find((item: ImageItem) => +item.i === +thisTerm.id);
 					AdFuncs.initItem(thisTerm.id.toString(), true);
 				}
 			});
@@ -341,19 +370,19 @@ const searchSequence = {
 			};
 		},
 
-		selectSearchPage: (currentPage, page) => {
+		selectSearchPage: (currentPage: Identifier, page: { i: number }) => {
 			if (+currentPage !== +page.i) {
 				Engine.dispatch(searchAdvertiseAction(page.i));
 			}
 		},
 
-		selectHomePage: (currentPage, page) => {
+		selectHomePage: (currentPage: number, page: { i: number }) => {
 			if (+currentPage !== +page.i) {
 				listAdvertise(page.i);
 			}
 		},
 
-		fetchUserAdvertise: advertiseId => {
+		fetchUserAdvertise: (advertiseId: Identifier) => {
 			return fetchUserAdvertiseForEdit('fetch-user-ad', { action: 'fetch_user_ad', advertise_id: advertiseId });
 		},
 
@@ -377,8 +406,9 @@ const searchSequence = {
 			);
 		},
 
-		flagDetail: ad => {
-			let [flag, open] = ['', Engine.store().OBJECTS['OPENFLAG']];
+		flagDetail: (ad: { id: Identifier }) => {
+			let flag: Identifier | '' = '',
+				open = Engine.store().OBJECTS['OPENFLAG'];
 			if (open && open === ad.id) {
 				open = '';
 			} else {

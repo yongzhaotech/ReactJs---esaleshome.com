@@ -1,3 +1,4 @@
+import React from 'react';
 import AdvertiseList from '../ad/advertise-list';
 import AdvertiseDetail from '../ad/advertise-detail';
 import PostAdvertise from '../ad/post-advertise';
@@ -13,7 +14,14 @@ import AdminPerm from '../user/admin/admin-perm';
 import SaveCategory from '../user/admin/save-category';
 import SaveSubCategory from '../user/admin/save-sub-category';
 
-const Config = [
+interface RouteDefinition {
+	exact?: boolean;
+	path?: string;
+	list?: boolean;
+	comp: React.ComponentType<any>;
+}
+
+const Config: RouteDefinition[] = [
 	{
 		exact: true,
 		path: '/',
