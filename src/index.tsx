@@ -13,6 +13,12 @@ import Advertise from './main/advertise';
 import { Engine } from './common/engine';
 import registerServiceWorker from './registerServiceWorker';
 
+declare global {
+	interface Window {
+		__REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof compose;
+	}
+}
+
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose,
 	config = {
 		key: "esaleshome-app",
