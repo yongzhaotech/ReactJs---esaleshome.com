@@ -220,6 +220,7 @@ Helper = {
 		}, 0);
 	},
 
+	/** @param {string | null} [page] */
 	hits: (page = null) => {
         Http.ServerRequest('request', {action: 'hits', uri: page ? page : pathName()}).then(promise => {}).catch(e => {});
 	},
