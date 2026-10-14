@@ -1,19 +1,34 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { UserFunction } from '../user-function';
 import { AdminFunction } from './admin-function';
 
-class Permission extends Component {
+interface PermissionFile {
+	page: string;
+	access_level: string | number;
+	check_ad: string | number;
+}
+
+interface PermissionProps {
+	USERSIGNEDIN: boolean;
+	profile?: {
+		access_level?: string | number;
+	};
+	files: PermissionFile[];
+}
+
+class Permission extends Component<PermissionProps> {
     render() {
         const {profile, files, USERSIGNEDIN} = this.props;
 
-        if(!USERSIGNEDIN || !profile || +profile.access_level < 2 || !files.length) {
+        if(!USERSIGNEDIN || !profile || Number(profile.access_level) < 2 || !files.length) {
             return null;
         }
 
 		console.log(files);
 		
         let output = (
-			<table style={{width: '100%'}} border='0' cellPadding='2' cellSpacing='2'>
+			<table style={{width: '100%', border: 0}} cellPadding='2' cellSpacing='2'>
 				<tbody>
 				<tr style={{fontWeight: 'bold'}}>
 					<td>Page Name</td>
@@ -64,4 +79,4 @@ class Permission extends Component {
     };
 }
 
-export default Permission;
+export default connect()(Permission);
