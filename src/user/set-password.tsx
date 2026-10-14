@@ -6,7 +6,22 @@ import { UserFunction } from './user-function';
 import { Engine } from '../common/engine';
 import { updateStateModelData } from '../action';
 
-class SetPassword extends Component {
+interface SetPasswordProps {
+	ERRORS: Record<string, Parameters<typeof getLabel>[0]>;
+	MODELS: {
+		accCode?: string | null;
+	};
+}
+
+interface SetPasswordState {
+	ERRORS: Record<string, Parameters<typeof getLabel>[0]>;
+	MODELS: {
+		accCode?: string | null;
+	};
+	language: string;
+}
+
+class SetPassword extends Component<SetPasswordProps> {
 	componentDidMount() {
 		let accCode = Engine.param('accCode') || null;
 
@@ -48,7 +63,7 @@ class SetPassword extends Component {
 					</div><div className="ad_inline_block_top">
 						<div className="account_box_field">
 							{ERRORS['new_password'] ? (<div className="error">{getLabel(ERRORS['new_password'])}</div>) : null}
-							<input type="password" name="new_password" maxLength="40" />
+							<input type="password" name="new_password" maxLength={40} />
 						</div>
 					</div>
 					<div className="ad_inline_block">
@@ -56,7 +71,7 @@ class SetPassword extends Component {
 					</div><div className="ad_inline_block_top">
 						<div className="account_box_field">
 							{ERRORS['confirm_new_password'] ? (<div className="error">{getLabel(ERRORS['confirm_new_password'])}</div>) : null}
-							<input type="password" name="confirm_new_password" maxLength="40" />
+							<input type="password" name="confirm_new_password" maxLength={40} />
 						</div>
 					</div>
 					<div className="account_box_label">
@@ -69,7 +84,7 @@ class SetPassword extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: SetPasswordState) => ({
 	ERRORS: state.ERRORS,
 	MODELS: state.MODELS,
 	LANGUAGE: state.language
