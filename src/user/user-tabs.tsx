@@ -7,7 +7,18 @@ import { Helper } from '../common/js-funcs';
 import AdminTabs from './admin/admin-tabs';
 import { UserFunction } from './user-function';
 
-let UserTabs = class extends Component {
+interface UserTabsProps {
+	USERSIGNEDIN: boolean;
+	profile?: {
+		access_level?: string | number;
+	};
+}
+
+interface UserTabsState {
+	language: string;
+}
+
+let UserTabs = class extends Component<UserTabsProps> {
 	render() {
         const {profile, USERSIGNEDIN} = this.props;
 
@@ -34,7 +45,7 @@ let UserTabs = class extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: UserTabsState) => ({
 	LANGUAGE: state.language,
 	USERSIGNEDIN: Engine.userSignedIn()
 });
