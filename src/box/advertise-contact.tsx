@@ -2,16 +2,21 @@ import React, { Component } from 'react';
 import { getLabel } from '../common/label';
 import { Helper } from '../common/js-funcs';
 
-class AdvertiseContact extends Component {
-    constructor(props) {
-        super(props);
-        this.actionBoxReference = null;
+interface AdvertiseContactProps {
+	BOXES: {
+		box: string;
+		name?: string;
+		id?: string | number;
+	};
+}
 
-        this.createReference = element => {
-            this.actionBoxReference = element;
-            Helper.setActionBoxReference(this.actionBoxReference);
-        }
-    }
+class AdvertiseContact extends Component<AdvertiseContactProps> {
+	private actionBoxReference: HTMLDivElement | null = null;
+
+	private createReference = (element: HTMLDivElement | null): void => {
+		this.actionBoxReference = element;
+		Helper.setActionBoxReference(this.actionBoxReference);
+	};
 
     render() {
 		if(this.props.BOXES.box !== 'ask_poster') {
@@ -26,12 +31,12 @@ class AdvertiseContact extends Component {
 						<div className="account_box_title">{getLabel('c_contact_poster_title')}</div>
 						<div>
 							{Helper.inputLable('c_return_eml', 'email')}
-							<div className="account_box_field"><input type="text" name="email" maxLength="100" placeholder="account.name@example.com" autoFocus /></div>
+							<div className="account_box_field"><input type="text" name="email" maxLength={100} placeholder="account.name@example.com" autoFocus /></div>
 						</div>
 						<div>
 							{Helper.inputLable('c_msg_post_title', 'message')}
 							<div className="account_box_field">
-								<textarea name="message" rows="4" cols="100" placeholder={getLabel('c_msg_post_hint')} onPaste={() => {return false}}></textarea>
+								<textarea name="message" rows={4} cols={100} placeholder={getLabel('c_msg_post_hint')} onPaste={() => {return false}}></textarea>
 							</div>
 						</div>
 						<div className="account_box_label">
