@@ -2,16 +2,19 @@ import React, { Component } from 'react';
 import { getLabel } from '../common/label';
 import { Helper } from '../common/js-funcs';
 
-class ForgetPasswordBox extends Component {
-    constructor(props) {
-        super(props);
-        this.actionBoxReference = null;
+interface ForgetPasswordBoxProps {
+	BOXES: {
+		box: string;
+	};
+}
 
-        this.createReference = element => {
-            this.actionBoxReference = element;
-            Helper.setActionBoxReference(this.actionBoxReference);
-        }
-    }
+class ForgetPasswordBox extends Component<ForgetPasswordBoxProps> {
+	private actionBoxReference: HTMLDivElement | null = null;
+
+	private createReference = (element: HTMLDivElement | null): void => {
+		this.actionBoxReference = element;
+		Helper.setActionBoxReference(this.actionBoxReference);
+	};
 
     render() {
 		if(this.props.BOXES.box !== 'forget_password') {
