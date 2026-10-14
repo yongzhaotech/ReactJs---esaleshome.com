@@ -2,16 +2,19 @@ import React, { Component } from 'react';
 import { getLabel } from '../common/label';
 import { Helper } from '../common/js-funcs';
 
-class ContactUs extends Component {
-    constructor(props) {
-        super(props);
-        this.actionBoxReference = null;
+interface ContactUsProps {
+	BOXES: {
+		box: string;
+	};
+}
 
-        this.createReference = element => {
-            this.actionBoxReference = element;
-            Helper.setActionBoxReference(this.actionBoxReference);
-        }
-    }
+class ContactUs extends Component<ContactUsProps> {
+	private actionBoxReference: HTMLDivElement | null = null;
+
+	private createReference = (element: HTMLDivElement | null): void => {
+		this.actionBoxReference = element;
+		Helper.setActionBoxReference(this.actionBoxReference);
+	};
 
     render() {
 		if(this.props.BOXES.box !== 'contact_us') {
@@ -25,17 +28,17 @@ class ContactUs extends Component {
 					<div className="register_name_field">
 						<div>
 							{Helper.inputLable('c_return_eml', 'email')}
-							<div className="account_box_field"><input type="text" name="email" maxLength="150" autoFocus /></div>
+							<div className="account_box_field"><input type="text" name="email" maxLength={150} autoFocus /></div>
 						</div>
 						<div>
 							{Helper.inputLable('c_subject', 'subject')}
-							<div className="account_box_field"><input type="text" name="subject" maxLength="30" /></div>
+							<div className="account_box_field"><input type="text" name="subject" maxLength={30} /></div>
 						</div>
 					</div>
 					<div>
 						{Helper.inputLable('c_message', 'message')}
 						<div className="account_box_field">
-							<textarea name="message" rows="4" cols="100"></textarea>
+							<textarea name="message" rows={4} cols={100}></textarea>
 						</div>
 					</div>
 					<div className="account_box_label">
