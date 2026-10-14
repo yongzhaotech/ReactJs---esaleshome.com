@@ -1,11 +1,18 @@
 import { fork, put, takeLatest, takeEvery, call, all, select } from 'redux-saga/effects';
+import { AnyAction } from 'redux';
 import { AdInfo } from '../common/ad-info';
 import { getLabel } from '../common/label';
 import * as Action from '../action';
 import { UserFunction } from '../user/user-function';
 import { smallImageSrc } from '../common/config';
 
-function* fetchAdvertises (action) {
+type TypedSaga = Generator<unknown, void, any>;
+interface UserDataFetchArg {
+	dataKey: 'profile' | 'ads' | 'siteUsers' | 'siteAds' | 'visitorHits' | 'files' | 'categories' | 'subCategories';
+	page: { i: string | number } | undefined;
+}
+
+function* fetchAdvertises (action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const resultSets = yield call(AdInfo.fetchAdvertises, action.start);
@@ -18,7 +25,7 @@ function* fetchAdvertises (action) {
 	}
 }
 
-function* fetchAdvertise (action) {
+function* fetchAdvertise (action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const dataSet = yield call(AdInfo.fetchAdvertise, action.advertiseId);
@@ -35,10 +42,10 @@ function* fetchAdvertise (action) {
 	}
 }
 
-function* searchAdvertise (action) {
+function* searchAdvertise (action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
-		const requestData = yield select(state => state.MODELS);
+		const requestData = yield select((state: { MODELS: Record<string, any> }) => state.MODELS);
 		requestData.start = action.start;
 		const dataSet = yield call(AdInfo.searchAdvertise, requestData);
 		if (dataSet.error) {
@@ -54,7 +61,7 @@ function* searchAdvertise (action) {
 	}
 }
 
-function* keyWordSearch (action) {
+function* keyWordSearch (action: AnyAction): TypedSaga {
 	if(action.keyWord.length < 3 || action.keyWord.match(/^ *$/)) {
 		return;
 	}
@@ -78,13 +85,13 @@ function* keyWordSearch (action) {
 	}
 }
 
-function* selectSearchTerm (action) {
+function* selectSearchTerm (action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const newSearchTermsData = yield call(AdInfo.searchTerm, action.term);
 		yield put(Action.searchTerms(Action.ADD_SEARCHTERMS, newSearchTermsData.searchTerms));
 		yield put(Action.updateStateModelData(newSearchTermsData.searchData));
-		const requestData = yield select(state => state.MODELS);
+		const requestData = yield select((state: { MODELS: Record<string, any> }) => state.MODELS);
 		requestData.start = 0;
 		const dataSet = yield call(AdInfo.searchAdvertise, requestData);
 		if (dataSet.error) {
@@ -99,7 +106,7 @@ function* selectSearchTerm (action) {
 	}
 }
 
-function* fetchUserAdvertise (action) {
+function* fetchUserAdvertise (action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const dataSet = yield call(AdInfo.fetchUserAdvertise, action.advertiseId);
@@ -114,7 +121,7 @@ function* fetchUserAdvertise (action) {
 	}	
 }
 
-function* fetchVisitorAdvertise () {
+function* fetchVisitorAdvertise (): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const dataSet = yield call(AdInfo.fetchVisitorAdvertise);
@@ -129,12 +136,13 @@ function* fetchVisitorAdvertise () {
 	}	
 }
 
-function* fetchUserData (action) {
+function* fetchUserData (action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const [...dataSets] = yield all(
 			action.args.map(
-				arg => call(UserFunction.fetchUserDataFromServer, arg)
+				(arg: Omit<UserDataFetchArg, 'page'> & { page?: UserDataFetchArg['page'] }) =>
+					call(UserFunction.fetchUserDataFromServer, { ...arg, page: arg.page })
 			)
 		);
 		if (dataSets.length) {
@@ -148,40 +156,40 @@ function* fetchUserData (action) {
 	}
 }
 
-function* viewLargeImages (action) {
+function* viewLargeImages (action: AnyAction): TypedSaga {
 	yield fork(AdInfo.viewImages, action.currentImageId);
 }
 
-function *nonBlockingLoadImages (ads) {
+function *nonBlockingLoadImages (ads: { picture_id: string | number }[]): TypedSaga {
 	const images = yield call(asyncLoadImages, ads);
 	yield put(Action.asyncImageLoaded(images));
 }
 
-function asyncLoadImages (ads) {
+function asyncLoadImages (ads: { picture_id: string | number }[]): Promise<string[]> {
 	return Promise.all(ads.map(ad => {
-    	return new Promise(res => {
+    	return new Promise<string>(res => {
             let img = new Image();
 			img.src = `${smallImageSrc}${ad.picture_id}.jpg`;
             img.onload = () => {
 				res(''+ad.picture_id);
             };
         });
-	})).then(images => images).catch();
+	}));
 }
 
 /*
  * @description list of saga events, add whatever is needed
  */
-export default function* RootSaga () {
+export default function* RootSaga (): TypedSaga {
 	yield all([
-		fork(takeLatest, Action.FETCH_ADVERTISES, fetchAdvertises),
-		fork(takeLatest, Action.FETCH_ADVERTISE, fetchAdvertise),
-		fork(takeLatest, Action.SEARCH_ADVERTISE, searchAdvertise),
-		fork(takeLatest, Action.SELECT_SEARCH_TERM, selectSearchTerm),
-		fork(takeLatest, Action.FETCH_USER_ADVERTISE, fetchUserAdvertise),
-		fork(takeLatest, Action.FETCH_VISITOR_ADVERTISE, fetchVisitorAdvertise),
-		fork(takeLatest, Action.KEY_WORD_SEARCH, keyWordSearch),
-		fork(takeLatest, Action.VIEW_LARGE_IMAGES, viewLargeImages),
+		takeLatest(Action.FETCH_ADVERTISES, fetchAdvertises),
+		takeLatest(Action.FETCH_ADVERTISE, fetchAdvertise),
+		takeLatest(Action.SEARCH_ADVERTISE, searchAdvertise),
+		takeLatest(Action.SELECT_SEARCH_TERM, selectSearchTerm),
+		takeLatest(Action.FETCH_USER_ADVERTISE, fetchUserAdvertise),
+		takeLatest(Action.FETCH_VISITOR_ADVERTISE, fetchVisitorAdvertise),
+		takeLatest(Action.KEY_WORD_SEARCH, keyWordSearch),
+		takeLatest(Action.VIEW_LARGE_IMAGES, viewLargeImages),
 		takeEvery(Action.FETCH_USER_DATA, fetchUserData),
 	])
 };
