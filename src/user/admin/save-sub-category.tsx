@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Engine } from '../../common/engine';
 import UserTabs from '../user-tabs';
-import SubCategories from './sub-categories';
+import SubCategories, { SubCategoriesData } from './sub-categories';
 import { fetchUserData } from '../../action';
 
 interface SaveSubCategoryProps {
@@ -10,13 +10,13 @@ interface SaveSubCategoryProps {
 	profile?: {
 		access_level?: string | number;
 	};
-	subCategories?: Record<string, unknown>;
+	subCategories?: SubCategoriesData;
 }
 
 interface SaveSubCategoryState {
 	USER: {
 		profile?: SaveSubCategoryProps['profile'];
-		subCategories?: Record<string, unknown>;
+		subCategories?: SubCategoriesData;
 	};
 }
 
@@ -29,12 +29,11 @@ class SaveSubCategory extends React.Component<SaveSubCategoryProps> {
 
 	render() {
 		const { profile, subCategories } = this.props;
-		const subCategoryData = subCategories || [];
 
 		return (
 			<section>
 				{Engine.component(UserTabs, { profile })}
-				{Engine.component(SubCategories, { profile, subCategories: subCategoryData })}
+				{Engine.component(SubCategories, { profile, subCategories })}
 			</section>
 		);
 	};
