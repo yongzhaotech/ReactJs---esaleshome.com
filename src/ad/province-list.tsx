@@ -4,7 +4,18 @@ import { AdFuncs} from '../common/ad-funcs';
 import { optionHeight } from '../common/config';
 import { Engine } from '../common/engine';
 
-let ProvinceList = class extends Component {
+interface ProvinceListProps {
+	SEARCH?: string;
+	MODELS: Record<string, any>;
+	LANGUAGE: 'en' | 'cn';
+}
+
+interface ProvinceListState {
+	MODELS: Record<string, any>;
+	language: 'en' | 'cn';
+}
+
+const ProvinceList = class extends Component<ProvinceListProps> {
 	componentDidMount() {
 		Engine.keyboardCategoryList(this.props.SEARCH ? 'province-for-search' : 'province-not-search');
 	}
@@ -46,13 +57,9 @@ let ProvinceList = class extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: ProvinceListState) => ({
 	MODELS: state.MODELS,
 	LANGUAGE: state.language
 });
 
-ProvinceList = connect(
-	mapStateToProps
-)(ProvinceList);
-
-export default ProvinceList;
+export default connect(mapStateToProps)(ProvinceList);
