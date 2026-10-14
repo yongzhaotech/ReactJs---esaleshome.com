@@ -10,22 +10,50 @@ import { Engine } from '../common/engine';
 import { Helper } from '../common/js-funcs';
 import { smallImageSrc } from '../common/config';
 
-let AdvertiseDetail = class extends Component {
+type Identifier = string | number;
+
+interface AdvertiseDetailData {
+	id: Identifier;
+	name: string;
+	main_picture: Identifier;
+	picture_ids: { i: Identifier }[];
+	is_free: Identifier;
+	price_display: Record<string, string>;
+	province: Record<string, string>;
+	city: Record<string, string>;
+	location: Record<string, string>;
+	category: Record<string, string>;
+	item: Record<string, string>;
+	contact_method?: string;
+	contact_phone?: string;
+	ad_description: Record<string, string>;
+}
+
+interface AdvertiseDetailProps {
+	advertiseDetail: AdvertiseDetailData | null;
+	LANGUAGE: string;
+}
+
+interface AdvertiseDetailState {
+	advertiseDetail: AdvertiseDetailData | null;
+	language: string;
+}
+
+class AdvertiseDetail extends Component<AdvertiseDetailProps> {
     componentDidMount() {
 		Engine.dispatch(fetchAdvertise(Engine.param('advertiseId')));
 	}
 	
 	render() {
-		let advertise = this.props.advertiseDetail,
-			photo = '';
+		const advertise = this.props.advertiseDetail;
 
 		if(!advertise) {
 			return (<ReactLoader />);
-		}else {
-			photo = +advertise.main_picture ? 'photo' : '';
 		}
+
+		const photo = +advertise.main_picture ? 'photo' : '';
 		
-		this.output = (
+		const output = (
 			<div>
 				{Engine.component(SearchTerms)}
 				<div className="ad_detail_title">
@@ -81,7 +109,7 @@ let AdvertiseDetail = class extends Component {
 							<section>
 								<div className="devider"></div>
 								<div>
-									{getLabel('c_call_poster')}: <font style={{fontWeight: 'bold'}}><a href={`tel:${advertise.contact_phone}`}>{advertise.contact_phone}</a></font>
+									{getLabel('c_call_poster')}: <span style={{fontWeight: 'bold'}}><a href={`tel:${advertise.contact_phone}`}>{advertise.contact_phone}</a></span>
 								</div>
 							</section>
 						) : null
@@ -112,19 +140,17 @@ let AdvertiseDetail = class extends Component {
 		
         return (
 			<section>
-                {this.output}
+                {output}
 			</section>
         );
     }
-};
+}
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: AdvertiseDetailState) => ({
 	advertiseDetail: state.advertiseDetail,
 	LANGUAGE: state.language
 });
 
-AdvertiseDetail = connect(
+export default connect(
 	mapStateToProps
 )(AdvertiseDetail);
-
-export default AdvertiseDetail;
