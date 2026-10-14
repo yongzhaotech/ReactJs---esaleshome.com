@@ -3,41 +3,66 @@ import { Helper } from './js-funcs';
 import { Engine } from './engine';
 import { loadingData } from '../action';
 
-const validEmail = eml => {
+type FormField = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+type FormControl = FormField | RadioNodeList;
+
+const validEmail = (eml: string): RegExpMatchArray | null => {
 	return eml.match(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/);	
 };
 
-const validPhone = ph => {
+const validPhone = (ph: string): RegExpMatchArray | null => {
 	return ph.match(/^\d{10,20}$/);
 };
 
-const validMoneyAmount = amt => {
+const validMoneyAmount = (amt: string): boolean => {
 	return +amt * 0 === 0;
 };
 
-const getElementValue = (f, e) => {
+const getNamedControl = (form: HTMLFormElement, name: string): FormControl | null => {
+	const control = form.elements.namedItem(name);
+	if(control instanceof RadioNodeList || control instanceof HTMLInputElement ||
+		control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement) {
+		return control;
+	}
+	return null;
+};
+
+const isFormField = (element: Element): element is FormField => (
+	element instanceof HTMLInputElement ||
+	element instanceof HTMLSelectElement ||
+	element instanceof HTMLTextAreaElement
+);
+
+const isDisabled = (form: HTMLFormElement, name: string): boolean => {
+	const control = getNamedControl(form, name);
+	return control && !(control instanceof RadioNodeList) ? control.disabled : false;
+};
+
+const getElementValue = (f: HTMLFormElement, e: FormField): string => {
     if(e.type.match(/^radio$/i)) {
-        for(let i = 0; i < f[e.name].length; i++) {
-            if(f[e.name][i].checked) {
-                return f[e.name][i].value;
+		const control = getNamedControl(f, e.name);
+		if(control instanceof RadioNodeList) {
+			for(let i = 0; i < control.length; i++) {
+				const field = control.item(i);
+				if(field instanceof HTMLInputElement && field.checked) {
+					return field.value;
+				}
             }
         }
 		return '';
     }else if(e.type.match(/^checkbox$/i)) {
-        let v = [];
-        for(let i = 0; i < f[e.name].length; i++) {
-            if(f[e.name][i].checked) {
-                v.push(f[e.name][i].value);
-            }
-        }
+		const control = getNamedControl(f, e.name),
+    		fields = control instanceof RadioNodeList ? Array.from(control) : [],
+			v = fields.filter((field): field is HTMLInputElement => field instanceof HTMLInputElement && field.checked)
+				.map(field => field.value);
         return v.join(",");
     }else {
         return e.value;
     }
 };
 
-const validateInputFields = (f, data) => {
-	let error = {};
+const validateInputFields = (f: HTMLFormElement, data: Record<string, string>): Record<string, string> => {
+	const error: Record<string, string> = {};
 	for(let field in data) {
 		if(field.match(/^(?:(contact_name|first_name|last_name))$/)) {
 			let n = RegExp.$1;
@@ -77,7 +102,7 @@ const validateInputFields = (f, data) => {
 				error[field] = 'r_contact_method';
 			}
 		}else if(field.match(/^contact_phone$/)) {
-			if(!f[field].disabled) {
+			if(!isDisabled(f, field)) {
 				if(data[field] === '') {
 					error[field] = 'r_contact_phone';
 				}else if(!validPhone(data[field])) {
@@ -89,7 +114,7 @@ const validateInputFields = (f, data) => {
 				error[field] = 'r_message';
 			}
 		}else if(field.match(/^price$/)) {
-			if(!f[field].disabled) {
+			if(!isDisabled(f, field)) {
 				if(data[field] === '') {
 					error[field] = 'r_price';
 				}else if(!validMoneyAmount(data[field])) {
@@ -137,7 +162,7 @@ const validateInputFields = (f, data) => {
 	return error;
 };
 
-const sendData = (form, post) => {
+const sendData = (form: HTMLFormElement, post: boolean): void => {
     if(post) {
         Http.Post(form);
     }else {
@@ -149,15 +174,18 @@ const sendData = (form, post) => {
     }
 };
 
-const formValidator = (fn, post) => {
-	let f = document.forms[fn],
-		accessed = {},
-		values = {},
-        error = {},
+const formValidator = (fn: string, post: boolean = false): void => {
+	const f = document.forms.namedItem(fn);
+	if(!f) {
+		throw new Error(`Form "${fn}" was not found`);
+	}
+	const accessed: Record<string, number> = {},
+		values: Record<string, string> = {};
+	let error: Record<string, string> = {},
 		ef = false;
 
-	for(let i = 0; i < f.elements.length; i++) {
-		let e = f.elements[i],
+	for(const e of Array.from(f.elements).filter(isFormField)) {
+		const
 			n = e.name,
 			t = e.type;
 		if(e.disabled) { continue; }
@@ -170,7 +198,11 @@ const formValidator = (fn, post) => {
 	ef = Object.keys(error).length > 0;
 
     if(!ef && f.name === 'reset_password') {
-        if(f['new_password'].value !== f['confirm_new_password'].value) {
+	const newPassword = getNamedControl(f, 'new_password'),
+		confirmNewPassword = getNamedControl(f, 'confirm_new_password'),
+		newPasswordValue = newPassword && !(newPassword instanceof RadioNodeList) ? newPassword.value : newPassword?.value,
+		confirmNewPasswordValue = confirmNewPassword && !(confirmNewPassword instanceof RadioNodeList) ? confirmNewPassword.value : confirmNewPassword?.value;
+        if(newPasswordValue !== confirmNewPasswordValue) {
 			error['new_password'] = 'w_pwd_no_match';
 			ef = true;
 		}
