@@ -1,8 +1,11 @@
-import { combineReducers } from 'redux';
+import { AnyAction, combineReducers } from 'redux';
 import * as Action from '../action';
 import { Engine } from '../common/engine';
 
-const advertiseList = (state = {}, action) => {
+type DataRecord = Record<string, unknown>;
+type AppAction = AnyAction;
+
+const advertiseList = (state: DataRecord = {}, action: AppAction): DataRecord => {
 	switch (action.type) {
 		case Action.FETCH_ADVERTISES:
 			return { ...state };
@@ -13,7 +16,7 @@ const advertiseList = (state = {}, action) => {
 	}
 };
 
-const advertiseDetail = (state = null, action) => {
+const advertiseDetail = (state: DataRecord | null = null, action: AppAction): DataRecord | null => {
 	switch (action.type) {
 		case Action.FETCH_ADVERTISE_SUCCESS:
 			return action.advertiseDetail;
@@ -22,7 +25,7 @@ const advertiseDetail = (state = null, action) => {
 	}
 };
 
-const messageCenter = (state = {}, action) => {
+const messageCenter = (state: DataRecord = {}, action: AppAction): DataRecord => {
 	switch (action.type) {
 		case Action.ADD_MESSAGE:
 			const messageData = { ...state, MESSAGEFLAG: action.error ? 'error' : 'success', MESSAGE: Array.isArray(action.message) ? action.message : [action.message] };
@@ -34,7 +37,7 @@ const messageCenter = (state = {}, action) => {
 	}
 };
 
-const searchTerms = (state = [], action) => {
+const searchTerms = (state: unknown[] = [], action: AppAction): unknown[] => {
 	switch (action.type) {
 		case Action.ADD_SEARCHTERMS:
 			return action.terms;
@@ -45,7 +48,7 @@ const searchTerms = (state = [], action) => {
 	}
 };
 
-const loadingData = (state = {}, action) => {
+const loadingData = (state: DataRecord = {}, action: AppAction): DataRecord => {
 	switch (action.type) {
 		case Action.LOADING_DATA:
 			return { ...state, ISLOADINGDATA: action.flag || null, HIDELOADINGTITLE: action.hideTitle || null };
@@ -54,7 +57,7 @@ const loadingData = (state = {}, action) => {
 	}
 };
 
-const changeModelProperty = (state = {}, action) => {
+const changeModelProperty = (state: DataRecord = {}, action: AppAction): DataRecord => {
 	const prefix = action.search ? '_SEARCH' : '';
 	switch (action.type) {
 		case `SELECT_CITY${prefix}`:
@@ -84,7 +87,7 @@ const changeModelProperty = (state = {}, action) => {
 	}
 };
 
-const language = (state = 'en', action) => {
+const language = (state = 'en', action: AppAction): string => {
 	switch (action.type) {
 		case Action.SWITCH_LANGUAGE:
 			let lang = Engine.getCookie('lang') || 'en';
@@ -98,7 +101,7 @@ const language = (state = 'en', action) => {
 	}
 };
 
-const performSearch = (state = false, action) => {
+const performSearch = (state = false, action: AppAction): boolean => {
 	switch (action.type) {
 		case Action.PERFORM_SEARCH:
 			return true;
@@ -107,7 +110,7 @@ const performSearch = (state = false, action) => {
 	}
 };
 
-const dropDownMenus = (state = false, action) => {
+const dropDownMenus = (state = false, action: AppAction): boolean => {
 	switch (action.type) {
 		case Action.SET_DROP_DWON_MENUS:
 			return !state;
@@ -116,7 +119,7 @@ const dropDownMenus = (state = false, action) => {
 	}
 };
 
-const menuBoxReference = (state = null, action) => {
+const menuBoxReference = (state: HTMLElement | null = null, action: AppAction): HTMLElement | null => {
 	switch (action.type) {
 		case Action.SET_MENU_BOX_REFERENCE:
 			return action.menuBoxReference;
@@ -125,7 +128,7 @@ const menuBoxReference = (state = null, action) => {
 	}
 };
 
-const actionBoxReference = (state = null, action) => {
+const actionBoxReference = (state: HTMLElement | null = null, action: AppAction): HTMLElement | null => {
 	switch (action.type) {
 		case Action.SET_ACTION_BOX_REFERENCE:
 			return action.actionBoxReference;
@@ -134,7 +137,7 @@ const actionBoxReference = (state = null, action) => {
 	}
 };
 
-const messageBoxReference = (state = null, action) => {
+const messageBoxReference = (state: HTMLElement | null = null, action: AppAction): HTMLElement | null => {
 	switch (action.type) {
 		case Action.SET_MESSAGE_BOX_REFERENCE:
 			return action.messageBoxReference;
@@ -143,7 +146,7 @@ const messageBoxReference = (state = null, action) => {
 	}
 };
 
-const setActionBox = (state = {}, action) => {
+const setActionBox = (state: DataRecord = {}, action: AppAction): DataRecord => {
 	switch (action.type) {
 		case Action.SET_ACTION_BOX:
 			return action.box;
@@ -152,7 +155,7 @@ const setActionBox = (state = {}, action) => {
 	}
 };
 
-const setPostErrors = (state = {}, action) => {
+const setPostErrors = (state: DataRecord = {}, action: AppAction): DataRecord => {
 	switch (action.type) {
 		case Action.ADD_POSTERRORS:
 			return action.errors;
@@ -163,7 +166,7 @@ const setPostErrors = (state = {}, action) => {
 	}
 };
 
-const setErrors = (state = {}, action) => {
+const setErrors = (state: DataRecord = {}, action: AppAction): DataRecord => {
 	switch (action.type) {
 		case Action.ADD_ERRORS:
 			return action.errors;
@@ -172,18 +175,18 @@ const setErrors = (state = {}, action) => {
 	}
 };
 
-const userDataSet = (state = {}, action) => {
+const userDataSet = (state: DataRecord = {}, action: AppAction): DataRecord => {
 	switch (action.type) {
 		case Action.FETCH_USER_DATA_SUCCESS:
 			return action.dataSets.reduce(
-				(acc, cur) => ({ ...acc, ...cur }), { ...state }
+				(acc: DataRecord, cur: DataRecord) => ({ ...acc, ...cur }), { ...state }
 			);
 		default:
 			return state;
 	}
 };
 
-const stateObjects = (state = {}, action) => {
+const stateObjects = (state: DataRecord = {}, action: AppAction): DataRecord => {
 	switch (action.type) {
 		case Action.SAVE_STATE_OBJECTS:
 			return { ...state, ...action.objects };
@@ -192,18 +195,18 @@ const stateObjects = (state = {}, action) => {
 	}
 };
 
-const asyncLoadedImages = (state = {}, action) => {
+const asyncLoadedImages = (state: DataRecord = {}, action: AppAction): DataRecord => {
 	switch (action.type) {
 		case Action.ASYNC_IMAGE_LOADED:
 			return action.images.reduce(
-				(acc, cur) => ({ ...acc, [cur]: true }), { ...state }
+				(acc: DataRecord, cur: string | number) => ({ ...acc, [cur]: true }), { ...state }
 			);
 		default:
 			return state;
 	}
 };
 
-const loadingImagesMessage = (state = '', action) => {
+const loadingImagesMessage = (state = '', action: AppAction): string => {
 	switch (action.type) {
 		case Action.LOADING_LARGE_IMAGE_COUNT:
 			return action.message;
