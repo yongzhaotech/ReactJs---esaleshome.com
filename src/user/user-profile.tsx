@@ -1,11 +1,23 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { getLabel } from '../common/label';
 import { Helper } from '../common/js-funcs';
 import { Engine } from '../common/engine';
 
-const UserProfile = class extends Component {
+interface UserProfileProps {
+	USERSIGNEDIN: boolean;
+	profile?: {
+		first_name?: string;
+		last_name?: string;
+		email?: string;
+	};
+}
+
+interface UserProfileState {
+	language: string;
+}
+
+const UserProfile = class extends Component<UserProfileProps> {
 	render() {
 		const {profile, USERSIGNEDIN} = this.props;
 
@@ -23,14 +35,14 @@ const UserProfile = class extends Component {
                         {Helper.inputLable('c_first_name', 'first_name')}
 					</div><div className="ad_inline_block_top">
 					<div className="account_box_field">
-						<input type="text" name="first_name" maxLength="30" defaultValue={profile.first_name} />
+						<input type="text" name="first_name" maxLength={30} defaultValue={profile.first_name} />
 					</div>
 				</div>
 					<div className="ad_inline_block">
                         {Helper.inputLable('c_last_name', 'last_name')}
 					</div><div className="ad_inline_block_top">
 					<div className="account_box_field">
-						<input type="text" name="last_name" maxLength="30" defaultValue={profile.last_name} />
+						<input type="text" name="last_name" maxLength={30} defaultValue={profile.last_name} />
 					</div>
 				</div>
 					<div className="ad_inline_block">
@@ -42,7 +54,7 @@ const UserProfile = class extends Component {
                        {Helper.inputLable('c_passwd', 'password')}
 					</div><div className="ad_inline_block_top">
 					<div className="account_box_field">
-						<input type="password" name="password" maxLength="40" />
+						<input type="password" name="password" maxLength={40} />
 					</div>
 				</div>
 					<div className="account_box_label">
@@ -54,7 +66,7 @@ const UserProfile = class extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: UserProfileState) => ({
 	LANGUAGE: state.language,
 	USERSIGNEDIN: Engine.userSignedIn()
 });
@@ -62,11 +74,3 @@ const mapStateToProps = state => ({
 export default connect(
 	mapStateToProps
 )(UserProfile);
-
-UserProfile.propTypes = {
-	profile: PropTypes.shape({
-		first_name: PropTypes.string,
-		last_name: PropTypes.string,
-		email: PropTypes.string
-	})
-};

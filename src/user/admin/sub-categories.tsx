@@ -4,11 +4,43 @@ import { AdminFunction } from './admin-function';
 import { Helper } from '../../common/js-funcs';
 import { Engine } from '../../common/engine';
 
-class SubCategories extends Component {
+export interface SubCategoryOption {
+	id: string | number;
+	name: string;
+	name_cn: string;
+}
+
+interface AdminCategoryItem {
+	i: string | number;
+	n: string;
+	n_cn: string;
+}
+
+export interface SubCategoriesData {
+	categories: SubCategoryOption[];
+	items: Record<string, SubCategoryOption[]>;
+	default_category_id: string | number;
+	category_list: Record<string, Record<string, AdminCategoryItem[]>>;
+}
+
+interface SubCategoriesProps {
+	USERSIGNEDIN: boolean;
+	profile?: {
+		access_level?: string | number;
+	};
+	subCategories?: SubCategoriesData;
+	POSTERRORS: Record<string, string>;
+}
+
+interface SubCategoriesState {
+	POSTERRORS: Record<string, string>;
+}
+
+class SubCategories extends Component<SubCategoriesProps> {
 	render() {
 		const {profile, subCategories, USERSIGNEDIN, POSTERRORS} = this.props;
 
-        if(!USERSIGNEDIN || !profile || +profile.access_level < 2 || !Object.keys(subCategories).length) {
+        if(!USERSIGNEDIN || !profile || Number(profile.access_level) < 2 || !subCategories) {
             return null;
         }
 
@@ -44,8 +76,8 @@ class SubCategories extends Component {
 						</div>
 						<div>
 							<div className="account_box_label">Sub Category</div>
-							<div className="account_box_field"><input type="text" name="sub_category" maxLength="60" /></div>
-							<div className="account_box_field"><input type="text" name="sub_category_cn" maxLength="60" /></div>
+							<div className="account_box_field"><input type="text" name="sub_category" maxLength={60} /></div>
+							<div className="account_box_field"><input type="text" name="sub_category_cn" maxLength={60} /></div>
 						</div>
 						<div className="account_box_label">
 							{Helper.submitButton('c_submit', 'add_subcategory', true)}
@@ -58,7 +90,15 @@ class SubCategories extends Component {
 							<div className="account_box_title">Change sub category text</div>
 							<div className="account_box_label">Select a category</div>
 							<div className="account_box_field">
-								<select name="category" onChange={() => {AdminFunction.admLoadDataItem(document.forms['edit_subcategory'], document.forms['edit_subcategory']['category'], 'item', document.forms['edit_subcategory']['new_subcategory'], document.forms['edit_subcategory']['new_subcategory_cn'])}}>
+								<select name="category" onChange={() => {
+									const form = document.forms.namedItem('edit_subcategory');
+									const category = form && form.elements.namedItem('category');
+									const subCategory = form && form.elements.namedItem('new_subcategory');
+									const subCategoryCn = form && form.elements.namedItem('new_subcategory_cn');
+									if (form && category instanceof HTMLSelectElement && subCategory instanceof HTMLInputElement && subCategoryCn instanceof HTMLInputElement) {
+										AdminFunction.admLoadDataItem(form, category, 'item', subCategory, subCategoryCn);
+									}
+								}}>
 								{
 									subCategories.categories.map(category => (
 										<option value={category.id} key={category.id}>{category.name}::{category.name_cn}</option>
@@ -68,7 +108,13 @@ class SubCategories extends Component {
 							</div>
 							<div className="account_box_label">Sub category to change</div>
 							<div className="account_box_field">
-								<select name="item" onChange={() => {AdminFunction.loadToChange(document.forms['edit_subcategory'], document.forms['edit_subcategory']['item'], 'new_subcategory', 'new_subcategory_cn', 'edit_subcategory_obj')}}>
+								<select name="item" onChange={() => {
+									const form = document.forms.namedItem('edit_subcategory');
+									const item = form && form.elements.namedItem('item');
+									if (form && item instanceof HTMLSelectElement) {
+										AdminFunction.loadToChange(form, item, 'new_subcategory', 'new_subcategory_cn', 'edit_subcategory_obj');
+									}
+								}}>
 									{
 										subCategories.items[subCategories.default_category_id].map(item => (
 											<option value={item.id} key={item.id}>{item.name}::{item.name_cn}</option>
@@ -80,8 +126,8 @@ class SubCategories extends Component {
 						<div id="edit_subcategory_obj" style={{display: 'none'}}>
 							<div>
 								<div className="account_box_label">Sub category</div>
-								<div className="account_box_field"><input type="text" name="new_subcategory" maxLength="60" /></div>
-								<div className="account_box_field"><input type="text" name="new_subcategory_cn" maxLength="60" /></div>
+								<div className="account_box_field"><input type="text" name="new_subcategory" maxLength={60} /></div>
+								<div className="account_box_field"><input type="text" name="new_subcategory_cn" maxLength={60} /></div>
 							</div>
 							<div className="account_box_label">
 								{Helper.submitButton('c_submit', 'edit_subcategory', true)}
@@ -100,7 +146,7 @@ class SubCategories extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: SubCategoriesState) => ({
 	POSTERRORS: state.POSTERRORS,
 	USERSIGNEDIN: Engine.userSignedIn()
 });

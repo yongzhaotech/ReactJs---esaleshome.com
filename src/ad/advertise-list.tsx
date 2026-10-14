@@ -7,12 +7,33 @@ import AdvertiseSnippets from "./advertise-snippets";
 import SortAds from "./sort-ads";
 import ReactLoader from "./react-loader";
 
-const applySorting = sorting => (a, b) => {
+import type { Advertise } from './advertise-snippets';
+
+type SortKey = 'create_date,asc' | 'create_date,des' | 'price,asc' | 'price,des';
+
+interface Page {
+	i: number;
+	n: string | number;
+}
+
+interface AdvertiseListState {
+	performSearch: boolean;
+	advertiseList: {
+		resultSets?: {
+			pages?: Page[];
+			currentPage?: number;
+			searchAd?: boolean;
+			ads?: Advertise[];
+		};
+	};
+}
+
+const applySorting = (sorting: SortKey) => (a: Advertise, b: Advertise) => {
 	if (!sorting) {
 		return 0;
 	}
-	const [by, type] = sorting.split(","),
-		[A, B] = [a[by], b[by]];
+	const [by, type] = sorting.split(",") as ['create_date' | 'price', 'asc' | 'des'],
+		[A, B] = by === 'price' ? [a.price, b.price] : [a.create_date, b.create_date];
 	if (type === "asc") {
 		if (A < B) {
 			return -1;
@@ -30,8 +51,9 @@ const applySorting = sorting => (a, b) => {
 		}
 		return 0;
 	}
+	return 0;
 },
-	sortAds = setState => eventKey => {
+	sortAds = (setState: React.Dispatch<React.SetStateAction<SortKey>>) => (eventKey: SortKey) => {
 		setState(eventKey);
 	};
 
@@ -41,10 +63,10 @@ const applySorting = sorting => (a, b) => {
  * re-mounts happens when the user clicks on the "Home" button or search returns a result set
  */
 const AdvertiseList = () => {
-	const [sorting, setSorting] = React.useState("create_date,des"),
+	const [sorting, setSorting] = React.useState<SortKey>("create_date,des"),
 		dispatch = useDispatch(),
-		performSearch = useSelector(state => state.performSearch),
-		resultSets = useSelector(state => state.advertiseList.resultSets || {}),
+		performSearch = useSelector((state: AdvertiseListState) => state.performSearch),
+		resultSets = useSelector((state: AdvertiseListState) => state.advertiseList.resultSets || {}),
 		pages = resultSets.pages || [],
 		currentPage = resultSets.currentPage || 0,
 		searchAd = resultSets.searchAd || false,

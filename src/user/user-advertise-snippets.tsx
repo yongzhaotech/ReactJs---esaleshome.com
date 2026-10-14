@@ -6,7 +6,19 @@ import { AdInfo } from '../common/ad-info';
 import { AdFuncs } from "../common/ad-funcs";
 import { Engine } from '../common/engine';
 
-class UserAdvertiseSnippets extends Component {
+import type { UserAdvertiseItem } from './user-advertise';
+
+interface UserAdvertiseSnippetsProps {
+	USERSIGNEDIN: boolean;
+	profile?: Record<string, unknown>;
+	ads?: UserAdvertiseItem[];
+}
+
+interface UserAdvertiseSnippetsState {
+	OBJECTS: Record<string, unknown>;
+}
+
+class UserAdvertiseSnippets extends Component<UserAdvertiseSnippetsProps> {
 	render() {
 		const {profile, ads, USERSIGNEDIN} = this.props;
 
@@ -47,7 +59,7 @@ class UserAdvertiseSnippets extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: UserAdvertiseSnippetsState) => ({
 	USERSIGNEDIN: Engine.userSignedIn(),
 	OBJECTS: state.OBJECTS
 });

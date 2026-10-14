@@ -1,15 +1,29 @@
 import React, { Component } from 'react';
-import { withCookies } from 'react-cookie';
+import { Cookies, withCookies } from 'react-cookie';
 import '../style/advertise.less';
 import { Engine } from '../common/engine';
 import RouteEngine from './route-engine';
 import { Http } from '../common/http-client';
 import { connection } from '../common/config';
 
-class Advertise extends Component {
-	constructor(props) {
+interface AdvertiseProps {
+	cookies?: Cookies;
+}
+
+interface AdvertiseState {
+	launchApplication: -1 | 0 | 1;
+}
+
+class Advertise extends Component<AdvertiseProps, AdvertiseState> {
+	constructor(props: AdvertiseProps) {
 		super(props);
-		Engine.cookie(props.cookies);
+		const cookies = props.cookies;
+		if (cookies) {
+			Engine.cookie({
+				get: name => cookies.get(name),
+				set: (name, value, options) => cookies.set(name, value, options)
+			});
+		}
         Engine.registerEvents();
 		this.state = {
 			launchApplication: -1
@@ -39,7 +53,7 @@ class Advertise extends Component {
 			<RouteEngine />
 		) : (
 			<section className="not-signed-in">
-				<span>{connection[this.state.launchApplication]}</span>
+				<span>{connection[this.state.launchApplication === -1 ? '-1' : '0']}</span>
 			</section>
 		);
 	}

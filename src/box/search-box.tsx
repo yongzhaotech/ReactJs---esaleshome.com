@@ -13,16 +13,24 @@ import ProvinceList from '../ad/province-list';
 import CityList from '../ad/city-list';
 import { changeAdKeyword, searchAdvertise } from '../action';
 
-let SearchBox = class extends Component {
-    constructor(props) {
-        super(props);
-        this.actionBoxReference = null;
+interface SearchBoxProps {
+	BOXES: {
+		box: string;
+	};
+	MODELS: Record<string, any>;
+}
 
-        this.createReference = element => {
-            this.actionBoxReference = element;
-            Helper.setActionBoxReference(this.actionBoxReference);
-        }
-    }
+interface SearchBoxState {
+	MODELS: Record<string, any>;
+}
+
+const SearchBox = class extends Component<SearchBoxProps> {
+	private actionBoxReference: HTMLDivElement | null = null;
+
+	private createReference = (element: HTMLDivElement | null): void => {
+		this.actionBoxReference = element;
+		Helper.setActionBoxReference(this.actionBoxReference);
+	};
 
     render() {
 		if(this.props.BOXES.box !== 'search') {
@@ -64,12 +72,6 @@ let SearchBox = class extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
-	MODELS: state.MODELS,
-});
-
-SearchBox = connect(
-	mapStateToProps
-)(SearchBox);
-
-export default SearchBox;
+export default connect((state: SearchBoxState) => ({
+	MODELS: state.MODELS
+}))(SearchBox);

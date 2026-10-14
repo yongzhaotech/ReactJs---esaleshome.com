@@ -4,7 +4,23 @@ import { AdFuncs } from '../common/ad-funcs';
 import { optionHeight } from '../common/config';
 import { Engine } from '../common/engine';
 
-let CityList = class extends Component {
+interface CityOption {
+	i: string | number;
+	n: Record<'en' | 'cn', string>;
+}
+
+interface CityListProps {
+	SEARCH?: string;
+	MODELS: Record<string, any>;
+	LANGUAGE: 'en' | 'cn';
+}
+
+interface CityListState {
+	MODELS: Record<string, any>;
+	language: 'en' | 'cn';
+}
+
+const CityList = class extends Component<CityListProps> {
 	componentDidUpdate() {
 		Engine.keyboardItemList(this.props.SEARCH ? 'city-for-search' : 'city-not-search');
 	}
@@ -12,7 +28,7 @@ let CityList = class extends Component {
 	render() {
 		let MODELS = this.props.MODELS,
 			search = this.props.SEARCH || '',
-			city = AdFuncs.city(search),
+			city: CityOption[] = AdFuncs.city(search),
 			list;
 
 		if (!city.length) {
@@ -39,7 +55,7 @@ let CityList = class extends Component {
 		));
 
 		return (
-			<fieldset style={{ position: 'relative', height: '33.5px' }}>
+			<fieldset style={{ position: 'relative', height: optionHeight }}>
 				<div className="dp_wrapper" style={{ zIndex: '97' }}>
 					<div className="dp_list" aria-label={`${search ? 'city-for-search' : 'city-not-search'}`}>
 						{(MODELS[`expandCity${search}`] && MODELS[`cityId${search}`]) ? (
@@ -59,13 +75,9 @@ let CityList = class extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: CityListState) => ({
 	MODELS: state.MODELS,
 	LANGUAGE: state.language
 });
 
-CityList = connect(
-	mapStateToProps
-)(CityList);
-
-export default CityList;
+export default connect(mapStateToProps)(CityList);

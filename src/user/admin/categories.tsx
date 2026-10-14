@@ -4,11 +4,26 @@ import { AdminFunction } from './admin-function';
 import { Helper } from '../../common/js-funcs';
 import { Engine } from '../../common/engine';
 
-class Categories extends Component {
+interface Category {
+	id: string | number;
+	name: string;
+	name_cn: string;
+}
+
+interface CategoriesProps {
+	USERSIGNEDIN: boolean;
+	profile?: {
+		access_level?: string | number;
+	};
+	categories: Category[];
+	POSTERRORS: Record<string, string>;
+}
+
+class Categories extends Component<CategoriesProps> {
 	render() {
 		const {profile, categories, USERSIGNEDIN, POSTERRORS} = this.props;
 
-        if(!USERSIGNEDIN || !profile || +profile.access_level < 2 || !categories.length) {
+        if(!USERSIGNEDIN || !profile || Number(profile.access_level) < 2 || !categories.length) {
             return null;
         }
 
@@ -30,8 +45,8 @@ class Categories extends Component {
 						<div className="account_box_title">Create a New Category</div>
 						<div>
 							<div className="account_box_label">Category</div>
-							<div className="account_box_field"><input type="text" name="new_category" maxLength="60" /></div>
-							<div className="account_box_field"><input type="text" name="new_category_cn" maxLength="60" /></div>
+							<div className="account_box_field"><input type="text" name="new_category" maxLength={60} /></div>
+							<div className="account_box_field"><input type="text" name="new_category_cn" maxLength={60} /></div>
 						</div>
 						<div className="account_box_label">
 							{Helper.submitButton('c_submit', 'add_category', true)}
@@ -44,7 +59,7 @@ class Categories extends Component {
 							<div className="account_box_title">Change the category text</div>
 							<div className="account_box_label">Select a category to change</div>
 							<div className="account_box_field">
-								<select name="category" onChange={() => {AdminFunction.loadToChange(document.forms['edit_category'], document.forms['edit_category']['category'], 'new_category', 'new_category_cn', 'edit_category_obj')}}>
+								<select name="category" onChange={() => {const form = document.forms.namedItem('edit_category'); if (form) { AdminFunction.loadToChange(form, form.elements.namedItem('category'), 'new_category', 'new_category_cn', 'edit_category_obj'); }}}>
 									<option value=""></option>
 									{
 										categories.map(category => (
@@ -57,8 +72,8 @@ class Categories extends Component {
 						<div id="edit_category_obj" style={{display: 'none'}}>
 							<div>
 								<div className="account_box_label">Category</div>
-								<div className="account_box_field"><input type="text" name="new_category" maxLength="60" /></div>
-								<div className="account_box_field"><input type="text" name="new_category_cn" maxLength="60" /></div>
+								<div className="account_box_field"><input type="text" name="new_category" maxLength={60} /></div>
+								<div className="account_box_field"><input type="text" name="new_category_cn" maxLength={60} /></div>
 							</div>
 							<div className="account_box_label">
 								{Helper.submitButton('c_submit', 'edit_category', true)}
@@ -77,7 +92,7 @@ class Categories extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: { POSTERRORS: Record<string, string> }) => ({
 	POSTERRORS: state.POSTERRORS,
 	USERSIGNEDIN: Engine.userSignedIn()
 });
