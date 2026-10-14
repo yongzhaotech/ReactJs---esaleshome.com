@@ -4,7 +4,18 @@ import { AdFuncs} from '../common/ad-funcs';
 import { optionHeight } from '../common/config';
 import { Engine } from '../common/engine';
 
-let CategoryList = class extends Component {
+interface CategoryListProps {
+	SEARCH?: string;
+	MODELS: Record<string, any>;
+	LANGUAGE: 'en' | 'cn';
+}
+
+interface CategoryListState {
+	MODELS: Record<string, any>;
+	language: 'en' | 'cn';
+}
+
+const CategoryList = class extends Component<CategoryListProps> {
 	componentDidMount() {
 		Engine.keyboardCategoryList(this.props.SEARCH ? 'category-for-search' : 'category-not-search');
 	}
@@ -45,13 +56,9 @@ let CategoryList = class extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: CategoryListState) => ({
 	MODELS: state.MODELS,
 	LANGUAGE: state.language
 });
 
-CategoryList = connect(
-	mapStateToProps
-)(CategoryList);
-
-export default CategoryList;
+export default connect(mapStateToProps)(CategoryList);
