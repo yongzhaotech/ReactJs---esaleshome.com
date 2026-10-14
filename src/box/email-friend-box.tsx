@@ -2,16 +2,20 @@ import React, { Component } from 'react';
 import { getLabel } from '../common/label';
 import { Helper } from '../common/js-funcs';
 
-class EmailFriendBox extends Component {
-    constructor(props) {
-        super(props);
-        this.actionBoxReference = null;
+interface EmailFriendBoxProps {
+	BOXES: {
+		box: string;
+		id?: string | number;
+	};
+}
 
-        this.createReference = element => {
-            this.actionBoxReference = element;
-            Helper.setActionBoxReference(this.actionBoxReference);
-        }
-    }
+class EmailFriendBox extends Component<EmailFriendBoxProps> {
+	private actionBoxReference: HTMLDivElement | null = null;
+
+	private createReference = (element: HTMLDivElement | null): void => {
+		this.actionBoxReference = element;
+		Helper.setActionBoxReference(this.actionBoxReference);
+	};
 
     render() {
 		if(this.props.BOXES.box !== 'email_friend') {
