@@ -5,17 +5,17 @@ import { Engine } from '../common/engine';
 import { smallImageSrc } from '../common/config';
 import { Helper } from '../common/js-funcs';
 
-class ImageList extends Component {
+class ImageList extends Component<{}> {
 	render() {
-		let	numbers = Array.from(Engine.store().MODELS['images'] || []),
+		let	numbers: number[] = Array.from(Engine.store().MODELS['images'] || []),
 			previews = numbers.map(count => {
 				let [imageFound, imageSelected] = [AdFuncs.imageFound(count), AdFuncs.imageSelected(count)];
 				return (
 					imageFound || imageSelected ?
 					(
 						<div key={count} className="img_wrapper">
-							{imageFound ? (<img className="img_selected" src={`${smallImageSrc}${count}.jpg`} align="top" alt="" />) : null}
-							{imageSelected ? (<img className="img_selected box-in" src={AdFuncs.imageSource(count)} align="top" alt="" />) : null}
+							{imageFound ? (<img className="img_selected" src={`${smallImageSrc}${count}.jpg`} style={{ verticalAlign: 'top' }} alt="" />) : null}
+							{imageSelected ? (<img className="img_selected box-in" src={AdFuncs.imageSource(count)} style={{ verticalAlign: 'top' }} alt="" />) : null}
 						</div>
 					) : null
 				)
