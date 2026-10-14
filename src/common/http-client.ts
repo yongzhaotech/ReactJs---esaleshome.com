@@ -31,7 +31,6 @@ interface Route {
 }
 
 const formControlTypes = new Set(['hidden', 'text', 'textarea', 'file', 'password', 'select-one']);
-const trackHit = Helper.hits;
 const routes: Record<string, Route> = {
 	ask_poster_form: {
 		script: 'request'
@@ -66,43 +65,9 @@ const routes: Record<string, Route> = {
 	}
 };
 
+const pathName = (): string => Engine.pathName()
+
 const endPoint = (script: string): string => script.split('/').pop() || '';
-
-const submit = (data: {
-		requestData: string[];
-		formData: boolean;
-		contentType: string;
-		script: string;
-		form: HTMLFormElement;
-	}): Promise<ApiResponse> => {
-		trackHit(data.script);
-
-	return new Promise((res, rej) => {
-		const xhr = new XMLHttpRequest();
-
-		xhr.onload = () => {
-			if(xhr.status === 200) {
-				res({data: xhr.response as ApiData});
-			}else {
-				rej({error: getLabel('backend_error')} as ApiError);
-			}
-		};
-		xhr.onerror = () => {
-			rej({error: getLabel('ui_error')} as ApiError);
-		};
-
-		xhr.open("post", `${host}/${data.script}`, true);
-		xhr.withCredentials = true;
-        xhr.responseType = "json";
-
-		if(data.formData) {
-			xhr.send(new FormData(data.form));
-		}else {
-			xhr.setRequestHeader("Content-Type", data.contentType);
-			xhr.send(data.requestData.join("&"));
-		}
-	});
-};
 
 const sendRequest = (data: string[], script: string, cache: CacheOptions = {}): Promise<ApiResponse> => {
 	let cacheKey: string | undefined,
@@ -158,8 +123,49 @@ const ServerRequest = (script: string, requestData: RequestData, cache: CacheOpt
     return sendRequest(segments, script, cache);
 };
 
+const trackHit = (page?: string | null) => {
+	ServerRequest('request', {action: 'hits', uri: page ? page : pathName()}).then(() => {}).catch(() => {});
+}
+
+const submit = (data: {
+		requestData: string[];
+		formData: boolean;
+		contentType: string;
+		script: string;
+		form: HTMLFormElement;
+	}): Promise<ApiResponse> => {
+		trackHit(data.script);
+
+	return new Promise((res, rej) => {
+		const xhr = new XMLHttpRequest();
+
+		xhr.onload = () => {
+			if(xhr.status === 200) {
+				res({data: xhr.response as ApiData});
+			}else {
+				rej({error: getLabel('backend_error')} as ApiError);
+			}
+		};
+		xhr.onerror = () => {
+			rej({error: getLabel('ui_error')} as ApiError);
+		};
+
+		xhr.open("post", `${host}/${data.script}`, true);
+		xhr.withCredentials = true;
+        xhr.responseType = "json";
+
+		if(data.formData) {
+			xhr.send(new FormData(data.form));
+		}else {
+			xhr.setRequestHeader("Content-Type", data.contentType);
+			xhr.send(data.requestData.join("&"));
+		}
+	});
+};
+
+
 const Http = {
-    ServerRequest: ServerRequest,
+    ServerRequest,
 
 	Post: (f: HTMLFormElement): void => {
 		let [formData, contentType] = (f.enctype && f.enctype === 'multipart/form-data') ? [true, f.enctype] : [false, 'application/x-www-form-urlencoded; charset=UTF-8'];

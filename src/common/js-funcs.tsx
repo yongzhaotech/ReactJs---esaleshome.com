@@ -7,7 +7,6 @@ import {
 	Glyphicon
 } from 'react-bootstrap';
 import { getLabel, Label } from './label';
-import { Http } from './http-client';
 import { AdFuncs} from './ad-funcs';
 import { Engine } from './engine';
 import { formValidator } from './form-process';
@@ -115,7 +114,6 @@ launchMenu = (a: string): void => {
 	setDropDownMenus();
 	attachActionBox(a);
 },
-pathName = (): string => Engine.pathName(),
 submitForm = (formName: string, post: boolean = false): void => {
     formValidator(formName, post);
 },
@@ -228,11 +226,6 @@ Helper = {
 			}
             clearMessage(null, true);
 		}, 0);
-	},
-
-	/** @param {string | null} [page] */
-	hits: (page?: string | null) => {
-        Http.ServerRequest('request', {action: 'hits', uri: page ? page : pathName()}).then(() => {}).catch(() => {});
 	},
 	
 	setMenuBoxReference: (reference: HTMLElement | null) => {
