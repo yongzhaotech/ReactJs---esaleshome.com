@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { AdFuncs } from '../common/ad-funcs';
+import type { SearchMode } from '../common/ad-funcs';
 import { optionHeight } from '../common/config';
 import { Engine } from '../common/engine';
 
@@ -10,7 +11,7 @@ interface CityOption {
 }
 
 interface CityListProps {
-	SEARCH?: string;
+	SEARCH?: SearchMode;
 	MODELS: Record<string, any>;
 	LANGUAGE: 'en' | 'cn';
 }
@@ -27,7 +28,7 @@ const CityList = class extends Component<CityListProps> {
 
 	render() {
 		let MODELS = this.props.MODELS,
-			search = this.props.SEARCH || '',
+			search: SearchMode = this.props.SEARCH || '',
 			city: CityOption[] = AdFuncs.city(search),
 			list;
 
