@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { AnyAction, Dispatch } from 'redux';
 import { Button	} from 'react-bootstrap';
 import { getLabel } from '../common/label';
 import { AdFuncs} from '../common/ad-funcs';
@@ -14,14 +15,28 @@ import CategoryList from './category-list';
 import ItemList from './item-list';
 import { clearStateModelData, clearPostErrors } from '../action';
 
-let PostAdvertise = class extends Component {
+interface PostAdvertiseProps {
+	POSTERRORS: Record<string, string | undefined>;
+	USERSIGNEDIN: boolean;
+	MODELS: Record<string, any>;
+	LANGUAGE: 'en' | 'cn';
+	dispatch: Dispatch<AnyAction>;
+}
+
+interface PostAdvertiseState {
+	POSTERRORS: Record<string, string | undefined>;
+	MODELS: Record<string, any>;
+	language: 'en' | 'cn';
+}
+
+class PostAdvertise extends Component<PostAdvertiseProps> {
 	componentWillUnmount() {
 		this.props.dispatch(clearStateModelData());
 		this.props.dispatch(clearPostErrors());
 	}
 	
 	render() {
-		const {POSTERRORS, USERSIGNEDIN, MODELS} = this.props;
+		const { POSTERRORS, USERSIGNEDIN, MODELS } = this.props;
 		
 		Helper.title(getLabel('p_post_title'));
 
@@ -58,7 +73,7 @@ let PostAdvertise = class extends Component {
 					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_name_title')}</div></div>
 					<div className="ad_box_field">
 						{Helper.errorLabel(POSTERRORS.ad_name)}
-						<input type="text" name="ad_name" maxLength="100" placeholder={getLabel('p_ad_name_placeholder')} />
+						<input type="text" name="ad_name" maxLength={100} placeholder={getLabel('p_ad_name_placeholder')} />
 					</div>
 				</div><div className="ad_inline_block_top">
 					<div className="ad_box_field">
@@ -106,7 +121,7 @@ let PostAdvertise = class extends Component {
 							<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_price_title')}</div></div>
 							<div className="ad_box_field">
 								{Helper.errorLabel(POSTERRORS.price)}
-								<input type="text" name="price" maxLength="15" />
+								<input type="text" name="price" maxLength={15} />
 							</div>
 						</div><div className="ad_inline_block_top">
 							<div className="ad_box_field">
@@ -118,7 +133,7 @@ let PostAdvertise = class extends Component {
 					</div>) : null}
 				<div className="ad_inline_block">
 					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_detail_title')}</div></div>
-					<div className="ad_box_field"><textarea name="description" rows="4" cols="100" placeholder={getLabel('p_detail_placeholder')}></textarea></div>
+					<div className="ad_box_field"><textarea name="description" rows={4} cols={100} placeholder={getLabel('p_detail_placeholder')}></textarea></div>
 				</div><div className="ad_inline_block_top">
 					<div className="ad_box_field">
 						<div className="post_hints">
@@ -201,7 +216,7 @@ let PostAdvertise = class extends Component {
 				</div>
 				<div className="ad_inline_block">
 					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_add_title')}</div></div>
-					<div className="ad_box_field"><input type="text" name="address" maxLength="100" placeholder={getLabel('p_add_placeholder')} /></div>
+					<div className="ad_box_field"><input type="text" name="address" maxLength={100} placeholder={getLabel('p_add_placeholder')} /></div>
 				</div><div className="ad_inline_block_top">
 					<div className="ad_box_field">
 						<div className="post_hints">
@@ -215,9 +230,9 @@ let PostAdvertise = class extends Component {
 			</form>
 		);
 	};
-};
+}
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: PostAdvertiseState) => ({
 	POSTERRORS: state.POSTERRORS,
 	MODELS: state.MODELS,
 	LANGUAGE: state.language,
