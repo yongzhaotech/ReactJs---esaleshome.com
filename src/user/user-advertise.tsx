@@ -4,15 +4,7 @@ import { Engine } from '../common/engine';
 import UserTabs from './user-tabs';
 import UserAdvertiseSnippets from './user-advertise-snippets';
 import { fetchUserData } from '../action';
-
-export interface UserAdvertiseItem {
-	id: string | number;
-	name: string;
-	viewed: number;
-	description: string;
-	is_free: string | number;
-	price: string | number;
-}
+import type { UserAdvertiseItem } from '../types/user';
 
 interface UserAdvertiseProps {
 	USERSIGNEDIN: boolean;

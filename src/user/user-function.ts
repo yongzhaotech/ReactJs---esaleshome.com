@@ -8,9 +8,9 @@ import {
 	fetchUserDataSuccess
 } from '../action';
 import { Cache } from '../common/cache';
+import type { Identifier } from '../types/common';
 
 type DataKey = 'profile' | 'ads' | 'siteUsers' | 'siteAds' | 'visitorHits' | 'files' | 'categories' | 'subCategories';
-type Identifier = string | number;
 
 interface DataFetchInfo {
 	script: string;

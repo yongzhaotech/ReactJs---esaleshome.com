@@ -2,16 +2,10 @@ import React from 'react';
 import { Glyphicon } from 'react-bootstrap';
 import { AdInfo } from '../common/ad-info';
 import { Helper } from '../common/js-funcs';
-
-interface Advertise {
-	id: string | number;
-	name: string;
-	contact_phone?: string;
-	contact_method?: string;
-}
+import type { Advertise } from '../types/ad';
 
 interface AdGlyphiconProps {
-	ad: Advertise;
+	ad: Pick<Advertise, 'id' | 'name' | 'contact_phone' | 'contact_method'>;
 	OBJECTS: {
 		DETAILFLAG?: string | number;
 	};

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { AdFuncs } from '../common/ad-funcs';
-import type { SearchMode } from '../common/ad-funcs';
+import type { SearchMode } from '../types/ad';
 import { optionHeight } from '../common/config';
 import { Engine } from '../common/engine';
 

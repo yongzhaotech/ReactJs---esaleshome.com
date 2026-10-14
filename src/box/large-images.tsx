@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { AdInfo } from '../common/ad-info';
 import { largeImageSrc } from '../common/config';
-
-type Identifier = string | number;
+import type { Identifier } from '../types/common';
 type Step = '' | 'previous' | 'next';
 
 interface ImageItem {

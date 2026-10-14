@@ -9,8 +9,7 @@ import { AdInfo } from '../common/ad-info';
 import { Engine } from '../common/engine';
 import { Helper } from '../common/js-funcs';
 import { smallImageSrc } from '../common/config';
-
-type Identifier = string | number;
+import type { Identifier } from '../types/common';
 
 interface AdvertiseDetailData {
 	id: Identifier;

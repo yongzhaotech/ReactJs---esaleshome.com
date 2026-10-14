@@ -12,7 +12,7 @@ import ItemList from '../ad/item-list';
 import ProvinceList from '../ad/province-list';
 import CityList from '../ad/city-list';
 import { changeAdKeyword, searchAdvertise } from '../action';
-import type { SearchMode } from '../common/ad-funcs';
+import type { SearchMode } from '../types/ad';
 
 interface SearchBoxProps {
 	BOXES: {

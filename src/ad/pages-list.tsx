@@ -2,16 +2,12 @@ import React from 'react';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 import { AdInfo } from '../common/ad-info';
 import { getLabel } from '../common/label';
-
-type Identifier = string | number;
+import type { Identifier } from '../types/common';
+import type { Advertise } from '../types/ad';
 
 interface Page {
 	i: number;
 	n: string | number;
-}
-
-interface Advertise {
-	id: Identifier;
 }
 
 interface PagesListProps {

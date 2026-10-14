@@ -6,7 +6,7 @@ import { AdInfo } from '../common/ad-info';
 import { AdFuncs } from "../common/ad-funcs";
 import { Engine } from '../common/engine';
 
-import type { UserAdvertiseItem } from './user-advertise';
+import type { UserAdvertiseItem } from '../types/user';
 
 interface UserAdvertiseSnippetsProps {
 	USERSIGNEDIN: boolean;

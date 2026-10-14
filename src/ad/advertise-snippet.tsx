@@ -6,7 +6,7 @@ import { getLabel } from "../common/label";
 import { AdInfo } from "../common/ad-info";
 import { smallImageSrc } from "../common/config";
 import Glyphicon from "./ad-glyphicon";
-import type { Advertise } from './advertise-snippets';
+import type { Advertise } from '../types/ad';
 
 interface AdvertiseSnippetProps {
 	ad: Advertise;

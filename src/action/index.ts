@@ -1,3 +1,5 @@
+import type { Identifier } from '../types/common';
+
 export const FETCH_ADVERTISES = 'FETCH_ADVERTISES';
 export const FETCH_ADVERTISE = 'FETCH_ADVERTISE';
 export const FETCH_ADVERTISES_SUCCESS = 'FETCH_ADVERTISES_SUCCESS';
@@ -47,7 +49,6 @@ export const SELECT_CITY = 'SELECT_CITY';
 /*
  * @description action creators
  */
-type Identifier = string | number;
 type SearchSuffix = '' | 'Search';
 
 export const loadingLargeImageCount = (message: string = '') => ({

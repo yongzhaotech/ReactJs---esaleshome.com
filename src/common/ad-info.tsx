@@ -17,8 +17,7 @@ import {
 	viewLargeImages
 } from '../action';
 import { Cache } from './cache';
-
-type Identifier = string | number;
+import type { Identifier } from '../types/common';
 
 interface ImageItem {
 	i: Identifier;

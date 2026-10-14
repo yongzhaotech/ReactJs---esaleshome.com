@@ -5,8 +5,7 @@ import { Engine } from '../../common/engine';
 import { Helper } from '../../common/js-funcs';
 import { getLabel } from '../../common/label';
 import { fetchUserDataSuccess } from '../../action';
-
-type Identifier = string | number;
+import type { Identifier } from '../../types/common';
 
 interface AdminCategoryItem {
 	i: Identifier;

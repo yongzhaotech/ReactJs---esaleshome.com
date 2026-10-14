@@ -7,7 +7,7 @@ import AdvertiseSnippets from "./advertise-snippets";
 import SortAds from "./sort-ads";
 import ReactLoader from "./react-loader";
 
-import type { Advertise } from './advertise-snippets';
+import type { Advertise } from '../types/ad';
 
 type SortKey = 'create_date,asc' | 'create_date,des' | 'price,asc' | 'price,des';
 

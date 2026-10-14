@@ -1,5 +1,8 @@
 import React from 'react';
 import { PageVars, StaticVars } from '../static/static-vars';
+import type { Language } from '../static/langs';
+import type { Identifier } from '../types/common';
+import type { SearchMode } from '../types/ad';
 import { Engine } from './engine';
 import {
 	selectCity as selectCityAction,
@@ -13,10 +16,6 @@ import {
 	updateStateModelData,
 	saveStateObjects
 } from '../action';
-
-type Identifier = string | number;
-export type SearchMode = '' | 'Search';
-type Language = 'en' | 'cn';
 
 interface AdOption {
 	i: Identifier;
