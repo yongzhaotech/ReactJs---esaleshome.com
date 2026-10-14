@@ -3,16 +3,33 @@ import { connect } from 'react-redux';
 import { UserFunction } from "../user-function";
 import { Engine } from '../../common/engine';
 
-const SiteUsers = class extends Component {
+interface SiteUser {
+	email: string;
+	last_name: string;
+	first_name: string;
+	create_time: string;
+	edit_time: string;
+	signin_count: number;
+}
+
+interface SiteUsersProps {
+	USERSIGNEDIN: boolean;
+	profile?: {
+		access_level?: string | number;
+	};
+	users: SiteUser[];
+}
+
+const SiteUsers = class extends Component<SiteUsersProps> {
 	render() {
 		const {profile, users} = this.props;
 
-        if(!this.props.USERSIGNEDIN || !profile || +profile.access_level < 2 || !users.length) {
+        if(!this.props.USERSIGNEDIN || !profile || Number(profile.access_level) < 2 || !users.length) {
             return null;
         }
 	
 		let output = (
-			<table style={{width: '100%'}} border="0" cellPadding="2" cellSpacing="2">
+			<table style={{width: '100%', border: 0}} cellPadding="2" cellSpacing="2">
 				<tbody>
 					<tr style={{fontWeight: 'bold'}}>
 						<td>email</td>
@@ -48,7 +65,7 @@ const SiteUsers = class extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = () => ({
 	USERSIGNEDIN: Engine.userSignedIn()
 });
 
