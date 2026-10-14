@@ -5,16 +5,25 @@ import UserTabs from './user-tabs';
 import UserAdvertiseSnippets from './user-advertise-snippets';
 import { fetchUserData } from '../action';
 
+export interface UserAdvertiseItem {
+	id: string | number;
+	name: string;
+	viewed: number;
+	description: string;
+	is_free: string | number;
+	price: string | number;
+}
+
 interface UserAdvertiseProps {
 	USERSIGNEDIN: boolean;
 	profile?: Record<string, unknown>;
-	ads?: unknown[];
+	ads?: UserAdvertiseItem[];
 }
 
 interface UserAdvertiseState {
 	USER: {
 		profile?: Record<string, unknown>;
-		ads?: unknown[];
+		ads?: UserAdvertiseItem[];
 	};
 }
 
