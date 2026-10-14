@@ -1,8 +1,8 @@
 import { LangMessages } from '../static/langs';
+import type { Language } from '../static/langs';
 import { Engine } from './engine';
 
-type Label = keyof typeof LangMessages;
-type Language = keyof typeof LangMessages[Label];
+export type Label = keyof typeof LangMessages;
 
 const getLabel = (label: Label): string => {
 	const language: Language = Engine.store().language;

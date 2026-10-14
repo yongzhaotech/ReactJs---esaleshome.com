@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { AnyAction, Dispatch } from 'redux';
 import { Button } from 'react-bootstrap';
 import { getLabel } from '../common/label';
 import { AdFuncs } from '../common/ad-funcs';
@@ -18,7 +19,36 @@ import {
 	clearStateModelData
 } from '../action';
 
-class EditAdvertise extends Component {
+interface UserAdvertise {
+	id: string | number;
+	name: string;
+	description?: string;
+	address?: string;
+}
+
+interface EditAdvertiseProps {
+	POSTERRORS: Record<string, string | undefined>;
+	LANGUAGE: 'en' | 'cn';
+	MODELS: Record<string, any> & {
+		userAdvertiseSet?: UserAdvertise;
+		contactMethods: Record<string, string>;
+		_contactMethods: Record<string, number>;
+	};
+	profile: Record<string, unknown> | null;
+	USERSIGNEDIN: boolean;
+	dispatch: Dispatch<AnyAction>;
+}
+
+interface EditAdvertiseReduxState {
+	POSTERRORS: Record<string, string | undefined>;
+	language: 'en' | 'cn';
+	MODELS: EditAdvertiseProps['MODELS'];
+	USER: {
+		profile: Record<string, unknown> | null;
+	};
+}
+
+class EditAdvertise extends Component<EditAdvertiseProps> {
 	componentDidMount() {
 		const advertiseId = Engine.param('advertiseId') || null;
 
@@ -85,7 +115,7 @@ class EditAdvertise extends Component {
 								<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_name_title')}</div></div>
 								<div className="ad_box_field">
 									{Helper.errorLabel(POSTERRORS.ad_name)}
-									<input type="text" name="ad_name" defaultValue={ad.name} maxLength="100" />
+									<input type="text" name="ad_name" defaultValue={ad.name} maxLength={100} />
 								</div>
 							</div><div className="ad_inline_block_top">
 								<div className="ad_box_field">
@@ -134,7 +164,7 @@ class EditAdvertise extends Component {
 											<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_price_title')}</div></div>
 											<div className="ad_box_field">
 												{Helper.errorLabel(POSTERRORS.price)}
-												<input type="text" name="price" defaultValue={MODELS['price']} maxLength="15" />
+												<input type="text" name="price" defaultValue={MODELS['price']} maxLength={15} />
 											</div>
 										</div><div className="ad_inline_block_top">
 											<div className="ad_box_field">
@@ -149,7 +179,7 @@ class EditAdvertise extends Component {
 							<div className="ad_inline_block">
 								<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_detail_title')}</div></div>
 								<div className="ad_box_field">
-									<textarea name="description" rows="4" cols="100" placeholder={getLabel('p_detail_placeholder')} defaultValue={ad.description} />
+									<textarea name="description" rows={4} cols={100} placeholder={getLabel('p_detail_placeholder')} defaultValue={ad.description} />
 								</div>
 							</div><div className="ad_inline_block_top">
 								<div className="ad_box_field">
@@ -221,7 +251,7 @@ class EditAdvertise extends Component {
 							<div className="ad_inline_block">
 								<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_add_title')}</div></div>
 								<div className="ad_box_field">
-									<input type="text" name="address" defaultValue={ad.address} maxLength="100" placeholder={getLabel('p_add_placeholder')} />
+									<input type="text" name="address" defaultValue={ad.address} maxLength={100} placeholder={getLabel('p_add_placeholder')} />
 								</div>
 							</div><div className="ad_inline_block_top">
 								<div className="ad_box_field">
@@ -238,10 +268,10 @@ class EditAdvertise extends Component {
 				}
 			</React.Fragment>
 		);
-	};
-};
+	}
+}
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: EditAdvertiseReduxState) => ({
 	POSTERRORS: state.POSTERRORS,
 	LANGUAGE: state.language,
 	MODELS: state.MODELS,

@@ -12,6 +12,7 @@ import ItemList from '../ad/item-list';
 import ProvinceList from '../ad/province-list';
 import CityList from '../ad/city-list';
 import { changeAdKeyword, searchAdvertise } from '../action';
+import type { SearchMode } from '../common/ad-funcs';
 
 interface SearchBoxProps {
 	BOXES: {
@@ -36,7 +37,8 @@ const SearchBox = class extends Component<SearchBoxProps> {
 		if(this.props.BOXES.box !== 'search') {
 			return null;
 		}
-		let SEARCH = 'Search',
+		const SEARCH: SearchMode = 'Search';
+		let
 			MODELS = this.props.MODELS;
 
 		return (

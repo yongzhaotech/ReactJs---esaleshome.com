@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { AnyAction, Dispatch } from 'redux';
 import AdvertiseContact from './advertise-contact';
 import ContactUs from './contact-us';
 import EmailFriendBox from './email-friend-box';
@@ -16,7 +16,26 @@ import { AdInfo } from '../common/ad-info';
 import { switchLanguage } from '../action';
 import * as Action from '../action';
 
-class ActionBox extends Component {
+interface ActionBoxProps {
+	BOXES: {
+		box: string;
+		name?: string;
+		id?: string | number;
+	};
+	MENUS: boolean;
+	dispatch: Dispatch<AnyAction>;
+}
+
+interface ActionBoxState {
+	BOXES: {
+		box: string;
+		name?: string;
+		id?: string | number;
+	};
+	MENUS: boolean;
+}
+
+class ActionBox extends Component<ActionBoxProps> {
 	goHome = () => {
 		AdInfo.listAdvertise();
 		Helper.location('');
@@ -27,7 +46,7 @@ class ActionBox extends Component {
 	}
 
 	render() {
-		const { BOXES, ERRORS, LANGUAGE } = this.props;
+		const { BOXES } = this.props;
 
 		return (
 			<nav id="ad_title_bar">
@@ -42,16 +61,16 @@ class ActionBox extends Component {
 						{getLabel('c_language')}
 					</div>
 					<label htmlFor="keyWordSearch" className="visually-hidden">{getLabel('c_key_search')}</label>
-					<input name="keyWordSearch" id="keyWordSearch" className="key-word-search" placeholder={getLabel('c_key_search')} onChange={e => this.props.dispatch(Action.keyWordSearch(e.target.value))} />
+					<input name="keyWordSearch" id="keyWordSearch" className="key-word-search" placeholder={getLabel('c_key_search')} onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.props.dispatch(Action.keyWordSearch(e.target.value))} />
 					<div className="ad_action_box_wrapper">
-						{Engine.component(AdvertiseContact, { BOXES, ERRORS, LANGUAGE })}
-						{Engine.component(ContactUs, { BOXES, ERRORS, LANGUAGE })}
-						{Engine.component(EmailFriendBox, { BOXES, ERRORS, LANGUAGE })}
-						{Engine.component(FindVisitorAdBox, { BOXES, ERRORS, LANGUAGE })}
-						{Engine.component(ForgetPasswordBox, { BOXES, ERRORS, LANGUAGE })}
-						{Engine.component(LoginBox, { BOXES, ERRORS, LANGUAGE })}
-						{Engine.component(Register, { BOXES, ERRORS, LANGUAGE })}
-						{Engine.component(SearchBox, { BOXES, ERRORS, LANGUAGE })}
+						{Engine.component(AdvertiseContact, { BOXES })}
+						{Engine.component(ContactUs, { BOXES })}
+						{Engine.component(EmailFriendBox, { BOXES })}
+						{Engine.component(FindVisitorAdBox, { BOXES })}
+						{Engine.component(ForgetPasswordBox, { BOXES })}
+						{Engine.component(LoginBox, { BOXES })}
+						{Engine.component(Register, { BOXES })}
+						{Engine.component(SearchBox, { BOXES })}
 					</div>
 				</nav>
 			</nav>
@@ -59,20 +78,11 @@ class ActionBox extends Component {
 	};
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: ActionBoxState) => ({
 	BOXES: state.BOXES,
 	MENUS: state.MENUS,
-	ERRORS: state.ERRORS,
-	LANGUAGE: state.language
 });
 
 export default connect(
 	mapStateToProps
 )(ActionBox);
-
-ActionBox.propTypes = {
-	BOXES: PropTypes.object.isRequired,
-	ERRORS: PropTypes.object.isRequired,
-	MENUS: PropTypes.bool.isRequired,
-	LANGUAGE: PropTypes.string
-};

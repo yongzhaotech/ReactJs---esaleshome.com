@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { AnyAction, Dispatch } from 'redux';
 import { Button, ButtonToolbar } from 'react-bootstrap';
 import { getLabel } from '../common/label';
 import { AdFuncs } from '../common/ad-funcs';
@@ -14,9 +15,39 @@ import CategoryList from './category-list';
 import ItemList from './item-list';
 import { fetchVisitorAdvertise, clearStateModelData } from '../action';
 
-class VisitorAdvertise extends Component {
+interface VisitorAd {
+	id: string | number;
+	name: string;
+	contact_phone?: string;
+	contact_email?: string;
+	address?: string;
+	description?: string;
+}
+
+interface VisitorAdvertiseProps {
+	POSTERRORS: Record<string, string | undefined>;
+	LANGUAGE: 'en' | 'cn';
+	MODELS: Record<string, any> & {
+		userAdvertiseSet?: VisitorAd;
+		contactMethods: Record<string, string>;
+		_contactMethods: Record<string, number>;
+	};
+	dispatch: Dispatch<AnyAction>;
+}
+
+interface VisitorAdvertiseState {
+	POSTERRORS: Record<string, string | undefined>;
+	language: 'en' | 'cn';
+	MODELS: Record<string, any> & {
+		userAdvertiseSet?: VisitorAd;
+		contactMethods: Record<string, string>;
+		_contactMethods: Record<string, number>;
+	};
+}
+
+class VisitorAdvertise extends Component<VisitorAdvertiseProps> {
 	componentDidMount() {
-		let behavior = Engine.param('behavior') || null;
+		const behavior = Engine.param('behavior') || null;
 
 		AdFuncs.initOtherItems();
 
@@ -81,7 +112,7 @@ class VisitorAdvertise extends Component {
 					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_name_title')}</div></div>
 					<div className="ad_box_field">
 						{Helper.errorLabel(POSTERRORS.ad_name)}
-						<input type="text" name="ad_name" defaultValue={ad.name} maxLength="100" />
+						<input type="text" name="ad_name" defaultValue={ad.name} maxLength={100} />
 					</div>
 				</div><div className="ad_inline_block_top">
 					<div className="ad_box_field">
@@ -130,7 +161,7 @@ class VisitorAdvertise extends Component {
 								<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_price_title')}</div></div>
 								<div className="ad_box_field">
 									{Helper.errorLabel(POSTERRORS.price)}
-									<input type="text" name="price" defaultValue={MODELS['price']} maxLength="15" />
+									<input type="text" name="price" defaultValue={MODELS['price']} maxLength={15} />
 								</div>
 							</div><div className="ad_inline_block_top">
 								<div className="ad_box_field">
@@ -145,7 +176,7 @@ class VisitorAdvertise extends Component {
 				<div className="ad_inline_block">
 					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_detail_title')}</div></div>
 					<div className="ad_box_field">
-						<textarea name="description" rows="4" cols="100" placeholder={getLabel('p_detail_placeholder')} defaultValue={ad.description} />
+						<textarea name="description" rows={4} cols={100} placeholder={getLabel('p_detail_placeholder')} defaultValue={ad.description} />
 					</div>
 				</div><div className="ad_inline_block_top">
 					<div className="ad_box_field">
@@ -217,7 +248,7 @@ class VisitorAdvertise extends Component {
 				<div className="ad_inline_block">
 					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_add_title')}</div></div>
 					<div className="ad_box_field">
-						<input type="text" name="address" defaultValue={ad.address} maxLength="100" placeholder={getLabel('p_add_placeholder')} />
+						<input type="text" name="address" defaultValue={ad.address} maxLength={100} placeholder={getLabel('p_add_placeholder')} />
 					</div>
 				</div><div className="ad_inline_block_top">
 					<div className="ad_box_field">
@@ -235,9 +266,9 @@ class VisitorAdvertise extends Component {
 			</form>
 		);
 	};
-};
+}
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: VisitorAdvertiseState) => ({
 	POSTERRORS: state.POSTERRORS,
 	LANGUAGE: state.language,
 	MODELS: state.MODELS

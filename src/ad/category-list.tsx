@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { AdFuncs} from '../common/ad-funcs';
+import type { SearchMode } from '../common/ad-funcs';
 import { optionHeight } from '../common/config';
 import { Engine } from '../common/engine';
 
 interface CategoryListProps {
-	SEARCH?: string;
+	SEARCH?: SearchMode;
 	MODELS: Record<string, any>;
 	LANGUAGE: 'en' | 'cn';
 }
@@ -22,7 +23,7 @@ const CategoryList = class extends Component<CategoryListProps> {
 
 	render() {
 		let MODELS = this.props.MODELS,
-			search = this.props.SEARCH || '',
+			search: SearchMode = this.props.SEARCH || '',
 			list = AdFuncs.category().map(cat => (
 					<button
 						key={cat.i}

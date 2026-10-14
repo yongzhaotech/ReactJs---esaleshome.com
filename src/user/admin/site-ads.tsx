@@ -4,11 +4,37 @@ import { AdminFunction } from './admin-function';
 import { Engine } from '../../common/engine';
 import { fetchUserData } from '../../action';
 
-class SiteAds extends Component {
+export interface SiteAd {
+	id: string | number;
+	name: string;
+	poster?: string;
+	contact_email?: string;
+	contact_phone?: string;
+	post_id: string | number;
+	create_time: string;
+	active: string | number;
+}
+
+export interface SiteAdsPage {
+	i: string | number;
+	n: string;
+}
+
+interface SiteAdsProps {
+	profile?: {
+		access_level?: string | number;
+	};
+	ads: SiteAd[];
+	pages: SiteAdsPage[];
+	currentPage: string | number;
+	USERSIGNEDIN: boolean;
+}
+
+class SiteAds extends Component<SiteAdsProps> {
 	render() {
 		const {profile, ads, pages, currentPage, USERSIGNEDIN} = this.props;
 
-        if(!USERSIGNEDIN || !profile || +profile.access_level < 2 || !ads.length) {
+        if(!USERSIGNEDIN || !profile || Number(profile.access_level) < 2 || !ads.length) {
             return null;
         }
 
@@ -27,7 +53,7 @@ class SiteAds extends Component {
 				</nav>
 			) : null,
 			output = (
-			<table style={{width: '100%'}} border='0' cellPadding='2' cellSpacing='2'>
+			<table style={{width: '100%', border: 0}} cellPadding='2' cellSpacing='2'>
 				<tbody>
 					<tr style={{fontWeight: 'bold'}}>
 						<td>Ad Name</td>

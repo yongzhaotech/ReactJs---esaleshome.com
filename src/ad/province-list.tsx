@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { AdFuncs} from '../common/ad-funcs';
+import type { SearchMode } from '../common/ad-funcs';
 import { optionHeight } from '../common/config';
 import { Engine } from '../common/engine';
 
 interface ProvinceListProps {
-	SEARCH?: string;
+	SEARCH?: SearchMode;
 	MODELS: Record<string, any>;
 	LANGUAGE: 'en' | 'cn';
 }
@@ -23,7 +24,7 @@ const ProvinceList = class extends Component<ProvinceListProps> {
 	render() {
 		let MODELS = this.props.MODELS,
 			LANGUAGE = this.props.LANGUAGE,
-			search = this.props.SEARCH || '',
+			search: SearchMode = this.props.SEARCH || '',
 			list = AdFuncs.province().map(prov => (
 					<button
 						key={prov.i}

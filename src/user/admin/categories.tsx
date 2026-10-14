@@ -59,7 +59,13 @@ class Categories extends Component<CategoriesProps> {
 							<div className="account_box_title">Change the category text</div>
 							<div className="account_box_label">Select a category to change</div>
 							<div className="account_box_field">
-								<select name="category" onChange={() => {const form = document.forms.namedItem('edit_category'); if (form) { AdminFunction.loadToChange(form, form.elements.namedItem('category'), 'new_category', 'new_category_cn', 'edit_category_obj'); }}}>
+								<select name="category" onChange={() => {
+									const form = document.forms.namedItem('edit_category');
+									const category = form && form.elements.namedItem('category');
+									if (form && category instanceof HTMLSelectElement) {
+										AdminFunction.loadToChange(form, category, 'new_category', 'new_category_cn', 'edit_category_obj');
+									}
+								}}>
 									<option value=""></option>
 									{
 										categories.map(category => (

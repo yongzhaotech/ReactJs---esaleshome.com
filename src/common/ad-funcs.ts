@@ -1,3 +1,4 @@
+import React from 'react';
 import { PageVars, StaticVars } from '../static/static-vars';
 import { Engine } from './engine';
 import {
@@ -13,41 +14,70 @@ import {
 	saveStateObjects
 } from '../action';
 
-let [images, _contactMethods, contactMethods, selectedImages, provonceList, provId, provObj, group, cityId, cityObj, categoryList, catId, catObj, itemId, itemObj, _removeAdImages] = [
-	[],
-	{},
-	{email: '', contact_phone: ''},
-	{},
-	PageVars.province,
-	'',
-	null,
-	'',
-	'',
-	null,
-	PageVars.category,
-	'',
-	null,
-	'',
-	null,
-	{}
-];
+type Identifier = string | number;
+export type SearchMode = '' | 'Search';
+type Language = 'en' | 'cn';
 
-// extra parameters for search box
-let [provIdSearch, provObjSearch, cityIdSearch, cityObjSearch, catIdSearch, catObjSearch, itemIdSearch, itemObjSearch] = ['', null, '', null, '', null, '', null];
+interface AdOption {
+	i: Identifier;
+	n: Record<Language, string>;
+	c?: AdOption[];
+	s?: Record<Language, string>;
+}
+
+interface AdIdentity {
+	id: Identifier;
+}
+
+interface ProvinceOption extends AdOption {
+	s: Record<Language, string>;
+}
+
+interface CollapseTarget {
+	dispatch(action: unknown): unknown;
+}
+
+let images: number[] = [],
+	_contactMethods: Record<string, number> = {},
+	contactMethods: Record<string, string> = { email: '', contact_phone: '' },
+	selectedImages: Record<string, string> = {},
+	provonceList: ProvinceOption[] = PageVars.province,
+	provId: Identifier | '' = '',
+	provObj: AdOption | null = null,
+	group = '',
+	cityId: Identifier | '' = '',
+	cityObj: AdOption | null = null,
+	categoryList: AdOption[] = PageVars.category,
+	catId: Identifier | '' = '',
+	catObj: AdOption | null = null,
+	itemId: Identifier | '' = '',
+	itemObj: AdOption | null = null,
+	_removeAdImages: Record<string, number> = {};
+
+let provIdSearch: Identifier | '' = '',
+	provObjSearch: AdOption | null = null,
+	cityIdSearch: Identifier | '' = '',
+	cityObjSearch: AdOption | null = null,
+	catIdSearch: Identifier | '' = '',
+	catObjSearch: AdOption | null = null,
+	itemIdSearch: Identifier | '' = '',
+	itemObjSearch: AdOption | null = null;
 
 const collapse = {
-	cat: o => { o.dispatch(expandCatAction(false)); },
-	item: o => { o.dispatch(expandItemAction(false)); },
-	prov: o => { o.dispatch(expandProvAction(false)); },
-	city: o => { o.dispatch(expandCityAction(false)); },
-	catSearch: o => { o.dispatch(expandCatAction(false, 'Search')); },
-	itemSearch: o => { o.dispatch(expandItemAction(false, 'Search')); },
-	provSearch: o => { o.dispatch(expandProvAction(false, 'Search')); },
-	citySearch: o => { o.dispatch(expandCityAction(false, 'Search')); }
+	cat: (o: CollapseTarget) => { o.dispatch(expandCatAction(false)); },
+	item: (o: CollapseTarget) => { o.dispatch(expandItemAction(false)); },
+	prov: (o: CollapseTarget) => { o.dispatch(expandProvAction(false)); },
+	city: (o: CollapseTarget) => { o.dispatch(expandCityAction(false)); },
+	catSearch: (o: CollapseTarget) => { o.dispatch(expandCatAction(false, 'Search')); },
+	itemSearch: (o: CollapseTarget) => { o.dispatch(expandItemAction(false, 'Search')); },
+	provSearch: (o: CollapseTarget) => { o.dispatch(expandProvAction(false, 'Search')); },
+	citySearch: (o: CollapseTarget) => { o.dispatch(expandCityAction(false, 'Search')); }
 };
 
-const collapseAll = (o, m) => {
-	for(let d in collapse) {
+type CollapseKey = keyof typeof collapse;
+
+const collapseAll = (o: CollapseTarget, m: string): void => {
+	for(const d of Object.keys(collapse) as CollapseKey[]) {
 		if(d !== m) {
 			collapse[d](o);
 		}
@@ -70,7 +100,7 @@ const AdFuncs = {
 		}));
 	},
 	
-	setCurrency: (c) => {
+	setCurrency: (c: string) => {
 		Engine.dispatch(updateStateModelData({
 			currency: c
 		}));
@@ -89,7 +119,7 @@ const AdFuncs = {
 		}));
 	},
 	
-	rmAdImage: n => {
+	rmAdImage: (n: number) => {
 		let idx = images.indexOf(n),
 			adImages = {...Engine.store().MODELS['adImages']};
 		if(idx >= 0) {
@@ -122,7 +152,7 @@ const AdFuncs = {
 		}
 	},
 	
-	setMainPicture: n => {
+	setMainPicture: (n: number) => {
 		Engine.dispatch(updateStateModelData({
 			mainPictureId: n
 		}));
@@ -132,7 +162,7 @@ const AdFuncs = {
 		return Object.keys(_contactMethods).join(',');
 	},
 
-	setContactMethod: c => {
+	setContactMethod: (c: string) => {
 		if((c in _contactMethods)) {
 			delete _contactMethods[c];
 			contactMethods[c] = '';
@@ -147,23 +177,23 @@ const AdFuncs = {
 		}
 	},
 
-	isContactMethod: c => {
+	isContactMethod: (c: string) => {
 		return (c in _contactMethods);
 	},
 
-	imageFound: n => {
+	imageFound: (n: number) => {
 		return (n in {...Engine.store().MODELS['adImages'] || {}});
 	},
 
-	imageSelected: n => {
+	imageSelected: (n: number) => {
 		return (n in selectedImages);
 	},
 	
-	imageSource: n => {
+	imageSource: (n: number): string | undefined => {
 		return selectedImages[n];
 	},
 	
-	imageError: n => {
+	imageError: (n: number) => {
 		return +Engine.store().MODELS['imageErrorNumber'] === n;
 	},
 	
@@ -171,16 +201,21 @@ const AdFuncs = {
 		return Engine.store().MODELS['imageErrorCode'];
 	},
 	
-	browseAdImage: n => {
+	browseAdImage: (n: number) => {
 		let camera = document.getElementById(`ad_image_${n}`);
 		if(camera) {
 			camera.click();
 		}
 	},
 	
-	selectFile: e => {
-		let [error, info] = ['', e.target.files[0]];
-		let [, n] = e.target.name.match(/^ad_image_(\d+)$/);
+	selectFile: (e: React.ChangeEvent<HTMLInputElement>) => {
+		let error = '',
+			info = e.target.files?.[0];
+		const match = e.target.name.match(/^ad_image_(\d+)$/);
+		if(!match) {
+			throw new Error(`Unexpected ad image input name: ${e.target.name}`);
+		}
+		const n = match[1];
 		
 		if(!info) {
 			return;
@@ -203,8 +238,11 @@ const AdFuncs = {
 			}));
 			let reader = new FileReader();
 			reader.readAsDataURL(info);
-			reader.onload = evt => {
-				selectedImages[n] = evt.target.result;
+			reader.onload = () => {
+				if(typeof reader.result !== 'string') {
+					return;
+				}
+				selectedImages[n] = reader.result;
 				Engine.dispatch(updateStateModelData({
 					selectedImages: selectedImages
 				}));
@@ -216,7 +254,7 @@ const AdFuncs = {
 		return categoryList;
 	},
 	
-	selectCat: (c, Search = '') => {
+	selectCat: (c: AdOption, Search: SearchMode = '') => {
 		let MODELS = Engine.store().MODELS,
 			expandCat = !MODELS[`expandCat${Search}`];
 		Engine.dispatch(expandCatAction(expandCat, Search));
@@ -231,25 +269,25 @@ const AdFuncs = {
 		Engine.dispatch(selectCatAction(Search ? catIdSearch : catId, Search ? catObjSearch : catObj, Search));
 	},
 
-	showCat: (c, Search = '') => {
+	showCat: (c: AdOption, Search: SearchMode = '') => {
 		let MODELS = Engine.store().MODELS,
 			[catId, expandCat] = [MODELS[`catId${Search}`], MODELS[`expandCat${Search}`]];
 		return expandCat || (!c.i && !catId) || (catId && catId === c.i);
 	},
 
-	catSelected: (c, Search = '') => {
+	catSelected: (c: AdOption, Search: SearchMode = '') => {
 		let MODELS = Engine.store().MODELS,
 			catId = MODELS[`catId${Search}`];
 		return catId && catId === c.i;
 	},
 
-	item: (Search = '') => {
+	item: (Search: SearchMode = ''): AdOption[] => {
 		let MODELS = Engine.store().MODELS,
 			catObj = MODELS[`catObj${Search}`];
-		return catObj ? catObj.c : [];
+		return catObj?.c || [];
 	},
 
-	selectItem: (i, Search = '') => {
+	selectItem: (i: AdOption, Search: SearchMode = '') => {
 		let MODELS = Engine.store().MODELS,
 			expandItem = !MODELS[`expandItem${Search}`]
 		Engine.dispatch(expandItemAction(expandItem, Search));
@@ -264,13 +302,13 @@ const AdFuncs = {
 		Engine.dispatch(selectItemAction(Search ? itemIdSearch : itemId, Search ? itemObjSearch : itemObj, Search));
 	},
 
-	showItem: (i, Search = '') => {
+	showItem: (i: AdOption, Search: SearchMode = '') => {
 		let MODELS = Engine.store().MODELS,
 			[expandItem, itemId] = [MODELS[`expandItem${Search}`], MODELS[`itemId${Search}`]];
 		return expandItem || (!i.i && !itemId) || (itemId && itemId === i.i);
 	},
 
-	itemSelected: (i, Search = '') => {
+	itemSelected: (i: AdOption, Search: SearchMode = '') => {
 		return Search ? (itemIdSearch && itemIdSearch === i.i ? true : false) : (itemId && itemId === i.i ? true : false);
 	},
 	
@@ -278,7 +316,7 @@ const AdFuncs = {
 		return provonceList;
 	},
 	
-	selectProv: (p, Search = '') => {
+	selectProv: (p: ProvinceOption, Search: SearchMode = '') => {
 		let MODELS = Engine.store().MODELS,
 			expandProv = !MODELS[`expandProv${Search}`];
 		Engine.dispatch(expandProvAction(expandProv, Search));
@@ -293,33 +331,34 @@ const AdFuncs = {
 		Engine.dispatch(selectProvAction(Search ? provIdSearch : provId, Search ? provObjSearch : provObj, Search));
 	},
 
-	showProv: (p, Search = '') => {
+	showProv: (p: ProvinceOption, Search: SearchMode = '') => {
 		let MODELS = Engine.store().MODELS,
 			[provId, expandProv] = [MODELS[`provId${Search}`], MODELS[`expandProv${Search}`]];
 		return expandProv || (!p.i && !provId) || (provId && provId === p.i);
 	},
 
-	provSelected: (p, Search = '') => {
+	provSelected: (p: ProvinceOption, Search: SearchMode = '') => {
 		let MODELS = Engine.store().MODELS,
 			provId = MODELS[`provId${Search}`];
 		return provId && provId === p.i;
 	},
 
-	displayGroup: p => {
-		if(p.s[Engine.store().LANGUAGE] !== '' && p.s[Engine.store().LANGUAGE] !== group) {
-			group = p.s[Engine.store().LANGUAGE];
+	displayGroup: (p: ProvinceOption): boolean => {
+		const language = Engine.store().LANGUAGE as Language;
+		if(p.s[language] !== '' && p.s[language] !== group) {
+			group = p.s[language];
 			return true;
 		}
 		return false;
 	},
 	
-	city: (Search = '') => {
+	city: (Search: SearchMode = ''): AdOption[] => {
 		let MODELS = Engine.store().MODELS,
 			provObj = MODELS[`provObj${Search}`];
 		return provObj ? provObj.c : [];
 	},
 
-	selectCity: (c, Search = '') => {
+	selectCity: (c: AdOption, Search: SearchMode = '') => {
 		let MODELS = Engine.store().MODELS,
 			expandCity = !MODELS[`expandCity${Search}`];
 		Engine.dispatch(expandCityAction(expandCity, Search));
@@ -334,13 +373,13 @@ const AdFuncs = {
 		Engine.dispatch(selectCityAction(Search ? cityIdSearch : cityId, Search ? cityObjSearch : cityObj, Search));
 	},
 
-	showCity: (c, Search = '') => {
+	showCity: (c: AdOption, Search: SearchMode = '') => {
 		let MODELS = Engine.store().MODELS,
 			[expandCity, cityId] = [MODELS[`expandCity${Search}`], MODELS[`cityId${Search}`]];
 		return expandCity || (!c.i && !cityId) || (cityId && cityId === c.i);
 	},
 
-	citySelected: (c, Search = '') => {
+	citySelected: (c: AdOption, Search: SearchMode = '') => {
 		return Search ? (cityIdSearch && cityIdSearch === c.i ? true : false) : (cityId && cityId === c.i ? true : false);
 	},
 
@@ -367,7 +406,7 @@ const AdFuncs = {
         [provIdSearch, provObjSearch, cityIdSearch, cityObjSearch, catIdSearch, catObjSearch, itemIdSearch, itemObjSearch] = ['', null, '', null, '', null, '', null];
 	},
 	
-	expandUserAd: ad => {
+	expandUserAd: (ad: AdIdentity) => {
 		let expandedAds = {...Engine.store().OBJECTS['EXPANDEDADS'] || {}};
 		if(ad.id in expandedAds) {
 			delete expandedAds[ad.id];
@@ -379,7 +418,7 @@ const AdFuncs = {
 		}));
 	},
 
-	userAdExpanded: ad => {
+	userAdExpanded: (ad: AdIdentity): boolean => {
 		let expandedAds = Engine.store().OBJECTS['EXPANDEDADS'] || {};
 		return (ad.id in expandedAds);
 	},
@@ -398,7 +437,7 @@ const AdFuncs = {
 		return !nothing && +isFree === 0;
 	},
 
-	initCity: (value, search = false) => {
+	initCity: (value: Identifier | '', search: boolean = false) => {
 		if(search) {
 			cityIdSearch = value;
 		}else {
@@ -406,7 +445,7 @@ const AdFuncs = {
 		}
 	},
 	
-	initItem: (value, search = false) => {
+	initItem: (value: Identifier | '', search: boolean = false) => {
 		if(search) {
 			itemIdSearch = value;
 		}else {
@@ -414,11 +453,11 @@ const AdFuncs = {
 		}
 	},
 
-	initImages: value => {
+	initImages: (value: number[]) => {
 		images = value;
 	},
 
-	initContactMethods: (...methods) => {
+	initContactMethods: (...methods: [Record<string, string>, Record<string, number>]) => {
 		[contactMethods, _contactMethods] = methods;
 	},
 

@@ -8,10 +8,31 @@ import {
 	loadingData
 } from '../action';
 
-const types = {
-	'hidden': 1, 'text': 1, 'textarea': 1, 'file': 1, 'password': 1, 'select-one': 1
-},
-routes = {
+type RequestData = Record<string, string | number | boolean | undefined | null>;
+type ApiData = Record<string, any>;
+
+interface ApiResponse {
+	data: ApiData;
+}
+
+interface ApiError {
+	error: string;
+}
+
+interface CacheOptions {
+	requireCache?: boolean;
+	requestData?: RequestData;
+}
+
+interface Route {
+	script: string;
+	page?: string;
+	action?: string;
+}
+
+const formControlTypes = new Set(['hidden', 'text', 'textarea', 'file', 'password', 'select-one']);
+const trackHit = Helper.hits;
+const routes: Record<string, Route> = {
 	ask_poster_form: {
 		script: 'request'
 	},
@@ -43,23 +64,31 @@ routes = {
         script: 'reset-password',
 		page: 'user-account'
 	}
-},
-endPoint = script => script.split('/').pop(),
-submit = data => {
-	Helper.hits(data.script);
+};
+
+const endPoint = (script: string): string => script.split('/').pop() || '';
+
+const submit = (data: {
+		requestData: string[];
+		formData: boolean;
+		contentType: string;
+		script: string;
+		form: HTMLFormElement;
+	}): Promise<ApiResponse> => {
+		trackHit(data.script);
 
 	return new Promise((res, rej) => {
 		const xhr = new XMLHttpRequest();
 
 		xhr.onload = () => {
 			if(xhr.status === 200) {
-				res({data:xhr.response});
+				res({data: xhr.response as ApiData});
 			}else {
-				rej({error: getLabel('backend_error')});
+				rej({error: getLabel('backend_error')} as ApiError);
 			}
 		};
 		xhr.onerror = () => {
-			rej({error: getLabel('ui_error')});
+			rej({error: getLabel('ui_error')} as ApiError);
 		};
 
 		xhr.open("post", `${host}/${data.script}`, true);
@@ -73,36 +102,40 @@ submit = data => {
 			xhr.send(data.requestData.join("&"));
 		}
 	});
-},
-sendRequest = (data, script, cache = {}) => {
-	let cacheKey,
-        cacheData;
+};
+
+const sendRequest = (data: string[], script: string, cache: CacheOptions = {}): Promise<ApiResponse> => {
+	let cacheKey: string | undefined,
+		cacheData: ApiResponse | null = null;
 
 	if(cache.requireCache) {
         cacheKey = Cache.key(script, cache.requestData);
-        cacheData = Cache.get(cacheKey);
+		cacheData = Cache.get<ApiResponse>(cacheKey);
         if(cacheData) {
         	return Promise.resolve(cacheData);
 		}
 	}
 	
-    return new Promise((res, rej) => {
+	return new Promise((res, rej) => {
         const xhr = new XMLHttpRequest();
         xhr.onload = () => {
 			if(xhr.status === 200) {
 				if(cache.requireCache) {
-					Cache.add(cacheKey, {data:xhr.response});
+					if(cacheKey) {
+						Cache.add(cacheKey, {data: xhr.response as ApiData});
+					}
 				}
-				res({data:xhr.response});
-				if(xhr.response.sessionExpire) {
+				const response: ApiResponse = {data: xhr.response as ApiData};
+				res(response);
+				if(response.data.sessionExpire) {
 					Helper.location('user-account');
 				}
 			}else {
-				rej({error: getLabel('backend_error')});
+				rej({error: getLabel('backend_error')} as ApiError);
 			}
         };
         xhr.onerror = () => {
-            rej({error: getLabel('ui_error')});
+			rej({error: getLabel('ui_error')} as ApiError);
         };
         xhr.open("post", `${host}/${script}`, true);
 		xhr.withCredentials = true;
@@ -110,26 +143,30 @@ sendRequest = (data, script, cache = {}) => {
         xhr.responseType = "json";
         xhr.send(data.join("&"));
     });
-},
-ServerRequest = (script, requestData, cache = {}) => {
+};
+
+const ServerRequest = (script: string, requestData: RequestData, cache: CacheOptions = {}): Promise<ApiResponse> => {
     const segments = [];
     for (let key in requestData) {
         segments.push(`${key}=${requestData[key]}`);
     }
 
     if (requestData.action !== 'hits') {
-        Helper.hits(`${script}?${requestData.action}`);
+		trackHit(`${script}?${requestData.action}`);
     }
 
     return sendRequest(segments, script, cache);
-},
-Http = {
+};
+
+const Http = {
     ServerRequest: ServerRequest,
 
-	Post: f => {
+	Post: (f: HTMLFormElement): void => {
 		let [formData, contentType] = (f.enctype && f.enctype === 'multipart/form-data') ? [true, f.enctype] : [false, 'application/x-www-form-urlencoded; charset=UTF-8'];
-		let data = { requestData: [], formData: formData, contentType: contentType, script: endPoint(f.action), form: f };
-		for(let elem of Array.from(f.elements).filter(e => e.type.toLowerCase() in types)) {
+		const data = { requestData: [] as string[], formData: formData, contentType: contentType, script: endPoint(f.action), form: f };
+		for(const elem of Array.from(f.elements).filter((element): element is HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement =>
+			(element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) &&
+			formControlTypes.has(element.type.toLowerCase()))) {
 			if(!formData) {
 				data.requestData.push(elem.name + '=' + elem.value);
 			}
@@ -155,31 +192,34 @@ Http = {
 					Helper.addMessage(messages);
 				}
 			}
-		}).catch(reason => {
+		}).catch((reason: ApiError) => {
 			Engine.dispatch(loadingData());
 			return reason.error;
 		});
 	},
 	
-	Request: f => {
+	Request: (f: HTMLFormElement): Promise<ApiResponse> => {
 		const segments = [],
 			script = (routes[f.name] && routes[f.name]['script']) || 'server_request',
 			action = (routes[f.name] && routes[f.name]['action']) || Engine.store().BOXES.box;
-		for(let elem of Array.from(f.elements).filter(e => e.type.toLowerCase() in types)) {
+		for(const elem of Array.from(f.elements).filter((element): element is HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement =>
+			(element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) &&
+			formControlTypes.has(element.type.toLowerCase()))) {
 			segments.push(`${elem.name}=${elem.value}`);
 		}
 		segments.push(`action=${action}`);
-        Helper.hits(`${script}?${Engine.store().BOXES.box}`);
+		trackHit(`${script}?${Engine.store().BOXES.box}`);
 
 		return sendRequest(segments, script);
 	},
 
-	Fetch: (script, requestData) => ServerRequest(script, requestData, {requireCache: true, requestData: requestData}),
+	Fetch: (script: string, requestData: RequestData): Promise<ApiResponse> =>
+		ServerRequest(script, requestData, {requireCache: true, requestData: requestData}),
 	
 	/**
 	 * @description when the promise is fullfilled, do something interactively
 	 */
-	AfterRequest: (frm, promise) => {
+	AfterRequest: (frm: HTMLFormElement, promise: ApiResponse): void => {
 		if(promise.data.sessionExpire) {
 			Helper.location('user-account');
 		}else if(promise.data.error) {

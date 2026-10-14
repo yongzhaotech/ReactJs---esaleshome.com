@@ -2,14 +2,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Engine } from '../../common/engine';
 import UserTabs from '../user-tabs';
-import SiteAds from './site-ads';
+import SiteAds, { SiteAd, SiteAdsPage } from './site-ads';
 import { fetchUserData } from '../../action';
 
 interface SiteAdsData {
-	ads?: unknown[];
+	ads?: SiteAd[];
 	pages?: {
-		p?: unknown[];
-		c?: number;
+		p?: SiteAdsPage[];
+		c?: string | number;
 	};
 }
 
