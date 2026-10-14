@@ -7,6 +7,7 @@ export interface Advertise {
 	picture_ids: (string | number)[];
 	picture_id: string | number;
 	name: string;
+	price: string | number;
 	price_display: Record<string, string>;
 	create_date: string;
 	city: Record<string, string>;
