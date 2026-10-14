@@ -6,12 +6,25 @@ import { getLabel } from "../common/label";
 import { AdInfo } from "../common/ad-info";
 import { smallImageSrc } from "../common/config";
 import Glyphicon from "./ad-glyphicon";
+import type { Advertise } from './advertise-snippets';
 
-const AdvertiseSnippet = ({ ad }) => {
+interface AdvertiseSnippetProps {
+	ad: Advertise;
+}
 
-	const LANGUAGE = useSelector(state => state.language),
-		OBJECTS = useSelector(state => state.OBJECTS),
-		IMAGES = useSelector(state => state.IMAGES),
+interface AdvertiseSnippetState {
+	language: string;
+	OBJECTS: {
+		DETAILFLAG?: string | number;
+	};
+	IMAGES: Record<string, boolean>;
+}
+
+const AdvertiseSnippet = ({ ad }: AdvertiseSnippetProps) => {
+
+	const LANGUAGE = useSelector((state: AdvertiseSnippetState) => state.language),
+		OBJECTS = useSelector((state: AdvertiseSnippetState) => state.OBJECTS),
+		IMAGES = useSelector((state: AdvertiseSnippetState) => state.IMAGES),
 		photo = +ad.picture_id ? "photo" : "",
 		image = !!IMAGES[ad.picture_id] ? ad.picture_id : "0";
 

@@ -2,8 +2,20 @@ import React from 'react';
 import { Grid } from 'react-bootstrap';
 import AdvertiseSnippet from './advertise-snippet';
 
-interface Advertise {
+export interface Advertise {
 	id: string | number;
+	picture_ids: (string | number)[];
+	picture_id: string | number;
+	name: string;
+	price_display: Record<string, string>;
+	create_date: string;
+	city: Record<string, string>;
+	province: Record<string, string>;
+	address?: string;
+	description: string;
+	contact_phone?: string;
+	contact_method?: string;
+	contact_email?: string;
 }
 
 interface AdvertiseSnippetsProps {
