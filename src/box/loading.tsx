@@ -1,57 +1,44 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import logo from '../logo.svg';
-import { getLabel } from '../common/label';
+import RootReducer from '../reducer';
+import { LangMessages } from '../static/langs';
+import type { Language } from '../static/langs';
 
-interface LoadingData {
-	ISLOADINGDATA: boolean;
-	HIDELOADINGTITLE: boolean;
-}
+type RootState = ReturnType<typeof RootReducer>;
+const labels = LangMessages as Record<string, Record<Language, string>>;
 
-interface LoadingProps {
-	loadingData: LoadingData;
-	loadingImagesMessage: string;
-}
+const Loading = () => {
+	const loadingData = useSelector((state: RootState) => state.loadingData);
+	const loadingImagesMessage = useSelector((state: RootState) => state.loadingImagesMessage);
+	const language = useSelector((state: RootState): Language => (state.language === 'cn' ? 'cn' : 'en'));
 
-interface LoadingState {
-	loadingData: LoadingData;
-	loadingImagesMessage: string;
-}
-
-export class Loading extends Component<LoadingProps> {
-	render() {
-		const { loadingData, loadingImagesMessage } = this.props;
-
-		if (!loadingData.ISLOADINGDATA) {
-			return null;
-		}
-
-		const className = loadingData.HIDELOADINGTITLE ? 'transparent' : 'load_message';
-
-		return (
-			<section className="loading">
-				<div className={className}>
-					<div>
-						{loadingData.HIDELOADINGTITLE ? null : (
-							<React.Fragment>
-								<div>{getLabel('loading_data')}</div>
-								<div className="devider"></div>
-							</React.Fragment>
-						)}
-					</div>
-					{loadingImagesMessage ? (
-						<div>{getLabel('loading_large_image')}: {loadingImagesMessage}</div>
-					) : null}
-					<img className="rotate-on" alt="" src={logo} height="65" />
-				</div>
-			</section>
-		);
+	if (!loadingData.ISLOADINGDATA) {
+		return null;
 	}
-}
 
-const mapStateToProps = (state: LoadingState): LoadingProps => ({
-	loadingData: state.loadingData,
-	loadingImagesMessage: state.loadingImagesMessage
-});
+	const className = loadingData.HIDELOADINGTITLE ? 'transparent' : 'load_message';
 
-export default connect(mapStateToProps)(Loading);
+	return (
+		<section className='loading'>
+			<div className={className}>
+				<div>
+					{loadingData.HIDELOADINGTITLE ? null : (
+						<React.Fragment>
+							<div>{labels.loading_data[language]}</div>
+							<div className='devider'></div>
+						</React.Fragment>
+					)}
+				</div>
+				{loadingImagesMessage ? (
+					<div>
+						{labels.loading_large_image[language]}: {loadingImagesMessage}
+					</div>
+				) : null}
+				<img className='rotate-on' alt='' src={logo} height='65' />
+			</div>
+		</section>
+	);
+};
+
+export default Loading;
