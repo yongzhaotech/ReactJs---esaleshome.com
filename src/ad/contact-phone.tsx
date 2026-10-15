@@ -1,20 +1,16 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import type { Label } from '../common/label';
 import { AdFuncs } from '../common/ad-funcs';
 import { Helper } from '../common/js-funcs';
 import RootReducer from '../reducer';
-import { LangMessages } from '../static/langs';
-import type { Language } from '../static/langs';
+import { useLocalizedLabel } from '../common/use-localized-label';
 
 type RootState = ReturnType<typeof RootReducer>;
-const labels = LangMessages as Record<string, Record<Language, string>>;
 
 const ContactPhone = () => {
 	const models = useSelector((state: RootState) => state.MODELS);
 	const postErrors = useSelector((state: RootState) => state.POSTERRORS);
-	const language = useSelector((state: RootState): Language => (state.language === 'cn' ? 'cn' : 'en'));
-	const getLocalizedLabel = (label: Label) => labels[label][language];
+	const getLocalizedLabel = useLocalizedLabel();
 	const contactMethods = models.contactMethods;
 	const phone =
 		contactMethods && typeof contactMethods === 'object' && 'contact_phone' in contactMethods

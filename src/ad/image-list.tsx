@@ -1,19 +1,16 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import type { Label } from '../common/label';
 import { AdFuncs } from '../common/ad-funcs';
 import { smallImageSrc } from '../common/config';
 import { Helper } from '../common/js-funcs';
 import RootReducer from '../reducer';
-import { LangMessages } from '../static/langs';
+import { useLocalizedLabel } from '../common/use-localized-label';
 
 type RootState = ReturnType<typeof RootReducer>;
-const labels = LangMessages as Record<string, Record<string, string>>;
 
 const ImageList = () => {
 	const models = useSelector((state: RootState) => state.MODELS);
-	const language = useSelector((state: RootState) => state.language);
-	const getLocalizedLabel = (label: Label) => labels[label][language];
+	const getLocalizedLabel = useLocalizedLabel();
 	const numbers: number[] = Array.isArray(models.images)
 		? models.images.filter((count): count is number => typeof count === 'number')
 		: [];
