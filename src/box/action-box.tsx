@@ -65,7 +65,7 @@ class ActionBox extends Component<ActionBoxProps> {
 					<div className="ad_action_box_wrapper">
 						<AdvertiseContact />
 						{Engine.component(ContactUs, { BOXES })}
-						{Engine.component(EmailFriendBox, { BOXES })}
+						<EmailFriendBox />
 						{Engine.component(FindVisitorAdBox, { BOXES })}
 						{Engine.component(ForgetPasswordBox, { BOXES })}
 						{Engine.component(LoginBox, { BOXES })}
