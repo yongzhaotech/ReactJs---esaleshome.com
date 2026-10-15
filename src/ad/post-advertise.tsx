@@ -184,7 +184,7 @@ class PostAdvertise extends Component<PostAdvertiseProps> {
 						</div>
 					</div>
 				</div>
-			{Engine.component(ContactPhone, {MODELS, POSTERRORS})}
+			<ContactPhone />
 			<div className="ad_inline_block_top"></div>
 			{Engine.component(ContactEmail, {POSTERRORS, USERSIGNEDIN})}
 			<div><div className="ad_box_sub_title">{getLabel('p_loc_title')}</div></div>
