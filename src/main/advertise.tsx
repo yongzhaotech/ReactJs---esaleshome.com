@@ -23,7 +23,7 @@ const Advertise = ({ cookies }: AdvertiseProps) => {
 	}, [cookies]);
 
 	useEffect(() => {
-		Engine.registerEvents();
+		return Engine.registerEvents();
 	}, []);
 
 	useEffect(() => {

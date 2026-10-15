@@ -28,7 +28,8 @@ let reduxStore: StoreLike | null = null,
 	reactCookie: CookieLike | null = null,
 	routeParams: Record<string, string> = {},
 	routeHistory: HistoryLike | null = null,
-	timeOutId: ReturnType<typeof setTimeout> | null = null;
+	timeOutId: ReturnType<typeof setTimeout> | null = null,
+	screenClickHandler: ((event: MouseEvent) => void) | null = null;
 
 const keys = {
 		tab: 9,
@@ -146,27 +147,42 @@ const keys = {
 					expandItemSearch: { fn: expandItem, args: [false, 'Search'] },
 				},
 				screenClicked = (e: MouseEvent) => {
+					const state = store.getState();
+					const target = e.target as Node;
+					const insideDropdown = findAncestor(target, '.dp_wrapper');
+
 					if (
-						store.getState().messageCenter.MESSAGEFLAG &&
-						!document.querySelector('.message_wrapper')?.contains(e.target as Node)
+						state.messageCenter.MESSAGEFLAG &&
+						!document.querySelector('.message_wrapper')?.contains(target)
 					) {
 						Helper.clearMessage();
 					}
 					if (
-						store.getState().MENUS &&
-						!document.querySelector('#menu_launcher')?.contains(e.target as Node)
+						state.MENUS &&
+						!document.querySelector('#menu_launcher')?.contains(target)
 					) {
 						Helper.clearDropDownMenus();
 					}
 					Object.keys(expands).forEach((item) => {
-						if (store.getState().MODELS[item] && !findAncestor(e.target as Node, '.dp_wrapper')) {
+						if (state.MODELS[item] && !insideDropdown) {
 							const expand = expands[item];
 							expand.fn(expand.args[0], expand.args[1]);
 						}
 					});
 				};
 
+			if (screenClickHandler) {
+				window.removeEventListener('click', screenClickHandler);
+			}
+			screenClickHandler = screenClicked;
 			window.addEventListener('click', screenClicked);
+
+			return () => {
+				if (screenClickHandler === screenClicked) {
+					window.removeEventListener('click', screenClicked);
+					screenClickHandler = null;
+				}
+			};
 		},
 
 		keyboardCategoryList: (ariaLabel: SearchListLabel) => {
