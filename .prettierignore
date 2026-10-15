@@ -1,0 +1,5 @@
+node_modules/
+build/
+coverage/
+src/static/langs.ts
+src/static/static-vars.ts

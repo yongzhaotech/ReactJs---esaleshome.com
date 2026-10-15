@@ -14,7 +14,7 @@ import {
 	saveStateObjects,
 	loadingData,
 	loadingLargeImageCount,
-	viewLargeImages
+	viewLargeImages,
 } from '../action';
 import { Cache } from './cache';
 import type { Identifier } from '../types/common';
@@ -48,12 +48,12 @@ type EditableAdvertise = Record<string, any> & {
 
 let timeOutId: ReturnType<typeof setTimeout> | null = null;
 const searchSequence = {
-	province: 1,
-	city: 2,
-	category: 3,
-	item: 4,
-	ad_keyword: 5
-},
+		province: 1,
+		city: 2,
+		category: 3,
+		item: 4,
+		ad_keyword: 5,
+	},
 	swapper = {
 		province: 'provIdSearch',
 		city: 'cityIdSearch',
@@ -61,11 +61,11 @@ const searchSequence = {
 		item: 'itemIdSearch',
 		ad_keyword: 'adKeyword',
 		start: 'start',
-		searchByKeyword: 'searchByKeyword'
+		searchByKeyword: 'searchByKeyword',
 	},
 	loadImages = (imgs: ImageItem[], imageCount: number, count: number): Promise<boolean>[] => {
 		let init = 0;
-		return imgs.map(imageObject => {
+		return imgs.map((imageObject) => {
 			return new Promise((res, rej) => {
 				let img = new Image();
 				timeOutId = setTimeout(() => {
@@ -88,18 +88,24 @@ const searchSequence = {
 		if (imageCount) {
 			Engine.dispatch(loadingData(true, false, true));
 			Engine.dispatch(loadingLargeImageCount(`${++count} / ${imageCount}`));
-			Promise.all(loadImages(images, imageCount, count)).then(() => {
-				if (timeOutId) {
-					clearTimeout(timeOutId);
-					timeOutId = null;
-				}
-				Engine.dispatch(loadingData());
-				Engine.dispatch(loadingLargeImageCount());
-				Engine.dispatch(updateStateModelData({
-					currentImage: n,
-					largeImageFlag: true
-				}));
-			}).catch(e => { Engine.dispatch(loadingLargeImageCount()); });
+			Promise.all(loadImages(images, imageCount, count))
+				.then(() => {
+					if (timeOutId) {
+						clearTimeout(timeOutId);
+						timeOutId = null;
+					}
+					Engine.dispatch(loadingData());
+					Engine.dispatch(loadingLargeImageCount());
+					Engine.dispatch(
+						updateStateModelData({
+							currentImage: n,
+							largeImageFlag: true,
+						})
+					);
+				})
+				.catch((e) => {
+					Engine.dispatch(loadingLargeImageCount());
+				});
 		}
 	},
 	imageIndex = (listImages: ImageItem[], currentImage: Identifier) => {
@@ -120,76 +126,84 @@ const searchSequence = {
 			data[key] = requestData[criteria[key]] || '';
 		}
 
-		return Http.Fetch('search-advertise', data).then(promise => {
-			if (promise.data.angular_ads) {
-				Engine.dispatch(performSearch());
-				Helper.detachActionBox();
-				Helper.location('');
-				return {
-					resultSets: {
-						ads: promise.data.angular_ads,
-						pages: promise.data.angular_ad_pages.p,
-						searchAd: promise.data.angular_ad_pages.s ? true : false,
-						currentPage: promise.data.angular_ad_pages.c
-					},
-					searchTerms: promise.data.search_terms
-				};
-			} else {
-				return {
-					error: (promise.data.error && promise.data.error) || getLabel('unknown_error')
-				};
-			}
-		}).catch(errorData => errorData.error);
+		return Http.Fetch('search-advertise', data)
+			.then((promise) => {
+				if (promise.data.angular_ads) {
+					Engine.dispatch(performSearch());
+					Helper.detachActionBox();
+					Helper.location('');
+					return {
+						resultSets: {
+							ads: promise.data.angular_ads,
+							pages: promise.data.angular_ad_pages.p,
+							searchAd: promise.data.angular_ad_pages.s ? true : false,
+							currentPage: promise.data.angular_ad_pages.c,
+						},
+						searchTerms: promise.data.search_terms,
+					};
+				} else {
+					return {
+						error: (promise.data.error && promise.data.error) || getLabel('unknown_error'),
+					};
+				}
+			})
+			.catch((errorData) => errorData.error);
 	},
 	fetchAdvertises = (start: Identifier) => {
 		let data = { start };
 
-		return Http.Fetch('advertise', data).then(promise => {
-			if (promise.data.ads) {
-				return {
-					ads: promise.data.ads.angular_ads,
-					pages: promise.data.ads.angular_ad_pages.p,
-					currentPage: promise.data.ads.angular_ad_pages.c,
-					searchAd: false
-				};
-			} else {
-				return {};
-			}
-		}).catch(reason => reason.error);
+		return Http.Fetch('advertise', data)
+			.then((promise) => {
+				if (promise.data.ads) {
+					return {
+						ads: promise.data.ads.angular_ads,
+						pages: promise.data.ads.angular_ad_pages.p,
+						currentPage: promise.data.ads.angular_ad_pages.c,
+						searchAd: false,
+					};
+				} else {
+					return {};
+				}
+			})
+			.catch((reason) => reason.error);
 	},
 	fetchAdvertise = (advertiseId: Identifier) => {
-		return Http.Fetch('advertise-detail', { advertise_id: advertiseId }).then(promise => {
-			let provObj = AdFuncs.province().find(prov => +prov.i === +promise.data.item.pr),
-				cityObj = ((provObj && provObj.c) || []).find(city => +city.i === +promise.data.item.ct),
-				catObj = AdFuncs.category().find(cat => +cat.i === +promise.data.item.ca),
-				itemObj = ((catObj && catObj.c) || []).find(item => +item.i === +promise.data.item.it);
+		return Http.Fetch('advertise-detail', { advertise_id: advertiseId })
+			.then((promise) => {
+				let provObj = AdFuncs.province().find((prov) => +prov.i === +promise.data.item.pr),
+					cityObj = ((provObj && provObj.c) || []).find((city) => +city.i === +promise.data.item.ct),
+					catObj = AdFuncs.category().find((cat) => +cat.i === +promise.data.item.ca),
+					itemObj = ((catObj && catObj.c) || []).find((item) => +item.i === +promise.data.item.it);
 
-			AdFuncs.initCity(promise.data.item.ct, true);
-			AdFuncs.initItem(promise.data.item.it, true);
+				AdFuncs.initCity(promise.data.item.ct, true);
+				AdFuncs.initItem(promise.data.item.it, true);
 
-			return promise.data ? {
-				searchData: {
-					provIdSearch: promise.data.item.pr,
-					provObjSearch: provObj,
-					cityObjSearch: cityObj,
-					cityIdSearch: promise.data.item.ct,
-					catIdSearch: promise.data.item.ca,
-					catObjSearch: catObj,
-					itemObjSearch: itemObj,
-					itemIdSearch: promise.data.item.it,
-					adKeyword: promise.data.item.kw,
-					start: 0
-				},
-				searchTerms: promise.data.search_terms,
-				advertiseDetail: promise.data
-			} : null;
-		}).catch(reason => reason.error);
+				return promise.data
+					? {
+							searchData: {
+								provIdSearch: promise.data.item.pr,
+								provObjSearch: provObj,
+								cityObjSearch: cityObj,
+								cityIdSearch: promise.data.item.ct,
+								catIdSearch: promise.data.item.ca,
+								catObjSearch: catObj,
+								itemObjSearch: itemObj,
+								itemIdSearch: promise.data.item.it,
+								adKeyword: promise.data.item.kw,
+								start: 0,
+							},
+							searchTerms: promise.data.search_terms,
+							advertiseDetail: promise.data,
+						}
+					: null;
+			})
+			.catch((reason) => reason.error);
 	},
 	createUserAdvertiseSet = (ad: EditableAdvertise) => {
-		const provObj = AdFuncs.province().find(prov => +prov.i === +ad.province_id),
-			catObj = AdFuncs.category().find(cat => +cat.i === +ad.category_id),
-			cityObj = ((provObj && provObj.c) || []).find(city => +city.i === +ad.city_id),
-			itemObj = ((catObj && catObj.c) || []).find(item => +item.i === +ad.item_id),
+		const provObj = AdFuncs.province().find((prov) => +prov.i === +ad.province_id),
+			catObj = AdFuncs.category().find((cat) => +cat.i === +ad.category_id),
+			cityObj = ((provObj && provObj.c) || []).find((city) => +city.i === +ad.city_id),
+			itemObj = ((catObj && catObj.c) || []).find((item) => +item.i === +ad.item_id),
 			userAdvertiseSet = {
 				userAdvertiseSet: {
 					id: ad.id,
@@ -197,8 +211,8 @@ const searchSequence = {
 					description: ad.description,
 					address: ad.address,
 					contact_phone: ad.contact_phone,
-					contact_email: ad.contact_email
-				}
+					contact_email: ad.contact_email,
+				},
 			},
 			uiModelSet = {
 				provId: ad.province_id,
@@ -216,7 +230,7 @@ const searchSequence = {
 				images: ad.images.sort((a, b) => a - b),
 				contactMethods: {
 					contact_email: ad.contact_email,
-					contact_phone: ad.contact_phone
+					contact_phone: ad.contact_phone,
 				},
 				_contactMethods: ad.contact_method.split(',').reduce<Record<string, number>>((current, next) => {
 					current[next] = 1;
@@ -225,29 +239,33 @@ const searchSequence = {
 				adImages: ad.images.reduce<Record<string, number>>((current, next) => {
 					current[next] = 1;
 					return current;
-				}, {})
+				}, {}),
 			};
 		return { ...userAdvertiseSet, ...uiModelSet };
 	},
 	fetchUserAdvertiseForEdit = (script: string, requestData: Record<string, any>) => {
-		return Http.ServerRequest(script, requestData).then(promise => {
-			if (promise.data.angular_ad) {
-				let ad = promise.data.angular_ad;
-				if ('id' in ad) {
-					return { resultSets: createUserAdvertiseSet(ad) };
+		return Http.ServerRequest(script, requestData)
+			.then((promise) => {
+				if (promise.data.angular_ad) {
+					let ad = promise.data.angular_ad;
+					if ('id' in ad) {
+						return { resultSets: createUserAdvertiseSet(ad) };
+					}
+					return { error: getLabel('unknown_error') };
+				} else {
+					return { error: promise.data.error || promise.data };
 				}
-				return { error: getLabel('unknown_error') };
-			} else {
-				return { error: promise.data.error || promise.data };
-			}
-		}).catch(() => getLabel('unknown_error'));
+			})
+			.catch(() => getLabel('unknown_error'));
 	},
 	listAdvertise = (start: number = 0) => {
 		Engine.dispatch(fetchAdvertisesAction(start));
 	},
 	AdInfo = {
-		safeHtml: (html: string) => //(<SanitizedHTML html={html.replace(/[\n]/g, '<br />')} />),
-			(<div dangerouslySetInnerHTML={{ __html: html.replace(/[\n]/g, '<br />') }} />),
+		safeHtml: (html: string) => (
+			//(<SanitizedHTML html={html.replace(/[\n]/g, '<br />')} />),
+			<div dangerouslySetInnerHTML={{ __html: html.replace(/[\n]/g, '<br />') }} />
+		),
 
 		byMail: (ad: { contact_method?: string } | null | undefined): boolean => {
 			return ad && ad.contact_method && ad.contact_method.match(/\b(contact_)?email\b/) ? true : false;
@@ -261,9 +279,11 @@ const searchSequence = {
 			if (!ad.picture_ids.length) {
 				return;
 			}
-			Engine.dispatch(updateStateModelData({
-				listImages: ad.picture_ids.map(p => ({ i: p }))
-			}));
+			Engine.dispatch(
+				updateStateModelData({
+					listImages: ad.picture_ids.map((p) => ({ i: p })),
+				})
+			);
 			setTimeout(() => {
 				Engine.dispatch(viewLargeImages(ad.main_picture_id || ad.picture_id));
 			}, 0);
@@ -273,9 +293,11 @@ const searchSequence = {
 			if (!ad.picture_ids.length) {
 				return;
 			}
-			Engine.dispatch(updateStateModelData({
-				listImages: ad.picture_ids
-			}));
+			Engine.dispatch(
+				updateStateModelData({
+					listImages: ad.picture_ids,
+				})
+			);
 			setTimeout(() => {
 				Engine.dispatch(viewLargeImages(p.i));
 			}, 0);
@@ -286,11 +308,13 @@ const searchSequence = {
 				currentImageRef.className = 'fade-out';
 			}
 			setTimeout(() => {
-				Engine.dispatch(updateStateModelData({
-					currentImage: null,
-					largeImageFlag: null,
-					listImages: null
-				}));
+				Engine.dispatch(
+					updateStateModelData({
+						currentImage: null,
+						largeImageFlag: null,
+						listImages: null,
+					})
+				);
 			}, 1201);
 		},
 
@@ -305,18 +329,22 @@ const searchSequence = {
 		nextImage: (listImages: ImageItem[], currentImage: Identifier, currentImageRef: HTMLElement) => {
 			currentImageRef.className = 'fade-out';
 			setTimeout(() => {
-				Engine.dispatch(updateStateModelData({
-					currentImage: listImages[imageIndex(listImages, currentImage) + 1]['i']
-				}));
+				Engine.dispatch(
+					updateStateModelData({
+						currentImage: listImages[imageIndex(listImages, currentImage) + 1]['i'],
+					})
+				);
 			}, 1201);
 		},
 
 		prevImage: (listImages: ImageItem[], currentImage: Identifier, currentImageRef: HTMLElement) => {
 			currentImageRef.className = 'fade-out';
 			setTimeout(() => {
-				Engine.dispatch(updateStateModelData({
-					currentImage: listImages[imageIndex(listImages, currentImage) - 1]['i']
-				}));
+				Engine.dispatch(
+					updateStateModelData({
+						currentImage: listImages[imageIndex(listImages, currentImage) - 1]['i'],
+					})
+				);
 			}, 1201);
 		},
 
@@ -345,27 +373,31 @@ const searchSequence = {
 				searchTerms.pop();
 			}
 
-			searchTerms.forEach(thisTerm => {
+			searchTerms.forEach((thisTerm) => {
 				if (thisTerm.key === 'province') {
 					searchData.provIdSearch = thisTerm.id.toString();
-					searchData.provObjSearch = AdFuncs.province().find(prov => +prov.i === +thisTerm.id);
+					searchData.provObjSearch = AdFuncs.province().find((prov) => +prov.i === +thisTerm.id);
 				} else if (thisTerm.key === 'city') {
 					searchData.cityIdSearch = thisTerm.id.toString();
-					searchData.cityObjSearch = ((searchData.provObjSearch && searchData.provObjSearch.c) || []).find((city: ImageItem) => +city.i === +thisTerm.id);
+					searchData.cityObjSearch = ((searchData.provObjSearch && searchData.provObjSearch.c) || []).find(
+						(city: ImageItem) => +city.i === +thisTerm.id
+					);
 					AdFuncs.initCity(thisTerm.id.toString(), true);
 				} else if (thisTerm.key === 'category') {
 					searchData.catIdSearch = thisTerm.id.toString();
-					searchData.catObjSearch = AdFuncs.category().find(cat => +cat.i === +thisTerm.id);
+					searchData.catObjSearch = AdFuncs.category().find((cat) => +cat.i === +thisTerm.id);
 				} else if (thisTerm.key === 'item') {
 					searchData.itemIdSearch = thisTerm.id.toString();
-					searchData.itemObjSearch = ((searchData.catObjSearch && searchData.catObjSearch.c) || []).find((item: ImageItem) => +item.i === +thisTerm.id);
+					searchData.itemObjSearch = ((searchData.catObjSearch && searchData.catObjSearch.c) || []).find(
+						(item: ImageItem) => +item.i === +thisTerm.id
+					);
 					AdFuncs.initItem(thisTerm.id.toString(), true);
 				}
 			});
 
 			return {
 				searchData,
-				searchTerms
+				searchTerms,
 			};
 		},
 
@@ -390,19 +422,18 @@ const searchSequence = {
 		},
 
 		visitorConfirmDeletion: () => {
-			Helper.confirm(
-				getLabel('r_sure_delete'),
-				() => {
-					Http.ServerRequest('delete-visitor-advertise', { action: 'delete_visitor_advertise' }).then(promise => {
+			Helper.confirm(getLabel('r_sure_delete'), () => {
+				Http.ServerRequest('delete-visitor-advertise', { action: 'delete_visitor_advertise' }).then(
+					(promise) => {
 						if (promise.data.ok) {
 							Cache.clear();
 							Helper.location('home');
 						} else {
 							Helper.addMessage(promise.data.error, true);
 						}
-					});
-				}
-			);
+					}
+				);
+			});
 		},
 
 		flagDetail: (ad: { id: Identifier }) => {
@@ -414,10 +445,12 @@ const searchSequence = {
 				flag = ad.id;
 				open = ad.id;
 			}
-			Engine.dispatch(saveStateObjects({
-				DETAILFLAG: flag,
-				OPENFLAG: open
-			}));
+			Engine.dispatch(
+				saveStateObjects({
+					DETAILFLAG: flag,
+					OPENFLAG: open,
+				})
+			);
 		},
 
 		toPreviousColumn: () => {
@@ -436,7 +469,7 @@ const searchSequence = {
 
 		listAdvertise: listAdvertise,
 
-		viewImages: viewImages
+		viewImages: viewImages,
 	};
 
 export { AdInfo };
