@@ -1,6 +1,5 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { AnyAction, Dispatch } from 'redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import AdvertiseContact from './advertise-contact';
 import ContactUs from './contact-us';
 import EmailFriendBox from './email-friend-box';
@@ -10,79 +9,76 @@ import LoginBox from './login-box';
 import Register from './register';
 import SearchBox from './search-box';
 import { Helper } from '../common/js-funcs';
-import { getLabel } from '../common/label';
 import { Engine } from '../common/engine';
 import { AdInfo } from '../common/ad-info';
-import { switchLanguage } from '../action';
-import * as Action from '../action';
+import { useLocalizedLabel } from '../common/use-localized-label';
+import { switchLanguage, keyWordSearch } from '../action';
+import RootReducer from '../reducer';
 
-interface ActionBoxProps {
-	BOXES: {
-		box: string;
-		name?: string;
-		id?: string | number;
+type RootState = ReturnType<typeof RootReducer>;
+
+const ActionBox = () => {
+	const boxState = useSelector((state: RootState) => state.BOXES);
+	const boxes = {
+		box: typeof boxState.box === 'string' ? boxState.box : '',
+		name: typeof boxState.name === 'string' ? boxState.name : undefined,
+		id: typeof boxState.id === 'string' || typeof boxState.id === 'number' ? boxState.id : undefined,
 	};
-	MENUS: boolean;
-	dispatch: Dispatch<AnyAction>;
-}
+	const menusOpen = useSelector((state: RootState) => state.MENUS);
+	const dispatch = useDispatch();
+	const getLocalizedLabel = useLocalizedLabel();
 
-interface ActionBoxState {
-	BOXES: {
-		box: string;
-		name?: string;
-		id?: string | number;
-	};
-	MENUS: boolean;
-}
+	useEffect(() => {
+		Engine.registerMenuItems();
+	}, []);
 
-class ActionBox extends Component<ActionBoxProps> {
-	goHome = () => {
+	const goHome = () => {
 		AdInfo.listAdvertise();
 		Helper.location('');
 	};
 
-	componentDidMount() {
-		Engine.registerMenuItems();
-	}
-
-	render() {
-		const { BOXES } = this.props;
-
-		return (
-			<nav id="ad_title_bar">
-				<nav className="btn_list">
-					<div id="menu_launcher" className={`nav_btn ${this.props.MENUS ? 'menu_title_active' : ''}`} aria-haspopup="true" onClick={Helper.setDropDownMenus}>
-						{getLabel('c_menu')}
-					</div>
-					<div className="nav_btn" onClick={this.goHome}>
-						{getLabel('c_home')}
-					</div>
-					<div className="nav_btn" onClick={() => { this.props.dispatch(switchLanguage()) }}>
-						{getLabel('c_language')}
-					</div>
-					<label htmlFor="keyWordSearch" className="visually-hidden">{getLabel('c_key_search')}</label>
-					<input name="keyWordSearch" id="keyWordSearch" className="key-word-search" placeholder={getLabel('c_key_search')} onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.props.dispatch(Action.keyWordSearch(e.target.value))} />
-					<div className="ad_action_box_wrapper">
-						<AdvertiseContact />
-						{Engine.component(ContactUs, { BOXES })}
-						<EmailFriendBox />
-						{Engine.component(FindVisitorAdBox, { BOXES })}
-						<ForgetPasswordBox />
-						{Engine.component(LoginBox, { BOXES })}
-						{Engine.component(Register, { BOXES })}
-						{Engine.component(SearchBox, { BOXES })}
-					</div>
-				</nav>
+	return (
+		<nav id='ad_title_bar'>
+			<nav className='btn_list'>
+				<div
+					id='menu_launcher'
+					className={`nav_btn ${menusOpen ? 'menu_title_active' : ''}`}
+					aria-haspopup='true'
+					onClick={Helper.setDropDownMenus}
+				>
+					{getLocalizedLabel('c_menu')}
+				</div>
+				<div className='nav_btn' onClick={goHome}>
+					{getLocalizedLabel('c_home')}
+				</div>
+				<div className='nav_btn' onClick={() => dispatch(switchLanguage())}>
+					{getLocalizedLabel('c_language')}
+				</div>
+				<label htmlFor='keyWordSearch' className='visually-hidden'>
+					{getLocalizedLabel('c_key_search')}
+				</label>
+				<input
+					name='keyWordSearch'
+					id='keyWordSearch'
+					className='key-word-search'
+					placeholder={getLocalizedLabel('c_key_search')}
+					onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+						dispatch(keyWordSearch(event.target.value))
+					}
+				/>
+				<div className='ad_action_box_wrapper'>
+					<AdvertiseContact />
+					<ContactUs />
+					<EmailFriendBox />
+					{Engine.component(FindVisitorAdBox, { BOXES: boxes })}
+					<ForgetPasswordBox />
+					{Engine.component(LoginBox, { BOXES: boxes })}
+					{Engine.component(Register, { BOXES: boxes })}
+					{Engine.component(SearchBox, { BOXES: boxes })}
+				</div>
 			</nav>
-		);
-	};
+		</nav>
+	);
 };
 
-const mapStateToProps = (state: ActionBoxState) => ({
-	BOXES: state.BOXES,
-	MENUS: state.MENUS,
-});
-
-export default connect(
-	mapStateToProps
-)(ActionBox);
+export default ActionBox;
