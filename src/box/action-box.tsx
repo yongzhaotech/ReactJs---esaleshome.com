@@ -63,7 +63,7 @@ class ActionBox extends Component<ActionBoxProps> {
 					<label htmlFor="keyWordSearch" className="visually-hidden">{getLabel('c_key_search')}</label>
 					<input name="keyWordSearch" id="keyWordSearch" className="key-word-search" placeholder={getLabel('c_key_search')} onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.props.dispatch(Action.keyWordSearch(e.target.value))} />
 					<div className="ad_action_box_wrapper">
-						{Engine.component(AdvertiseContact, { BOXES })}
+						<AdvertiseContact />
 						{Engine.component(ContactUs, { BOXES })}
 						{Engine.component(EmailFriendBox, { BOXES })}
 						{Engine.component(FindVisitorAdBox, { BOXES })}
