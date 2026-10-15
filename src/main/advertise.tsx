@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Cookies, withCookies } from 'react-cookie';
 import '../style/advertise.less';
 import { Engine } from '../common/engine';
@@ -10,53 +10,46 @@ interface AdvertiseProps {
 	cookies?: Cookies;
 }
 
-interface AdvertiseState {
-	launchApplication: -1 | 0 | 1;
-}
+const Advertise = ({ cookies }: AdvertiseProps) => {
+	const [launchApplication, setLaunchApplication] = useState<-1 | 0 | 1>(-1);
 
-class Advertise extends Component<AdvertiseProps, AdvertiseState> {
-	constructor(props: AdvertiseProps) {
-		super(props);
-		const cookies = props.cookies;
+	useEffect(() => {
 		if (cookies) {
 			Engine.cookie({
 				get: name => cookies.get(name),
 				set: (name, value, options) => cookies.set(name, value, options)
 			});
 		}
-        Engine.registerEvents();
-		this.state = {
-			launchApplication: -1
-		};
-	}
+	}, [cookies]);
 
-	componentDidMount() {
+	useEffect(() => {
+		Engine.registerEvents();
+	}, []);
+
+	useEffect(() => {
+		let isMounted = true;
 		Http.ServerRequest('request', {action: 'connection'}).then(promise => {
-			if(!!promise.data.connectionSuccess) {
-				this.setState({
-					launchApplication: 1
-				});
-			}else {
-				this.setState({
-					launchApplication: 0
-				});
+			if (isMounted) {
+				setLaunchApplication(promise.data.connectionSuccess ? 1 : 0);
 			}
-		}).catch(e => {
-			this.setState({
-				launchApplication: 0
-			});
+		}).catch(() => {
+			if (isMounted) {
+				setLaunchApplication(0);
+			}
 		});
-	}
-	
-	render() {
-		return this.state.launchApplication > 0 ? (
-			<RouteEngine />
-		) : (
-			<section className="not-signed-in">
-				<span>{connection[this.state.launchApplication === -1 ? '-1' : '0']}</span>
-			</section>
-		);
-	}
-}
+
+		return () => {
+			isMounted = false;
+		};
+	}, []);
+
+	return launchApplication > 0 ? (
+		<RouteEngine />
+	) : (
+		<section className="not-signed-in">
+			<span>{connection[launchApplication === -1 ? '-1' : '0']}</span>
+		</section>
+	);
+};
 
 export default withCookies(Advertise);
