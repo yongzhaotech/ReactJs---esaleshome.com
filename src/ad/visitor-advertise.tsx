@@ -218,7 +218,7 @@ class VisitorAdvertise extends Component<VisitorAdvertiseProps> {
 						</div>
 					</div>
 				</div>
-				{Engine.component(ContactPhone, { MODELS, POSTERRORS })}
+				<ContactPhone />
 				<div className="ad_inline_block">
 					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_province_title')}</div></div>
 					<div className="ad_box_field">

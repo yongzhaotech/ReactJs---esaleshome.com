@@ -1,41 +1,48 @@
-import React, { Component } from 'react';
-import { getLabel } from '../common/label';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import { AdFuncs } from '../common/ad-funcs';
 import { Helper } from '../common/js-funcs';
+import RootReducer from '../reducer';
+import { useLocalizedLabel } from '../common/use-localized-label';
 
-interface ContactPhoneProps {
-	MODELS: {
-		contactMethods?: {
-			contact_phone?: string;
-		};
-	};
-	POSTERRORS: Record<string, string | undefined>;
-}
+type RootState = ReturnType<typeof RootReducer>;
 
-class ContactPhone extends Component<ContactPhoneProps> {
-	render() {
-		const { MODELS, POSTERRORS } = this.props;
-		const phone = MODELS.contactMethods?.contact_phone || '';
+const ContactPhone = () => {
+	const models = useSelector((state: RootState) => state.MODELS);
+	const postErrors = useSelector((state: RootState) => state.POSTERRORS);
+	const getLocalizedLabel = useLocalizedLabel();
+	const contactMethods = models.contactMethods;
+	const phone =
+		contactMethods && typeof contactMethods === 'object' && 'contact_phone' in contactMethods
+			? String(contactMethods.contact_phone || '')
+			: '';
 
-		return AdFuncs.isContactMethod('contact_phone') ? (
-			<React.Fragment>
-				<div className="ad_inline_block">
-					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_phone_title')}</div></div>
-					<div className="ad_box_field">
-						{Helper.errorLabel(POSTERRORS.contact_phone)}
-						<input type="text" name="contact_phone" maxLength={20} placeholder="9051234567" defaultValue={phone} />
-					</div>
+	return AdFuncs.isContactMethod('contact_phone') ? (
+		<>
+			<div className='ad_inline_block'>
+				<div className='ad_box_field'>
+					<div className='ad_box_label'>{getLocalizedLabel('p_phone_title')}</div>
 				</div>
-				<div className="ad_inline_block_top">
-					<div className="ad_box_field">
-						<div className="post_hints">
-							{getLabel('p_phone_hint')}
-						</div>
-					</div>
+				<div className='ad_box_field'>
+					{Helper.errorLabel(
+						typeof postErrors.contact_phone === 'string' ? postErrors.contact_phone : undefined
+					)}
+					<input
+						type='text'
+						name='contact_phone'
+						maxLength={20}
+						placeholder='9051234567'
+						defaultValue={phone}
+					/>
 				</div>
-			</React.Fragment>
-		) : null;
-	}
-}
+			</div>
+			<div className='ad_inline_block_top'>
+				<div className='ad_box_field'>
+					<div className='post_hints'>{getLocalizedLabel('p_phone_hint')}</div>
+				</div>
+			</div>
+		</>
+	) : null;
+};
 
 export default ContactPhone;
