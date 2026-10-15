@@ -28,3 +28,11 @@ Launches the test runner in interactive watch mode.
 ### `npm run build`
 
 Builds the app for production in the `build` directory.
+
+### `npm run format`
+
+Formats application source files and the TypeScript/CRACO configuration with Prettier.
+
+### `npm run format:check`
+
+Checks application source formatting without changing files.
