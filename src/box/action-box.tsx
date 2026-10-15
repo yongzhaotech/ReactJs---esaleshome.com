@@ -67,7 +67,7 @@ class ActionBox extends Component<ActionBoxProps> {
 						{Engine.component(ContactUs, { BOXES })}
 						<EmailFriendBox />
 						{Engine.component(FindVisitorAdBox, { BOXES })}
-						{Engine.component(ForgetPasswordBox, { BOXES })}
+						<ForgetPasswordBox />
 						{Engine.component(LoginBox, { BOXES })}
 						{Engine.component(Register, { BOXES })}
 						{Engine.component(SearchBox, { BOXES })}
