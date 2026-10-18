@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Pager } from 'react-bootstrap';
 import { Helper } from '../common/js-funcs';
-import { useLocalizedLabel } from '../common/use-localized-label';
+import { useLocalizedLabel } from '../hook/localization-hook';
 
 interface MessageCenter {
 	MESSAGEFLAG: string;

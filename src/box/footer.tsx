@@ -4,7 +4,7 @@ import { Button } from 'react-bootstrap';
 import browser from '../image/gui/search-icon.svg';
 import { Engine } from '../common/engine';
 import { Helper } from '../common/js-funcs';
-import { useLocalizedLabel } from '../common/use-localized-label';
+import { useLocalizedLabel } from '../hook/localization-hook';
 import { UserFunction } from '../user/user-function';
 import Menus from './menus';
 import MessageBox from './message-box';

@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import logo from '../logo.svg';
 import RootReducer from '../reducer';
-import { useLocalizedLabel } from '../common/use-localized-label';
+import { useLocalizedLabel } from '../hook/localization-hook';
 
 type RootState = ReturnType<typeof RootReducer>;
 

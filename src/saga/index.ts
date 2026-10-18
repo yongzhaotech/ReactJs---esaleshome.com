@@ -5,6 +5,10 @@ import { getLabel } from '../common/label';
 import * as Action from '../action';
 import { UserFunction } from '../user/user-function';
 import { smallImageSrc } from '../common/config';
+import { submitFormData } from '../common/form-process';
+import { ApiResponse, routes } from '../common/http-client';
+import { Cache } from '../common/cache';
+import { Engine } from '../common/engine';
 
 type TypedSaga = Generator<unknown, void, any>;
 interface UserDataFetchArg {
@@ -12,7 +16,7 @@ interface UserDataFetchArg {
 	page: { i: string | number } | undefined;
 }
 
-function* fetchAdvertises (action: AnyAction): TypedSaga {
+function* fetchAdvertises(action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const resultSets = yield call(AdInfo.fetchAdvertises, action.start);
@@ -25,7 +29,7 @@ function* fetchAdvertises (action: AnyAction): TypedSaga {
 	}
 }
 
-function* fetchAdvertise (action: AnyAction): TypedSaga {
+function* fetchAdvertise(action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const dataSet = yield call(AdInfo.fetchAdvertise, action.advertiseId);
@@ -42,7 +46,7 @@ function* fetchAdvertise (action: AnyAction): TypedSaga {
 	}
 }
 
-function* searchAdvertise (action: AnyAction): TypedSaga {
+function* searchAdvertise(action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const requestData = yield select((state: { MODELS: Record<string, any> }) => state.MODELS);
@@ -61,8 +65,8 @@ function* searchAdvertise (action: AnyAction): TypedSaga {
 	}
 }
 
-function* keyWordSearch (action: AnyAction): TypedSaga {
-	if(action.keyWord.length < 3 || action.keyWord.match(/^ *$/)) {
+function* keyWordSearch(action: AnyAction): TypedSaga {
+	if (action.keyWord.length < 3 || action.keyWord.match(/^ *$/)) {
 		return;
 	}
 	action.keyWord = action.keyWord.replace(/ {2,}/g, ' ');
@@ -70,7 +74,7 @@ function* keyWordSearch (action: AnyAction): TypedSaga {
 		yield put(Action.loadingData(true, true));
 		const dataSet = yield call(AdInfo.searchAdvertise, {
 			searchByKeyword: 1,
-			adKeyword: action.keyWord
+			adKeyword: action.keyWord,
 		});
 		if (dataSet.error) {
 			yield put(Action.messageCenter(Action.ADD_MESSAGE, dataSet.error, true));
@@ -85,7 +89,7 @@ function* keyWordSearch (action: AnyAction): TypedSaga {
 	}
 }
 
-function* selectSearchTerm (action: AnyAction): TypedSaga {
+function* selectSearchTerm(action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const newSearchTermsData = yield call(AdInfo.searchTerm, action.term);
@@ -106,7 +110,7 @@ function* selectSearchTerm (action: AnyAction): TypedSaga {
 	}
 }
 
-function* fetchUserAdvertise (action: AnyAction): TypedSaga {
+function* fetchUserAdvertise(action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const dataSet = yield call(AdInfo.fetchUserAdvertise, action.advertiseId);
@@ -118,10 +122,10 @@ function* fetchUserAdvertise (action: AnyAction): TypedSaga {
 		yield put(Action.loadingData());
 	} catch (error) {
 		yield put(Action.messageCenter(Action.ADD_MESSAGE, error, true));
-	}	
+	}
 }
 
-function* fetchVisitorAdvertise (): TypedSaga {
+function* fetchVisitorAdvertise(): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const dataSet = yield call(AdInfo.fetchVisitorAdvertise);
@@ -133,16 +137,15 @@ function* fetchVisitorAdvertise (): TypedSaga {
 		yield put(Action.loadingData());
 	} catch (error) {
 		yield put(Action.messageCenter(Action.ADD_MESSAGE, error, true));
-	}	
+	}
 }
 
-function* fetchUserData (action: AnyAction): TypedSaga {
+function* fetchUserData(action: AnyAction): TypedSaga {
 	try {
 		yield put(Action.loadingData(true, true));
 		const [...dataSets] = yield all(
-			action.args.map(
-				(arg: Omit<UserDataFetchArg, 'page'> & { page?: UserDataFetchArg['page'] }) =>
-					call(UserFunction.fetchUserDataFromServer, { ...arg, page: arg.page })
+			action.args.map((arg: Omit<UserDataFetchArg, 'page'> & { page?: UserDataFetchArg['page'] }) =>
+				call(UserFunction.fetchUserDataFromServer, { ...arg, page: arg.page })
 			)
 		);
 		if (dataSets.length) {
@@ -156,31 +159,76 @@ function* fetchUserData (action: AnyAction): TypedSaga {
 	}
 }
 
-function* viewLargeImages (action: AnyAction): TypedSaga {
+function* viewLargeImages(action: AnyAction): TypedSaga {
 	yield fork(AdInfo.viewImages, action.currentImageId);
 }
 
-function *nonBlockingLoadImages (ads: { picture_id: string | number }[]): TypedSaga {
+function* nonBlockingLoadImages(ads: { picture_id: string | number }[]): TypedSaga {
 	const images = yield call(asyncLoadImages, ads);
 	yield put(Action.asyncImageLoaded(images));
 }
 
-function asyncLoadImages (ads: { picture_id: string | number }[]): Promise<string[]> {
-	return Promise.all(ads.map(ad => {
-    	return new Promise<string>(res => {
-            let img = new Image();
-			img.src = `${smallImageSrc}${ad.picture_id}.jpg`;
-            img.onload = () => {
-				res(''+ad.picture_id);
-            };
-        });
-	}));
+function asyncLoadImages(ads: { picture_id: string | number }[]): Promise<string[]> {
+	return Promise.all(
+		ads.map((ad) => {
+			return new Promise<string>((res) => {
+				let img = new Image();
+				img.src = `${smallImageSrc}${ad.picture_id}.jpg`;
+				img.onload = () => {
+					res('' + ad.picture_id);
+				};
+			});
+		})
+	);
+}
+
+function* sendFormData(action: AnyAction): TypedSaga {
+	try {
+		const { formName, post } = action;
+		if (post) {
+			yield put(Action.loadingData(true)); // turn on spinner for post form submission
+		}
+
+		const { data }: ApiResponse = yield call(submitFormData, formName, post);
+
+		if (data.sessionExpire) {
+			Engine.location('user-account');
+		} else if (data.error) {
+			yield put(Action.messageCenter(Action.ADD_MESSAGE, data.error, true));
+		} else {
+			if (post) {
+				yield put(Action.loadingData()); // turn off spinner for post form submission
+
+				if (data.load) {
+					Cache.clear();
+					yield put(Action.messageCenter(Action.CLEAR_MESSAGE));
+					Engine.location(`ad-detail/${data.load}`);
+				}
+			} else {
+				yield put(Action.setActionBox({ box: null }));
+				yield put(Action.addErrors());
+				if (routes[formName] && routes[formName]['page']) {
+					if (data.user) {
+						yield put(Action.fetchUserData([{ dataKey: 'profile' }]));
+					}
+					Engine.location(routes[formName]['page']);
+				}
+			}
+
+			if (data.message) {
+				yield put(Action.messageCenter(Action.ADD_MESSAGE, data.message));
+			}
+		}
+	} catch (error) {
+		yield put(Action.messageCenter(Action.ADD_MESSAGE, error, true));
+		yield put(Action.loadingData());
+	}
 }
 
 /*
  * @description list of saga events, add whatever is needed
  */
-export default function* RootSaga (): TypedSaga {
+export default function* RootSaga(): TypedSaga {
 	yield all([
 		takeLatest(Action.FETCH_ADVERTISES, fetchAdvertises),
 		takeLatest(Action.FETCH_ADVERTISE, fetchAdvertise),
@@ -191,5 +239,6 @@ export default function* RootSaga (): TypedSaga {
 		takeLatest(Action.KEY_WORD_SEARCH, keyWordSearch),
 		takeLatest(Action.VIEW_LARGE_IMAGES, viewLargeImages),
 		takeEvery(Action.FETCH_USER_DATA, fetchUserData),
-	])
-};
+		takeEvery(Action.SEND_FORM_DATA, sendFormData),
+	]);
+}

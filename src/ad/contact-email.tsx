@@ -1,9 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { AdFuncs } from '../common/ad-funcs';
-import { Helper } from '../common/js-funcs';
 import RootReducer from '../reducer';
-import { useLocalizedLabel } from '../common/use-localized-label';
+import { useLocalizedLabel } from '../hook/localization-hook';
+import { ErrorLabel } from '../box/form-fields';
 
 interface ContactEmailProps {
 	USERSIGNEDIN: boolean;
@@ -23,7 +23,7 @@ const ContactEmail = ({ USERSIGNEDIN }: ContactEmailProps) => {
 						<div className='ad_box_label'>{getLocalizedLabel('p_email_title')}</div>
 					</div>
 					<div className='ad_box_field'>
-						{Helper.errorLabel(typeof postErrors.email === 'string' ? postErrors.email : undefined)}
+						<ErrorLabel errorLabel={postErrors.email} />
 						<input type='text' name='email' maxLength={150} placeholder='account.name@example.com' />
 					</div>
 				</div>

@@ -1,17 +1,24 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import { Helper } from '../common/js-funcs';
-import { useLocalizedLabel } from '../common/use-localized-label';
+import { useLocalizedLabel } from '../hook/localization-hook';
 import RootReducer from '../reducer';
+import { InputLabel } from './form-fields';
+import { Context } from '../context/reference-context';
 
 type RootState = ReturnType<typeof RootReducer>;
 
 const AdvertiseContact = () => {
 	const box = useSelector((state: RootState) => state.BOXES);
 	const getLocalizedLabel = useLocalizedLabel();
-	const createReference = useCallback((element: HTMLDivElement | null) => {
-		Helper.setActionBoxReference(element);
-	}, []);
+	const { setActionBox } = useContext(Context);
+	const createReference = useCallback(
+		(element: HTMLDivElement | null) => {
+			setActionBox(element);
+			Helper.setActionBoxReference(element);
+		},
+		[setActionBox]
+	);
 
 	if (box.box !== 'ask_poster') {
 		return null;
@@ -31,7 +38,7 @@ const AdvertiseContact = () => {
 					</div>
 					<div className='account_box_title'>{getLocalizedLabel('c_contact_poster_title')}</div>
 					<div>
-						{Helper.inputLable('c_return_eml', 'email')}
+						<InputLabel fieldLabel='c_return_eml' fieldName='email' />
 						<div className='account_box_field'>
 							<input
 								type='text'
@@ -43,7 +50,7 @@ const AdvertiseContact = () => {
 						</div>
 					</div>
 					<div>
-						{Helper.inputLable('c_msg_post_title', 'message')}
+						<InputLabel fieldLabel='c_msg_post_title' fieldName='message' />
 						<div className='account_box_field'>
 							<textarea
 								name='message'

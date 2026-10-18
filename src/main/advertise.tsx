@@ -5,9 +5,11 @@ import { Engine } from '../common/engine';
 import RouteEngine from './route-engine';
 import { Http } from '../common/http-client';
 import { connection } from '../common/config';
+import { SessionContext } from '../context/session-context';
+import { ReferenceContext } from '../context/reference-context';
 
 interface AdvertiseProps {
-	cookies?: Cookies;
+	cookies: Cookies;
 }
 
 const Advertise = ({ cookies }: AdvertiseProps) => {
@@ -46,7 +48,11 @@ const Advertise = ({ cookies }: AdvertiseProps) => {
 	}, []);
 
 	return launchApplication > 0 ? (
-		<RouteEngine />
+		<SessionContext cookies={cookies}>
+			<ReferenceContext>
+				<RouteEngine />
+			</ReferenceContext>
+		</SessionContext>
 	) : (
 		<section className='not-signed-in'>
 			<span>{connection[launchApplication === -1 ? '-1' : '0']}</span>
