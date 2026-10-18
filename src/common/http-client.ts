@@ -8,7 +8,7 @@ import { fetchUserData, loadingData } from '../action';
 type RequestData = Record<string, string | number | boolean | undefined | null>;
 type ApiData = Record<string, any>;
 
-interface ApiResponse {
+export interface ApiResponse {
 	data: ApiData;
 }
 
@@ -28,7 +28,7 @@ interface Route {
 }
 
 const formControlTypes = new Set(['hidden', 'text', 'textarea', 'file', 'password', 'select-one']);
-const routes: Record<string, Route> = {
+export const routes: Record<string, Route> = {
 	ask_poster_form: {
 		script: 'request',
 	},
@@ -215,6 +215,33 @@ const Http = {
 				Engine.dispatch(loadingData());
 				return reason.error;
 			});
+	},
+
+	PostForm: (f: HTMLFormElement): Promise<ApiResponse> => {
+		const [formData, contentType] =
+			f.enctype && f.enctype === 'multipart/form-data'
+				? [true, f.enctype]
+				: [false, 'application/x-www-form-urlencoded; charset=UTF-8'];
+		const data = {
+			requestData: [] as string[],
+			formData,
+			contentType,
+			script: endPoint(f.action),
+			form: f,
+		};
+		for (const { name, value } of Array.from(f.elements).filter(
+			(element): element is HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement =>
+				(element instanceof HTMLInputElement ||
+					element instanceof HTMLSelectElement ||
+					element instanceof HTMLTextAreaElement) &&
+				formControlTypes.has(element.type.toLowerCase())
+		)) {
+			if (!formData) {
+				data.requestData.push(`${name}=${value}`);
+			}
+		}
+
+		return submit(data);
 	},
 
 	Request: (f: HTMLFormElement): Promise<ApiResponse> => {

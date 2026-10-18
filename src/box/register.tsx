@@ -1,55 +1,65 @@
-import React, { Component } from 'react';
-import { getLabel } from '../common/label';
-import { Helper } from '../common/js-funcs';
+import React, { useCallback, useContext } from 'react';
+import { useSelector } from 'react-redux';
+import RootReducer from '../reducer';
+import { useLocalizedLabel } from '../hook/localization-hook';
+import { InputLabel, SubmitButtons } from './form-fields';
+import { Context } from '../context/reference-context';
 
-interface RegisterProps {
-	BOXES: {
-		box: string;
-	};
-}
+type RootState = ReturnType<typeof RootReducer>;
 
-class Register extends Component<RegisterProps> {
-	private actionBoxReference: HTMLDivElement | null = null;
+const Register = () => {
+	const { setActionBox } = useContext(Context);
+	const box = useSelector((state: RootState) => state.BOXES.box);
+	const getLocalizedLabel = useLocalizedLabel();
+	const createReference = useCallback(
+		(element: HTMLDivElement | null) => {
+			if (element) {
+				setActionBox(element);
+			}
+		},
+		[setActionBox]
+	);
 
-	private createReference = (element: HTMLDivElement | null): void => {
-		this.actionBoxReference = element;
-		Helper.setActionBoxReference(this.actionBoxReference);
-	};
+	if (box !== 'register') {
+		return null;
+	}
 
-    render() {
-		if(this.props.BOXES.box !== 'register') {
-			return null;
-		}
-
-		return (
-			<div id="register_box" className="ad_action_box box-in" ref = {this.createReference}>
-				<form name="register_form"> 
-					<div className="account_box_title">{getLabel('c_gen_account_tile')}</div>
-					<div className="register_name_field">
-						<div>
-							{Helper.inputLable('c_first_name', 'first_name')}
-							<div className="account_box_field"><input type="text" name="first_name" maxLength={30} placeholder="Joe" autoFocus /></div>
-						</div>
-						<div>
-							{Helper.inputLable('c_last_name', 'last_name')}
-							<div className="account_box_field"><input type="text" name="last_name" maxLength={30} placeholder="Doe" /></div>
+	return (
+		<div id='register_box' className='ad_action_box box-in' ref={createReference}>
+			<form name='register_form'>
+				<div className='account_box_title'>{getLocalizedLabel('c_gen_account_tile')}</div>
+				<div className='register_name_field'>
+					<div>
+						<InputLabel fieldLabel='c_first_name' fieldName='first_name' />
+						<div className='account_box_field'>
+							<input type='text' name='first_name' maxLength={30} placeholder='Joe' autoFocus />
 						</div>
 					</div>
 					<div>
-						{Helper.inputLable('c_eml_addr', 'email')}
-						<div className="account_box_field"><input type="text" name="email" maxLength={150} placeholder="account.name@example.com" /></div>
+						<InputLabel fieldLabel='c_last_name' fieldName='last_name' />
+						<div className='account_box_field'>
+							<input type='text' name='last_name' maxLength={30} placeholder='Doe' />
+						</div>
 					</div>
-					<div>
-						{Helper.inputLable('c_passwd', 'password')}
-						<div className="account_box_field"><input type="password" name="password"  maxLength={40} placeholder="Abc56789" /></div>
+				</div>
+				<div>
+					<InputLabel fieldLabel='c_eml_addr' fieldName='email' />
+					<div className='account_box_field'>
+						<input type='text' name='email' maxLength={150} placeholder='account.name@example.com' />
 					</div>
-					<div className="account_box_label">
-						{Helper.submitButtons('c_submit', 'register_form')}
+				</div>
+				<div>
+					<InputLabel fieldLabel='c_passwd' fieldName='password' />
+					<div className='account_box_field'>
+						<input type='password' name='password' maxLength={40} placeholder='Abc56789' />
 					</div>
-				</form>
-			</div>
-		);
-	};
-}
+				</div>
+				<div className='account_box_label'>
+					<SubmitButtons label='c_submit' name='register_form' />
+				</div>
+			</form>
+		</div>
+	);
+};
 
 export default Register;

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { AdFuncs } from '../common/ad-funcs';
-import { Helper } from '../common/js-funcs';
 import RootReducer from '../reducer';
-import { useLocalizedLabel } from '../common/use-localized-label';
+import { useLocalizedLabel } from '../hook/localization-hook';
+import { ErrorLabel } from '../box/form-fields';
 
 type RootState = ReturnType<typeof RootReducer>;
 
@@ -24,9 +24,7 @@ const ContactPhone = () => {
 					<div className='ad_box_label'>{getLocalizedLabel('p_phone_title')}</div>
 				</div>
 				<div className='ad_box_field'>
-					{Helper.errorLabel(
-						typeof postErrors.contact_phone === 'string' ? postErrors.contact_phone : undefined
-					)}
+					<ErrorLabel errorLabel={postErrors.contact_phone} />
 					<input
 						type='text'
 						name='contact_phone'

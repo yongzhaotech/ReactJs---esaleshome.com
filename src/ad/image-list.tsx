@@ -4,7 +4,7 @@ import { AdFuncs } from '../common/ad-funcs';
 import { smallImageSrc } from '../common/config';
 import { Helper } from '../common/js-funcs';
 import RootReducer from '../reducer';
-import { useLocalizedLabel } from '../common/use-localized-label';
+import { useLocalizedLabel } from '../hook/localization-hook';
 
 type RootState = ReturnType<typeof RootReducer>;
 

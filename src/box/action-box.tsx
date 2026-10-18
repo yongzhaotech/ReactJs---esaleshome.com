@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AdvertiseContact from './advertise-contact';
 import ContactUs from './contact-us';
@@ -11,13 +11,15 @@ import SearchBox from './search-box';
 import { Helper } from '../common/js-funcs';
 import { Engine } from '../common/engine';
 import { AdInfo } from '../common/ad-info';
-import { useLocalizedLabel } from '../common/use-localized-label';
+import { useLocalizedLabel } from '../hook/localization-hook';
 import { switchLanguage, keyWordSearch } from '../action';
 import RootReducer from '../reducer';
+import { Context } from '../context/session-context';
 
 type RootState = ReturnType<typeof RootReducer>;
 
 const ActionBox = () => {
+	const { toggleLang } = useContext(Context) || {};
 	const boxState = useSelector((state: RootState) => state.BOXES);
 	const boxes = {
 		box: typeof boxState.box === 'string' ? boxState.box : '',
@@ -51,7 +53,13 @@ const ActionBox = () => {
 				<div className='nav_btn' onClick={goHome}>
 					{getLocalizedLabel('c_home')}
 				</div>
-				<div className='nav_btn' onClick={() => dispatch(switchLanguage())}>
+				<div
+					className='nav_btn'
+					onClick={() => {
+						toggleLang();
+						// dispatch(switchLanguage());
+					}}
+				>
 					{getLocalizedLabel('c_language')}
 				</div>
 				<label htmlFor='keyWordSearch' className='visually-hidden'>
@@ -70,10 +78,10 @@ const ActionBox = () => {
 					<AdvertiseContact />
 					<ContactUs />
 					<EmailFriendBox />
-					{Engine.component(FindVisitorAdBox, { BOXES: boxes })}
+					<FindVisitorAdBox />
 					<ForgetPasswordBox />
-					{Engine.component(LoginBox, { BOXES: boxes })}
-					{Engine.component(Register, { BOXES: boxes })}
+					<LoginBox />
+					<Register />
 					{Engine.component(SearchBox, { BOXES: boxes })}
 				</div>
 			</nav>

@@ -45,6 +45,7 @@ export const CHANGE_SUBSCRIBER_NAME = 'CHANGE_SUBSCRIBER_NAME';
 export const CHANGE_SUBSCRIBER_PHONE = 'CHANGE_SUBSCRIBER_PHONE';
 export const KEEP_CURRENT_PHONE = 'KEEP_CURRENT_PHONE';
 export const SELECT_CITY = 'SELECT_CITY';
+export const SEND_FORM_DATA = 'SEND_FORM_DATA';
 
 /*
  * @description action creators
@@ -314,4 +315,10 @@ export const selectSubscriberCity = (number: number, cityId: Identifier) => ({
 	type: SELECT_CITY,
 	number,
 	cityId
+});
+
+export const sendFormData = (formName: string, post: boolean = false) => ({
+	type: SEND_FORM_DATA,
+	formName,
+	post
 });

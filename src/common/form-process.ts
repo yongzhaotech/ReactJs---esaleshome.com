@@ -1,13 +1,13 @@
 import { Http } from './http-client';
 import { Helper } from './js-funcs';
 import { Engine } from './engine';
-import { loadingData } from '../action';
+import { ADD_ERRORS, loadingData } from '../action';
 
 type FormField = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 type FormControl = FormField | RadioNodeList;
 
 const validEmail = (eml: string): RegExpMatchArray | null => {
-	return eml.match(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/);	
+	return eml.match(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/);
 };
 
 const validPhone = (ph: string): RegExpMatchArray | null => {
@@ -20,18 +20,21 @@ const validMoneyAmount = (amt: string): boolean => {
 
 const getNamedControl = (form: HTMLFormElement, name: string): FormControl | null => {
 	const control = form.elements.namedItem(name);
-	if(control instanceof RadioNodeList || control instanceof HTMLInputElement ||
-		control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement) {
+	if (
+		control instanceof RadioNodeList ||
+		control instanceof HTMLInputElement ||
+		control instanceof HTMLSelectElement ||
+		control instanceof HTMLTextAreaElement
+	) {
 		return control;
 	}
 	return null;
 };
 
-const isFormField = (element: Element): element is FormField => (
+const isFormField = (element: Element): element is FormField =>
 	element instanceof HTMLInputElement ||
 	element instanceof HTMLSelectElement ||
-	element instanceof HTMLTextAreaElement
-);
+	element instanceof HTMLTextAreaElement;
 
 const isDisabled = (form: HTMLFormElement, name: string): boolean => {
 	const control = getNamedControl(form, name);
@@ -39,122 +42,128 @@ const isDisabled = (form: HTMLFormElement, name: string): boolean => {
 };
 
 const getElementValue = (f: HTMLFormElement, e: FormField): string => {
-    if(e.type.match(/^radio$/i)) {
+	if (e.type.match(/^radio$/i)) {
 		const control = getNamedControl(f, e.name);
-		if(control instanceof RadioNodeList) {
-			for(let i = 0; i < control.length; i++) {
+		if (control instanceof RadioNodeList) {
+			for (let i = 0; i < control.length; i++) {
 				const field = control.item(i);
-				if(field instanceof HTMLInputElement && field.checked) {
+				if (field instanceof HTMLInputElement && field.checked) {
 					return field.value;
 				}
-            }
-        }
+			}
+		}
 		return '';
-    }else if(e.type.match(/^checkbox$/i)) {
+	} else if (e.type.match(/^checkbox$/i)) {
 		const control = getNamedControl(f, e.name),
-    		fields = control instanceof RadioNodeList ? Array.from(control) : [],
-			v = fields.filter((field): field is HTMLInputElement => field instanceof HTMLInputElement && field.checked)
-				.map(field => field.value);
-        return v.join(",");
-    }else {
-        return e.value;
-    }
+			fields = control instanceof RadioNodeList ? Array.from(control) : [],
+			v = fields
+				.filter((field): field is HTMLInputElement => field instanceof HTMLInputElement && field.checked)
+				.map((field) => field.value);
+		return v.join(',');
+	} else {
+		return e.value;
+	}
 };
 
 const validateInputFields = (f: HTMLFormElement, data: Record<string, string>): Record<string, string> => {
 	const error: Record<string, string> = {};
-	for(let field in data) {
-		if(field.match(/^(?:(contact_name|first_name|last_name))$/)) {
+	for (let field in data) {
+		if (field.match(/^(?:(contact_name|first_name|last_name))$/)) {
 			let n = RegExp.$1;
-			if(data[field] === '') {
+			if (data[field] === '') {
 				error[field] = 'r_' + n;
 			}
-		}else if(field.match(/^email$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^email$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_email';
-			}else if(!validEmail(data[field])) {
+			} else if (!validEmail(data[field])) {
 				error[field] = 'w_email';
 			}
-		}else if(field.match(/^friend_email$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^friend_email$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_friend_email';
-			}else if(!validEmail(data[field])) {
+			} else if (!validEmail(data[field])) {
 				error[field] = 'w_friend_email';
 			}
-		}else if(field.match(/^contact_message$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^contact_message$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_contact_message';
 			}
-		}else if(field.match(/^ad_name$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^ad_name$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_ad_name';
 			}
-		}else if(field.match(/^is_free$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^is_free$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_is_free';
 			}
-		}else if(field.match(/^currency$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^currency$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_currency';
 			}
-		}else if(field.match(/^contact_method$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^contact_method$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_contact_method';
 			}
-		}else if(field.match(/^contact_phone$/)) {
-			if(!isDisabled(f, field)) {
-				if(data[field] === '') {
+		} else if (field.match(/^contact_phone$/)) {
+			if (!isDisabled(f, field)) {
+				if (data[field] === '') {
 					error[field] = 'r_contact_phone';
-				}else if(!validPhone(data[field])) {
+				} else if (!validPhone(data[field])) {
 					error[field] = 'w_contact_phone';
 				}
 			}
-		}else if(field.match(/^message$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^message$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_message';
 			}
-		}else if(field.match(/^price$/)) {
-			if(!isDisabled(f, field)) {
-				if(data[field] === '') {
+		} else if (field.match(/^price$/)) {
+			if (!isDisabled(f, field)) {
+				if (data[field] === '') {
 					error[field] = 'r_price';
-				}else if(!validMoneyAmount(data[field])) {
+				} else if (!validMoneyAmount(data[field])) {
 					error[field] = 'w_price';
 				}
 			}
-		}else if(field.match(/^((confirm_)?new_)?password$/)) {
-			if(data[field] === '') {
-				if(!f.name.match(/^change_user_profile$/)) {
+		} else if (field.match(/^((confirm_)?new_)?password$/)) {
+			if (data[field] === '') {
+				if (!f.name.match(/^change_user_profile$/)) {
 					error[field] = 'r_' + field;
 				}
-			}else if(!(data[field].match(/[a-z]+/i) && data[field].match(/\d+/) && data[field].length >= 10 && !data[field].match(/\s/))) {
+			} else if (!(
+				data[field].match(/[a-z]+/i) &&
+				data[field].match(/\d+/) &&
+				data[field].length >= 10 &&
+				!data[field].match(/\s/)
+			)) {
 				error[field] = 'w_' + field;
 			}
-		}else if(field.match(/^new_category$/)) {
-			if(data[field] === '') {
-				error[field] = "specify the category text";
+		} else if (field.match(/^new_category$/)) {
+			if (data[field] === '') {
+				error[field] = 'specify the category text';
 			}
-		}else if(field.match(/^category$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^category$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_category';
 			}
-		}else if(field.match(/^item$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^item$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_item';
 			}
-		}else if(field.match(/^province$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^province$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_province';
 			}
-		}else if(field.match(/^city$/)) {
-			if(data[field] === '') {
+		} else if (field.match(/^city$/)) {
+			if (data[field] === '') {
 				error[field] = 'r_city';
 			}
-		}else if(field.match(/^email_phone$/)) {
-			if(data[field].match(/^\s*$/)) {
+		} else if (field.match(/^email_phone$/)) {
+			if (data[field].match(/^\s*$/)) {
 				error[field] = 'r_email_phone';
 			}
-		}else if(field.match(/^post_id$/)) {
-			if(data[field].match(/^\s*$/)) {
+		} else if (field.match(/^post_id$/)) {
+			if (data[field].match(/^\s*$/)) {
 				error[field] = 'r_post_id';
 			}
 		}
@@ -163,20 +172,34 @@ const validateInputFields = (f: HTMLFormElement, data: Record<string, string>): 
 };
 
 const sendData = (form: HTMLFormElement, post: boolean): void => {
-    if(post) {
-        Http.Post(form);
-    }else {
-        Http.Request(form).then(promise => {
-            Http.AfterRequest(form, promise);
-        }).catch(reason => {
-            Helper.addMessage(reason.error, true);
-        });
-    }
+	if (post) {
+		Http.Post(form);
+	} else {
+		Http.Request(form)
+			.then((promise) => {
+				Http.AfterRequest(form, promise);
+			})
+			.catch((reason) => {
+				Helper.addMessage(reason.error, true);
+			});
+	}
+};
+
+const submitFormData = (formName: string, post: boolean) => {
+	const form = document.forms.namedItem(formName);
+	if (!form) {
+		throw new Error(`Form "${formName}" was not found`);
+	}
+	if (post) {
+		return Http.PostForm(form);
+	} else {
+		return Http.Request(form);
+	}
 };
 
 const formValidator = (fn: string, post: boolean = false): void => {
 	const f = document.forms.namedItem(fn);
-	if(!f) {
+	if (!f) {
 		throw new Error(`Form "${fn}" was not found`);
 	}
 	const accessed: Record<string, number> = {},
@@ -184,12 +207,15 @@ const formValidator = (fn: string, post: boolean = false): void => {
 	let error: Record<string, string> = {},
 		ef = false;
 
-	for(const e of Array.from(f.elements).filter(isFormField)) {
-		const
-			n = e.name,
+	for (const e of Array.from(f.elements).filter(isFormField)) {
+		const n = e.name,
 			t = e.type;
-		if(e.disabled) { continue; }
-		if((n in accessed) || t.match(/^button$/i)) { continue; }
+		if (e.disabled) {
+			continue;
+		}
+		if (n in accessed || t.match(/^button$/i)) {
+			continue;
+		}
 		accessed[n] = 1;
 		values[n] = getElementValue(f, e);
 	}
@@ -197,25 +223,69 @@ const formValidator = (fn: string, post: boolean = false): void => {
 	error = validateInputFields(f, values);
 	ef = Object.keys(error).length > 0;
 
-    if(!ef && f.name === 'reset_password') {
-	const newPassword = getNamedControl(f, 'new_password'),
-		confirmNewPassword = getNamedControl(f, 'confirm_new_password'),
-		newPasswordValue = newPassword && !(newPassword instanceof RadioNodeList) ? newPassword.value : newPassword?.value,
-		confirmNewPasswordValue = confirmNewPassword && !(confirmNewPassword instanceof RadioNodeList) ? confirmNewPassword.value : confirmNewPassword?.value;
-        if(newPasswordValue !== confirmNewPasswordValue) {
+	if (!ef && f.name === 'reset_password') {
+		const newPassword = getNamedControl(f, 'new_password'),
+			confirmNewPassword = getNamedControl(f, 'confirm_new_password'),
+			newPasswordValue =
+				newPassword && !(newPassword instanceof RadioNodeList) ? newPassword.value : newPassword?.value,
+			confirmNewPasswordValue =
+				confirmNewPassword && !(confirmNewPassword instanceof RadioNodeList)
+					? confirmNewPassword.value
+					: confirmNewPassword?.value;
+		if (newPasswordValue !== confirmNewPasswordValue) {
 			error['new_password'] = 'w_pwd_no_match';
 			ef = true;
 		}
-    }
+	}
 
 	Helper.addErrors(error, post);
 
-	if(!ef) {
-		if(post) {
+	if (!ef) {
+		if (post) {
 			Engine.dispatch(loadingData(true));
 		}
 		sendData(f, post);
 	}
 };
 
-export { formValidator };
+const processForm = (formName: string, post: boolean = false) => {
+	const inputForm = document.forms.namedItem(formName);
+	if (!inputForm) {
+		throw new Error(`Form "${formName}" was not found`);
+	}
+	const accessed: Record<string, number> = {},
+		values: Record<string, string> = {};
+
+	for (const e of Array.from(inputForm.elements).filter(isFormField)) {
+		const n = e.name,
+			t = e.type;
+		if (e.disabled) {
+			continue;
+		}
+		if (n in accessed || t.match(/^button$/i)) {
+			continue;
+		}
+		accessed[n] = 1;
+		values[n] = getElementValue(inputForm, e);
+	}
+
+	const errors: Record<string, string> = validateInputFields(inputForm, values);
+
+	if (Object.keys(errors).length <= 0 && inputForm.name === 'reset_password') {
+		const newPassword = getNamedControl(inputForm, 'new_password'),
+			confirmNewPassword = getNamedControl(inputForm, 'confirm_new_password'),
+			newPasswordValue =
+				newPassword && !(newPassword instanceof RadioNodeList) ? newPassword.value : newPassword?.value,
+			confirmNewPasswordValue =
+				confirmNewPassword && !(confirmNewPassword instanceof RadioNodeList)
+					? confirmNewPassword.value
+					: confirmNewPassword?.value;
+		if (newPasswordValue !== confirmNewPasswordValue) {
+			errors['new_password'] = 'w_pwd_no_match';
+		}
+	}
+
+	return errors;
+};
+
+export { formValidator, processForm, submitFormData };
