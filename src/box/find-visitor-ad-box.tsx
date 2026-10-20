@@ -1,16 +1,11 @@
 import React, { useCallback, useContext } from 'react';
-import { useSelector } from 'react-redux';
 import { Helper } from '../common/js-funcs';
 import { useLocalizedLabel } from '../hook/localization-hook';
 import { useSessionContext } from '../context/session-context';
-import RootReducer from '../reducer';
 import { InputLabel, SubmitButtons } from './form-fields';
 import { Context } from '../context/reference-context';
 
-type RootState = ReturnType<typeof RootReducer>;
-
 const FindVisitorAdBox = () => {
-	const boxes = useSelector((state: RootState) => state.BOXES);
 	const getLabel = useLocalizedLabel();
 	const { setActionBox } = useContext(Context);
 	const createReference = useCallback(
@@ -22,10 +17,6 @@ const FindVisitorAdBox = () => {
 		[setActionBox]
 	);
 	const { userSignedIn } = useSessionContext();
-
-	if (boxes.box !== 'find_visitor_ad') {
-		return null;
-	}
 
 	return (
 		<div id='find_visitor_ad_box' className='ad_action_box box-in' ref={createReference}>

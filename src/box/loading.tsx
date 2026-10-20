@@ -21,18 +21,14 @@ const Loading = () => {
 		<section className='loading'>
 			<div className={className}>
 				<div>
-					{loadingData.HIDELOADINGTITLE ? null : (
+					{!loadingData.HIDELOADINGTITLE && (
 						<>
 							<div>{getLocalizedLabel('loading_data')}</div>
 							<div className='devider'></div>
 						</>
 					)}
 				</div>
-				{loadingImagesMessage ? (
-					<div>
-						{getLocalizedLabel('loading_large_image')}: {loadingImagesMessage}
-					</div>
-				) : null}
+				{loadingImagesMessage && `${getLocalizedLabel('loading_large_image')}: ${loadingImagesMessage}`}
 				<img className='rotate-on' alt='' src={logo} height='65' />
 			</div>
 		</section>

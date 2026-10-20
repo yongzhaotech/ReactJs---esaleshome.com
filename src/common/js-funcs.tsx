@@ -27,6 +27,7 @@ import {
 	ADD_MESSAGE,
 	CLEAR_MESSAGE
 } from '../action';
+import { route } from '../utils';
 
 type Callback = (() => void) | null | undefined;
 
@@ -193,15 +194,17 @@ Helper = {
 	) => {
 		let {match: {params}, history} = props;
 		Engine.route(params, history);
+		route.params = params;
+		route.history = history;
 
 		return (
 			<React.Fragment>
-				{Engine.component(ActionBox)}
+				<ActionBox />
 				<main id="ad_content_area">
 					{Engine.component(Comp)}
 				</main>
 				{Engine.component(Footer, {ISLISTSCREEN: list})}
-				{Engine.component(Loading)}
+				<Loading />
 			</React.Fragment>
 		);
 	},

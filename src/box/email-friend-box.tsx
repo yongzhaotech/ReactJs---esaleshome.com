@@ -20,10 +20,6 @@ const EmailFriendBox = () => {
 		[setActionBox]
 	);
 
-	if (boxes.box !== 'email_friend') {
-		return null;
-	}
-
 	const advertiseId = typeof boxes.id === 'string' || typeof boxes.id === 'number' ? boxes.id : undefined;
 
 	return (

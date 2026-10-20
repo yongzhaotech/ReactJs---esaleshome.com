@@ -1,15 +1,11 @@
 import React, { useCallback, useContext } from 'react';
-import { useSelector } from 'react-redux';
-import RootReducer from '../reducer';
 import { useLocalizedLabel } from '../hook/localization-hook';
 import { InputLabel, SubmitButtons } from './form-fields';
 import { Context } from '../context/reference-context';
 
-type RootState = ReturnType<typeof RootReducer>;
 
 const ContactUs = () => {
 	const { setActionBox } = useContext(Context);
-	const box = useSelector((state: RootState) => state.BOXES.box);
 	const getLocalizedLabel = useLocalizedLabel();
 	const createReference = useCallback(
 		(element: HTMLDivElement | null) => {
@@ -19,10 +15,6 @@ const ContactUs = () => {
 		},
 		[setActionBox]
 	);
-
-	if (box !== 'contact_us') {
-		return null;
-	}
 
 	return (
 		<div id='contact_us_box' className='ad_action_box box-in' ref={createReference}>

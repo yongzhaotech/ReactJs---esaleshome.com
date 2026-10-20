@@ -1,17 +1,12 @@
 import { Button } from 'react-bootstrap';
 import React, { useCallback, useContext } from 'react';
-import { useSelector } from 'react-redux';
 import { Helper } from '../common/js-funcs';
 import { useLocalizedLabel } from '../hook/localization-hook';
-import RootReducer from '../reducer';
 import { InputLabel, SubmitButtons } from './form-fields';
 import { Context } from '../context/reference-context';
 import { useSessionContext } from '../context/session-context';
 
-type RootState = ReturnType<typeof RootReducer>;
-
 const LoginBox = () => {
-	const boxes = useSelector((state: RootState) => state.BOXES);
 	const getLocalizedLabel = useLocalizedLabel();
 	const { setActionBox } = useContext(Context);
 	const createReference = useCallback(
@@ -24,7 +19,7 @@ const LoginBox = () => {
 	);
 	const { userSignedIn } = useSessionContext();
 
-	if (boxes.box !== 'login' || userSignedIn) {
+	if (userSignedIn) {
 		return null;
 	}
 
