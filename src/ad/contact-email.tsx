@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { AdFuncs } from '../common/ad-funcs';
 import RootReducer from '../reducer';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import { useLocalizationContext } from '../context/localization-context';
 import { ErrorLabel } from '../box/form-fields';
 
 interface ContactEmailProps {
@@ -13,7 +13,7 @@ type RootState = ReturnType<typeof RootReducer>;
 
 const ContactEmail = ({ USERSIGNEDIN }: ContactEmailProps) => {
 	const postErrors = useSelector((state: RootState) => state.POSTERRORS);
-	const getLocalizedLabel = useLocalizedLabel();
+	const { getLocalizedLabel } = useLocalizationContext();
 
 	return !USERSIGNEDIN && AdFuncs.isContactMethod('email') ? (
 		<>

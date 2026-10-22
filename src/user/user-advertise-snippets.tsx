@@ -1,69 +1,93 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { getLabel } from '../common/label';
-import { UserFunction } from "./user-function";
+import React, { useCallback } from 'react';
 import { AdInfo } from '../common/ad-info';
-import { AdFuncs } from "../common/ad-funcs";
-import { Engine } from '../common/engine';
+import { useSelector, useDispatch } from 'react-redux';
+import RootReducer from '../reducer';
+import { session } from '../utils';
+import { useLocalizationContext } from '../context/localization-context';
+import { useServerFunctions, useUserFunctions } from '../hook/user-function-hook';
+import { saveStateObjects } from '../action';
 
 import type { UserAdvertiseItem } from '../types/user';
 
-interface UserAdvertiseSnippetsProps {
-	USERSIGNEDIN: boolean;
+type RootState = ReturnType<typeof RootReducer>;
+
+type UserProps = {
 	profile?: Record<string, unknown>;
 	ads?: UserAdvertiseItem[];
-}
-
-interface UserAdvertiseSnippetsState {
-	OBJECTS: Record<string, unknown>;
-}
-
-class UserAdvertiseSnippets extends Component<UserAdvertiseSnippetsProps> {
-	render() {
-		const {profile, ads, USERSIGNEDIN} = this.props;
-
-        if(!USERSIGNEDIN || !profile || !ads) {
-            return null;
-        }
-
-		let output = ads.map(advertise => (
-			<div className="user_advertise_box" id={`ad_${advertise.id}`} key={advertise.id}>
-				<div><span className="button" onClick={() => AdFuncs.expandUserAd(advertise)}>{advertise.name} (viewed: {advertise.viewed})</span></div>
-				{
-					AdFuncs.userAdExpanded(advertise) ? (
-						<div className="user_ad_detail">
-							<div className="devider"></div>
-							<div>{AdInfo.safeHtml(advertise.description)}</div>
-							<div className="devider"></div>
-							<div>
-						<span>
-							{+advertise.is_free ? getLabel('c_free_offer') : advertise.price}
-						</span>
-							</div>
-							<div className="devider"></div>
-							<div>
-								<span className="wide_button" onClick={() => {UserFunction.userPage(`edit-ad/${advertise.id}`)}}>{getLabel('c_edit_ad')}</span>
-								<span className="wide_button" onClick={() => {UserFunction.deleteAd(advertise)}}>{getLabel('c_delete')}</span>
-							</div>
-						</div>
-					) : null
-				}
-			</div>
-		));
-
-		return (
-			<section>
-				{output}
-			</section>
-		);
-	};
 };
 
-const mapStateToProps = (state: UserAdvertiseSnippetsState) => ({
-	USERSIGNEDIN: Engine.userSignedIn(),
-	OBJECTS: state.OBJECTS
-});
+type ExpandProps = { EXPANDEDADS: Record<string, number> };
 
-export default connect(
-	mapStateToProps
-)(UserAdvertiseSnippets);
+const UserAdvertiseSnippets = () => {
+	const dispatch = useDispatch();
+	const { EXPANDEDADS = {} } = useSelector((state: RootState) => state.OBJECTS) as ExpandProps;
+	const { profile, ads } = useSelector((state: RootState) => state.USER) as UserProps;
+	const { getLocalizedLabel: getLabel } = useLocalizationContext();
+	const { deleteAd } = useServerFunctions();
+	const { userPage } = useUserFunctions();
+	const expand = useCallback(
+		({ id }: UserAdvertiseItem) => {
+			const expandedAds = { ...EXPANDEDADS };
+			if (expandedAds[id] !== undefined) {
+				delete expandedAds[id];
+			} else {
+				expandedAds[id] = 1;
+			}
+			dispatch(
+				saveStateObjects({
+					EXPANDEDADS: expandedAds,
+				})
+			);
+		},
+		[EXPANDEDADS, dispatch]
+	);
+
+	if (!session.userSignedIn || !profile || !ads) {
+		return null;
+	}
+
+	return (
+		<>
+			{ads.map((advertise) => (
+				<div className='user_advertise_box' id={`ad_${advertise.id}`} key={advertise.id}>
+					<div>
+						<span className='button' onClick={() => expand(advertise)}>
+							{advertise.name} (viewed: {advertise.viewed})
+						</span>
+					</div>
+					{EXPANDEDADS[advertise.id] !== undefined && (
+						<div className='user_ad_detail'>
+							<div className='devider'></div>
+							<div>{AdInfo.safeHtml(advertise.description)}</div>
+							<div className='devider'></div>
+							<div>
+								<span>{+advertise.is_free ? getLabel('c_free_offer') : advertise.price}</span>
+							</div>
+							<div className='devider'></div>
+							<div>
+								<span
+									className='wide_button'
+									onClick={() => {
+										userPage(`edit-ad/${advertise.id}`);
+									}}
+								>
+									{getLabel('c_edit_ad')}
+								</span>
+								<span
+									className='wide_button'
+									onClick={() => {
+										deleteAd(advertise);
+									}}
+								>
+									{getLabel('c_delete')}
+								</span>
+							</div>
+						</div>
+					)}
+				</div>
+			))}
+		</>
+	);
+};
+
+export default UserAdvertiseSnippets;

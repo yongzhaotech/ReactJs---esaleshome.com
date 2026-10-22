@@ -5,8 +5,9 @@ import { Engine } from '../common/engine';
 import RouteEngine from './route-engine';
 import { Http } from '../common/http-client';
 import { connection } from '../common/config';
-import { SessionContext } from '../context/session-context';
+import { LocalizationContext } from '../context/localization-context';
 import { ReferenceContext } from '../context/reference-context';
+import { session } from '../utils';
 
 interface AdvertiseProps {
 	cookies: Cookies;
@@ -21,6 +22,8 @@ const Advertise = ({ cookies }: AdvertiseProps) => {
 				get: (name) => cookies.get(name),
 				set: (name, value, options) => cookies.set(name, value, options),
 			});
+
+			session.cookies = cookies;
 		}
 	}, [cookies]);
 
@@ -48,11 +51,11 @@ const Advertise = ({ cookies }: AdvertiseProps) => {
 	}, []);
 
 	return launchApplication > 0 ? (
-		<SessionContext cookies={cookies}>
+		<LocalizationContext cookies={cookies}>
 			<ReferenceContext>
 				<RouteEngine />
 			</ReferenceContext>
-		</SessionContext>
+		</LocalizationContext>
 	) : (
 		<section className='not-signed-in'>
 			<span>{connection[launchApplication === -1 ? '-1' : '0']}</span>

@@ -1,30 +1,21 @@
 import { Button } from 'react-bootstrap';
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 import { Helper } from '../common/js-funcs';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import { useLocalizationContext } from '../context/localization-context';
 import { InputLabel, SubmitButtons } from './form-fields';
-import { Context } from '../context/reference-context';
-import { useSessionContext } from '../context/session-context';
+import { useReferenceContext } from '../context/reference-context';
+import { session } from '../utils';
 
 const LoginBox = () => {
-	const getLocalizedLabel = useLocalizedLabel();
-	const { setActionBox } = useContext(Context);
-	const createReference = useCallback(
-		(element: HTMLDivElement | null) => {
-			if (element) {
-				setActionBox(element);
-			}
-		},
-		[setActionBox]
-	);
-	const { userSignedIn } = useSessionContext();
+	const { getLocalizedLabel } = useLocalizationContext();
+	const { createActionReference } = useReferenceContext();
 
-	if (userSignedIn) {
+	if (session.userSignedIn) {
 		return null;
 	}
 
 	return (
-		<div id='login_box' className='ad_action_box box-in' ref={createReference}>
+		<div id='login_box' className='ad_action_box box-in' ref={createActionReference}>
 			<form name='login_form'>
 				<div className='account_box_title'>{getLocalizedLabel('c_sign_in')}</div>
 				<div>

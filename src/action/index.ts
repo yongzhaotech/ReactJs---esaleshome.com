@@ -46,6 +46,7 @@ export const CHANGE_SUBSCRIBER_PHONE = 'CHANGE_SUBSCRIBER_PHONE';
 export const KEEP_CURRENT_PHONE = 'KEEP_CURRENT_PHONE';
 export const SELECT_CITY = 'SELECT_CITY';
 export const SEND_FORM_DATA = 'SEND_FORM_DATA';
+export const SIGN_OUT = 'SIGN_OUT';
 
 /*
  * @description action creators
@@ -322,3 +323,7 @@ export const sendFormData = (formName: string, post: boolean = false) => ({
 	formName,
 	post
 });
+
+export const signOut = () => ({
+	type: SIGN_OUT
+})

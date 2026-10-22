@@ -10,6 +10,7 @@ import { Engine } from '../common/engine';
 import { Helper } from '../common/js-funcs';
 import { smallImageSrc } from '../common/config';
 import type { Identifier } from '../types/common';
+import { route } from '../utils'
 
 interface AdvertiseDetailData {
 	id: Identifier;
@@ -40,7 +41,7 @@ interface AdvertiseDetailState {
 
 class AdvertiseDetail extends Component<AdvertiseDetailProps> {
     componentDidMount() {
-		Engine.dispatch(fetchAdvertise(Engine.param('advertiseId')));
+		Engine.dispatch(fetchAdvertise(route.param('advertiseId')));
 	}
 	
 	render() {

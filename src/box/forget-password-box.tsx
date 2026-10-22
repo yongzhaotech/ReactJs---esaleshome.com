@@ -1,22 +1,14 @@
-import React, { useCallback, useContext } from 'react';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import React from 'react';
+import { useLocalizationContext } from '../context/localization-context';
 import { InputLabel, SubmitButtons } from './form-fields';
-import { Context } from '../context/reference-context';
+import { useReferenceContext } from '../context/reference-context';
 
 const ForgetPasswordBox = () => {
-	const getLocalizedLabel = useLocalizedLabel();
-	const { setActionBox } = useContext(Context);
-	const createReference = useCallback(
-		(element: HTMLDivElement | null) => {
-			if (element) {
-				setActionBox(element);
-			}
-		},
-		[setActionBox]
-	);
+	const { getLocalizedLabel } = useLocalizationContext();
+	const { createActionReference } = useReferenceContext();
 
 	return (
-		<div id='forget_password_box' className='ad_action_box box-in' ref={createReference}>
+		<div id='forget_password_box' className='ad_action_box box-in' ref={createActionReference}>
 			<form name='forget_password_form'>
 				<div>
 					<div className='account_box_title'>{getLocalizedLabel('c_reset_passwd_title')}</div>

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 import { Button, ButtonToolbar } from 'react-bootstrap';
 import { Helper } from '../common/js-funcs';
 import { Engine } from '../common/engine';
@@ -10,29 +10,21 @@ import { changeAdKeyword, searchAdvertise } from '../action';
 import type { SearchMode } from '../types/ad';
 import { useSelector } from 'react-redux';
 import RootReducer from '../reducer';
-import { useLocalizedLabel } from '../hook/localization-hook';
-import { Context } from '../context/reference-context';
+import { useLocalizationContext } from '../context/localization-context';
+import { useReferenceContext } from '../context/reference-context';
 
 type RootState = ReturnType<typeof RootReducer>;
 
 const SearchBox = () => {
 	const MODELS = useSelector((state: RootState) => state.MODELS);
 
-	const getLocalizedLabel = useLocalizedLabel();
-	const { setActionBox } = useContext(Context);
-	const createReference = useCallback(
-		(element: HTMLDivElement | null) => {
-			if (element) {
-				setActionBox(element);
-			}
-		},
-		[setActionBox]
-	);
+	const { getLocalizedLabel } = useLocalizationContext();
+	const { createActionReference,  } = useReferenceContext();
 
 	const SEARCH: SearchMode = 'Search';
 
 	return (
-		<div id='search_box' className='ad_action_box box-in' ref={createReference}>
+		<div id='search_box' className='ad_action_box box-in' ref={createActionReference}>
 			<form name='search_advertise'>
 				<div className='account_box_title'>{getLocalizedLabel('c_search_title')}</div>
 				<div className='account_box_field'>{Engine.component(CategoryList, { SEARCH })}</div>

@@ -38,7 +38,7 @@ const UserAccount = class extends React.Component<UserAccountProps> {
 
 		return (
 			<section>
-				{Engine.component(UserTabs, { profile, USERSIGNEDIN: this.props.USERSIGNEDIN })}
+				<UserTabs />
 				{Engine.component(UserProfile, { profile, USERSIGNEDIN: this.props.USERSIGNEDIN })}
 			</section>
 		);

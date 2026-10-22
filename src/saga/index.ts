@@ -9,6 +9,7 @@ import { submitFormData } from '../common/form-process';
 import { ApiResponse, routes } from '../common/http-client';
 import { Cache } from '../common/cache';
 import { route } from '../utils';
+import { signOut } from '../hook/user-function-hook';
 
 type TypedSaga = Generator<unknown, void, any>;
 interface UserDataFetchArg {
@@ -225,6 +226,20 @@ function* sendFormData(action: AnyAction): TypedSaga {
 	}
 }
 
+function* signUserOut(): TypedSaga {
+	try {
+		const { data }: ApiResponse = yield call(signOut);
+		if (data.ok) {
+			yield put(Action.fetchUserDataSuccess([{ profile: null }, { ads: null }]));
+			yield put(Action.userSignedOut());
+		} else {
+			yield put(Action.messageCenter(Action.ADD_MESSAGE, data, true));
+		}
+	} catch (error) {
+		yield put(Action.messageCenter(Action.ADD_MESSAGE, error, true));
+	}
+}
+
 /*
  * @description list of saga events, add whatever is needed
  */
@@ -240,5 +255,6 @@ export default function* RootSaga(): TypedSaga {
 		takeLatest(Action.VIEW_LARGE_IMAGES, viewLargeImages),
 		takeEvery(Action.FETCH_USER_DATA, fetchUserData),
 		takeEvery(Action.SEND_FORM_DATA, sendFormData),
+		takeEvery(Action.SIGN_OUT, signUserOut),
 	]);
 }

@@ -26,6 +26,10 @@ class Route {
 		this.#_history = history;
 	}
 
+	param(param: string) {
+		return this.#_params ? this.#_params[param] : '';
+	}
+
 	location(path?: string) {
 		if (!this.#_history) {
 			throw new Error('Router history has not been registered');

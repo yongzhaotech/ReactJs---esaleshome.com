@@ -1,23 +1,14 @@
-import React, { useCallback, useContext } from 'react';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import React from 'react';
 import { InputLabel, SubmitButtons } from './form-fields';
-import { Context } from '../context/reference-context';
-
+import { useReferenceContext } from '../context/reference-context';
+import { useLocalizationContext } from '../context/localization-context';
 
 const ContactUs = () => {
-	const { setActionBox } = useContext(Context);
-	const getLocalizedLabel = useLocalizedLabel();
-	const createReference = useCallback(
-		(element: HTMLDivElement | null) => {
-			if (element) {
-				setActionBox(element);
-			}
-		},
-		[setActionBox]
-	);
+	const { getLocalizedLabel } = useLocalizationContext();
+	const { createActionReference } = useReferenceContext();
 
 	return (
-		<div id='contact_us_box' className='ad_action_box box-in' ref={createReference}>
+		<div id='contact_us_box' className='ad_action_box box-in' ref={createActionReference}>
 			<form name='contact_us_form'>
 				<div className='account_box_title'>{getLocalizedLabel('c_contact_us')}</div>
 				<div className='register_name_field'>

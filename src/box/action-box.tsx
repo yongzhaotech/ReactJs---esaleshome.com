@@ -3,10 +3,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Helper } from '../common/js-funcs';
 import { Engine } from '../common/engine';
 import { AdInfo } from '../common/ad-info';
-import { useLocalizedLabel } from '../hook/localization-hook';
-import { switchLanguage, keyWordSearch } from '../action';
+import { useLocalizationContext } from '../context/localization-context';
+import { keyWordSearch } from '../action';
 import RootReducer from '../reducer';
 import { Boxes } from './boxes';
+import { route } from '../utils';
 
 type RootState = ReturnType<typeof RootReducer>;
 
@@ -16,7 +17,7 @@ const ActionBox = () => {
 	const Box = Boxes[box];
 	const menusOpen = useSelector((state: RootState) => state.MENUS);
 	const dispatch = useDispatch();
-	const getLocalizedLabel = useLocalizedLabel();
+	const { toggleLang, getLocalizedLabel } = useLocalizationContext();
 
 	useEffect(() => {
 		Engine.registerMenuItems();
@@ -24,7 +25,7 @@ const ActionBox = () => {
 
 	const goHome = () => {
 		AdInfo.listAdvertise();
-		Engine.location('');
+		route.location('');
 	};
 
 	return (
@@ -41,7 +42,7 @@ const ActionBox = () => {
 				<div className='nav_btn' onClick={goHome}>
 					{getLocalizedLabel('c_home')}
 				</div>
-				<div className='nav_btn' onClick={() => dispatch(switchLanguage())}>
+				<div className='nav_btn' onClick={toggleLang}>
 					{getLocalizedLabel('c_language')}
 				</div>
 				<label htmlFor='keyWordSearch' className='visually-hidden'>

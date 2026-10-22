@@ -26,7 +26,11 @@ class Session {
 	}
 
 	get userSignedIn() {
-		return this.#_cookies?.get('userSignedIn') === '1';
+		return this.#_cookies?.get('user_is_signed_in') === '1';
+	}
+
+	signOut() {
+		this.#_cookies?.remove('user_is_signed_in', options);
 	}
 
 	set cookies(cookies: Cookies) {

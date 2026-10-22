@@ -1,28 +1,21 @@
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import { useLocalizationContext } from '../context/localization-context';
 import RootReducer from '../reducer';
-import { Context } from '../context/reference-context';
+import { useReferenceContext } from '../context/reference-context';
 import { InputLabel, SubmitButtons } from './form-fields';
 
 type RootState = ReturnType<typeof RootReducer>;
 
 const AdvertiseContact = () => {
 	const { id, name } = useSelector((state: RootState) => state.BOXES);
-	const getLocalizedLabel = useLocalizedLabel();
-	const { setActionBox } = useContext(Context);
-	const createReference = useCallback(
-		(element: HTMLDivElement | null) => {
-			if (element) {
-				setActionBox(element);
-			}
-		},
-		[setActionBox]
-	);
+	const { getLocalizedLabel } = useLocalizationContext();
+	const { createActionReference } = useReferenceContext();
+
 	const advertiseId = typeof id === 'string' || typeof id === 'number' ? id : undefined;
 
 	return (
-		<div id='ask_poster_box' className='ad_action_box box-in' ref={createReference}>
+		<div id='ask_poster_box' className='ad_action_box box-in' ref={createActionReference}>
 			<div id='ask_poster'>
 				<form name='ask_poster_form'>
 					<div

@@ -2,14 +2,14 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import logo from '../logo.svg';
 import RootReducer from '../reducer';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import { useLocalizationContext } from '../context/localization-context';
 
 type RootState = ReturnType<typeof RootReducer>;
 
 const Loading = () => {
 	const loadingData = useSelector((state: RootState) => state.loadingData);
 	const loadingImagesMessage = useSelector((state: RootState) => state.loadingImagesMessage);
-	const getLocalizedLabel = useLocalizedLabel();
+	const { getLocalizedLabel } = useLocalizationContext();
 
 	if (!loadingData.ISLOADINGDATA) {
 		return null;

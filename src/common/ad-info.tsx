@@ -18,6 +18,7 @@ import {
 } from '../action';
 import { Cache } from './cache';
 import type { Identifier } from '../types/common';
+import { route } from '../utils'
 
 interface ImageItem {
 	i: Identifier;
@@ -131,7 +132,7 @@ const searchSequence = {
 				if (promise.data.angular_ads) {
 					Engine.dispatch(performSearch());
 					Helper.detachActionBox();
-					Helper.location('');
+					route.location('');
 					return {
 						resultSets: {
 							ads: promise.data.angular_ads,
