@@ -4,12 +4,12 @@ import { Button } from 'react-bootstrap';
 import browser from '../image/gui/search-icon.svg';
 import { Engine } from '../common/engine';
 import { Helper } from '../common/js-funcs';
-import { useLocalizedLabel } from '../hook/localization-hook';
-import { UserFunction } from '../user/user-function';
+import { useLocalizationContext } from '../context/localization-context';
 import Menus from './menus';
 import MessageBox from './message-box';
 import LargeImages from './large-images';
 import RootReducer from '../reducer';
+import { useUserFunctions } from '../hook/user-function-hook';
 
 type RootState = ReturnType<typeof RootReducer>;
 
@@ -28,7 +28,8 @@ const Footer = () => {
 			: [],
 		functionFlag: state.messageCenter.functionFlag === true,
 	}));
-	const getLocalizedLabel = useLocalizedLabel();
+	const { getLocalizedLabel } = useLocalizationContext();
+	const { signOut } = useUserFunctions();
 	const off = boxes.box === 'search' ? 'off' : '';
 	const siteMsg = messageCenter.MESSAGEFLAG ? 'site_msg_active' : 'site_msg';
 
@@ -36,7 +37,7 @@ const Footer = () => {
 		<footer>
 			<div className='footer'>
 				{Engine.userSignedIn() ? (
-					<Button bsSize='small' className='custom-button-white' onClick={() => UserFunction.signOut()}>
+					<Button bsSize='small' className='custom-button-white' onClick={signOut}>
 						{getLocalizedLabel('c_sign_out')}
 					</Button>
 				) : (

@@ -1,34 +1,16 @@
-import React, { useCallback, useContext } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import { Helper } from '../common/js-funcs';
-import { useLocalizedLabel } from '../hook/localization-hook';
-import { useSessionContext } from '../context/session-context';
-import RootReducer from '../reducer';
+import { useLocalizationContext } from '../context/localization-context';
 import { InputLabel, SubmitButtons } from './form-fields';
-import { Context } from '../context/reference-context';
-
-type RootState = ReturnType<typeof RootReducer>;
+import { useReferenceContext } from '../context/reference-context';
+import { session } from '../utils'
 
 const FindVisitorAdBox = () => {
-	const boxes = useSelector((state: RootState) => state.BOXES);
-	const getLabel = useLocalizedLabel();
-	const { setActionBox } = useContext(Context);
-	const createReference = useCallback(
-		(element: HTMLDivElement | null) => {
-			if (element) {
-				setActionBox(element);
-			}
-		},
-		[setActionBox]
-	);
-	const { userSignedIn } = useSessionContext();
-
-	if (boxes.box !== 'find_visitor_ad') {
-		return null;
-	}
+	const { getLocalizedLabel: getLabel } = useLocalizationContext();
+	const { createActionReference } = useReferenceContext();
 
 	return (
-		<div id='find_visitor_ad_box' className='ad_action_box box-in' ref={createReference}>
+		<div id='find_visitor_ad_box' className='ad_action_box box-in' ref={createActionReference}>
 			<form name='find_visitor_ad_form'>
 				<div className='account_box_title'>{getLabel('c_visitor_retrieve_title')}</div>
 				<div>
@@ -48,7 +30,7 @@ const FindVisitorAdBox = () => {
 				</div>
 				<div className='account_box_label'>
 					{getLabel('c_retrieve_hint')}
-					{userSignedIn ? (
+					{session.userSignedIn ? (
 						<button
 							type='button'
 							className='action-button'

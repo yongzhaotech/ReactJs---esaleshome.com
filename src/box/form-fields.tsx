@@ -1,10 +1,10 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import RootReducer from '../reducer';
-import { useLocalizedLabel, Label } from '../hook/localization-hook';
+import { useLocalizationContext, Label } from '../context/localization-context';
 import { useForm } from '../hook/form-hook';
 import { Button, ButtonToolbar, Glyphicon } from 'react-bootstrap';
-import { Context } from '../context/reference-context';
+import { useReferenceContext } from '../context/reference-context';
 import { addErrors, setActionBox } from '../action';
 
 type RootState = ReturnType<typeof RootReducer>;
@@ -26,7 +26,7 @@ type ButtonsProps = {
 
 export const InputLabel = ({ fieldLabel, fieldName }: InputLabelProps) => {
 	const errors = useSelector((state: RootState) => state.ERRORS);
-	const getLocalizedLabel = useLocalizedLabel();
+	const { getLocalizedLabel } = useLocalizationContext();
 	const errorLabel = errors[fieldName] as Label;
 
 	if (errorLabel) {
@@ -46,7 +46,7 @@ export const InputLabel = ({ fieldLabel, fieldName }: InputLabelProps) => {
 };
 
 export const ErrorLabel = ({ errorLabel }: ErrorLabelProps) => {
-	const getLocalizedLabel = useLocalizedLabel();
+	const { getLocalizedLabel } = useLocalizationContext();
 	if (errorLabel) {
 		return (
 			<div aria-label='error'>
@@ -63,7 +63,7 @@ const SubmitButton = ({ label, name, post = false }: ButtonsProps) => {
 	const { submitForm } = useForm();
 	const errors = useSelector((state: RootState) => state.ERRORS);
 	const buttonClass = Object.keys(errors).length > 0 ? 'danger' : 'success';
-	const getLabel = useLocalizedLabel();
+	const { getLocalizedLabel: getLabel } = useLocalizationContext();
 	const submit = React.useCallback(() => {
 		submitForm(name, post);
 	}, [name, post, submitForm]);
@@ -76,19 +76,19 @@ const SubmitButton = ({ label, name, post = false }: ButtonsProps) => {
 };
 
 const CancelButton = () => {
-	const { clearActionBox, actionBox } = useContext(Context);
+	const { clearActionBox, actionBox } = useReferenceContext();
 	const dispatch = useDispatch();
 
-	const getLabel = useLocalizedLabel();
+	const { getLocalizedLabel: getLabel } = useLocalizationContext();
 
 	const closeActionBox = React.useCallback(() => {
 		if (actionBox) {
-			actionBox.className = actionBox.className.replace(/box-in/, 'box-out');
+			// actionBox.className = actionBox.className.replace(/box-in/, 'box-out');
 			clearActionBox();
 			setTimeout(() => {
 				dispatch(setActionBox({ box: null }));
 				dispatch(addErrors());
-			}, 1001);
+			}, 0);
 		}
 	}, [clearActionBox, actionBox, dispatch]);
 

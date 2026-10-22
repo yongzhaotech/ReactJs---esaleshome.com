@@ -1,40 +1,28 @@
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { Helper } from '../common/js-funcs';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import { useLocalizationContext } from '../context/localization-context';
 import RootReducer from '../reducer';
-import { InputLabel } from './form-fields';
-import { Context } from '../context/reference-context';
+import { useReferenceContext } from '../context/reference-context';
+import { InputLabel, SubmitButtons } from './form-fields';
 
 type RootState = ReturnType<typeof RootReducer>;
 
 const AdvertiseContact = () => {
-	const box = useSelector((state: RootState) => state.BOXES);
-	const getLocalizedLabel = useLocalizedLabel();
-	const { setActionBox } = useContext(Context);
-	const createReference = useCallback(
-		(element: HTMLDivElement | null) => {
-			setActionBox(element);
-			Helper.setActionBoxReference(element);
-		},
-		[setActionBox]
-	);
+	const { id, name } = useSelector((state: RootState) => state.BOXES);
+	const { getLocalizedLabel } = useLocalizationContext();
+	const { createActionReference } = useReferenceContext();
 
-	if (box.box !== 'ask_poster') {
-		return null;
-	}
-
-	const advertiseId = typeof box.id === 'string' || typeof box.id === 'number' ? box.id : undefined;
+	const advertiseId = typeof id === 'string' || typeof id === 'number' ? id : undefined;
 
 	return (
-		<div id='ask_poster_box' className='ad_action_box box-in' ref={createReference}>
+		<div id='ask_poster_box' className='ad_action_box box-in' ref={createActionReference}>
 			<div id='ask_poster'>
 				<form name='ask_poster_form'>
 					<div
 						style={{ height: '19px', fontStyle: 'oblique', fontWeight: 'bold', color: '#1b0af9' }}
 						id='advertise_name'
 					>
-						{box.name}
+						{name}
 					</div>
 					<div className='account_box_title'>{getLocalizedLabel('c_contact_poster_title')}</div>
 					<div>
@@ -62,7 +50,7 @@ const AdvertiseContact = () => {
 						</div>
 					</div>
 					<div className='account_box_label'>
-						{Helper.submitButtons('c_submit', 'ask_poster_form')}
+						<SubmitButtons label='c_submit' name='ask_poster_form' />
 						<input type='hidden' name='advertise_id' value={advertiseId} />
 					</div>
 				</form>

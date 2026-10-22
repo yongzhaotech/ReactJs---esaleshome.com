@@ -1,34 +1,23 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import AdvertiseContact from './advertise-contact';
-import ContactUs from './contact-us';
-import EmailFriendBox from './email-friend-box';
-import FindVisitorAdBox from './find-visitor-ad-box';
-import ForgetPasswordBox from './forget-password-box';
-import LoginBox from './login-box';
-import Register from './register';
-import SearchBox from './search-box';
 import { Helper } from '../common/js-funcs';
 import { Engine } from '../common/engine';
 import { AdInfo } from '../common/ad-info';
-import { useLocalizedLabel } from '../hook/localization-hook';
-import { switchLanguage, keyWordSearch } from '../action';
+import { useLocalizationContext } from '../context/localization-context';
+import { keyWordSearch } from '../action';
 import RootReducer from '../reducer';
-import { Context } from '../context/session-context';
+import { Boxes } from './boxes';
+import { route } from '../utils';
 
 type RootState = ReturnType<typeof RootReducer>;
 
 const ActionBox = () => {
-	const { toggleLang } = useContext(Context) || {};
 	const boxState = useSelector((state: RootState) => state.BOXES);
-	const boxes = {
-		box: typeof boxState.box === 'string' ? boxState.box : '',
-		name: typeof boxState.name === 'string' ? boxState.name : undefined,
-		id: typeof boxState.id === 'string' || typeof boxState.id === 'number' ? boxState.id : undefined,
-	};
+	const box = typeof boxState.box === 'string' ? boxState.box : '';
+	const Box = Boxes[box];
 	const menusOpen = useSelector((state: RootState) => state.MENUS);
 	const dispatch = useDispatch();
-	const getLocalizedLabel = useLocalizedLabel();
+	const { toggleLang, getLocalizedLabel } = useLocalizationContext();
 
 	useEffect(() => {
 		Engine.registerMenuItems();
@@ -36,7 +25,7 @@ const ActionBox = () => {
 
 	const goHome = () => {
 		AdInfo.listAdvertise();
-		Helper.location('');
+		route.location('');
 	};
 
 	return (
@@ -53,13 +42,7 @@ const ActionBox = () => {
 				<div className='nav_btn' onClick={goHome}>
 					{getLocalizedLabel('c_home')}
 				</div>
-				<div
-					className='nav_btn'
-					onClick={() => {
-						toggleLang();
-						// dispatch(switchLanguage());
-					}}
-				>
+				<div className='nav_btn' onClick={toggleLang}>
 					{getLocalizedLabel('c_language')}
 				</div>
 				<label htmlFor='keyWordSearch' className='visually-hidden'>
@@ -74,16 +57,11 @@ const ActionBox = () => {
 						dispatch(keyWordSearch(event.target.value))
 					}
 				/>
-				<div className='ad_action_box_wrapper'>
-					<AdvertiseContact />
-					<ContactUs />
-					<EmailFriendBox />
-					<FindVisitorAdBox />
-					<ForgetPasswordBox />
-					<LoginBox />
-					<Register />
-					{Engine.component(SearchBox, { BOXES: boxes })}
-				</div>
+				{Box && (
+					<div className='ad_action_box_wrapper'>
+						<Box />
+					</div>
+				)}
 			</nav>
 		</nav>
 	);

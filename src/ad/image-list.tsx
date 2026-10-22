@@ -4,13 +4,13 @@ import { AdFuncs } from '../common/ad-funcs';
 import { smallImageSrc } from '../common/config';
 import { Helper } from '../common/js-funcs';
 import RootReducer from '../reducer';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import { useLocalizationContext } from '../context/localization-context';
 
 type RootState = ReturnType<typeof RootReducer>;
 
 const ImageList = () => {
 	const models = useSelector((state: RootState) => state.MODELS);
-	const getLocalizedLabel = useLocalizedLabel();
+	const { getLocalizedLabel } = useLocalizationContext();
 	const numbers: number[] = Array.isArray(models.images)
 		? models.images.filter((count): count is number => typeof count === 'number')
 		: [];

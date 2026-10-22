@@ -1,33 +1,21 @@
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { useLocalizedLabel } from '../hook/localization-hook';
 import RootReducer from '../reducer';
 import { InputLabel, SubmitButtons } from './form-fields';
-import { Context } from '../context/reference-context';
+import { useReferenceContext } from '../context/reference-context';
+import { useLocalizationContext } from '../context/localization-context';
 
 type RootState = ReturnType<typeof RootReducer>;
 
 const EmailFriendBox = () => {
 	const boxes = useSelector((state: RootState) => state.BOXES);
-	const getLocalizedLabel = useLocalizedLabel();
-	const { setActionBox } = useContext(Context);
-	const createReference = useCallback(
-		(element: HTMLDivElement | null) => {
-			if (element) {
-				setActionBox(element);
-			}
-		},
-		[setActionBox]
-	);
-
-	if (boxes.box !== 'email_friend') {
-		return null;
-	}
+	const { getLocalizedLabel } = useLocalizationContext();
+	const { createActionReference } = useReferenceContext();
 
 	const advertiseId = typeof boxes.id === 'string' || typeof boxes.id === 'number' ? boxes.id : undefined;
 
 	return (
-		<div id='email_friend_box' className='ad_action_box box-in' ref={createReference}>
+		<div id='email_friend_box' className='ad_action_box box-in' ref={createActionReference}>
 			<form name='email_friend_form'>
 				<div>
 					<div className='account_box_title'>{getLocalizedLabel('c_email_friend_link')}</div>

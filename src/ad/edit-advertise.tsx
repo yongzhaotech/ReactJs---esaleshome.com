@@ -18,6 +18,7 @@ import {
 	fetchUserAdvertise,
 	clearStateModelData
 } from '../action';
+import { route } from '../utils';
 
 interface UserAdvertise {
 	id: string | number;
@@ -50,7 +51,9 @@ interface EditAdvertiseReduxState {
 
 class EditAdvertise extends Component<EditAdvertiseProps> {
 	componentDidMount() {
-		const advertiseId = Engine.param('advertiseId') || null;
+		const advertiseId = route.param('advertiseId') || null;
+
+		console.log('advertiseId===', advertiseId)
 
 		AdFuncs.initOtherItems();
 

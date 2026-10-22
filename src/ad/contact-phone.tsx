@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { AdFuncs } from '../common/ad-funcs';
 import RootReducer from '../reducer';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import { useLocalizationContext } from '../context/localization-context';
 import { ErrorLabel } from '../box/form-fields';
 
 type RootState = ReturnType<typeof RootReducer>;
@@ -10,7 +10,7 @@ type RootState = ReturnType<typeof RootReducer>;
 const ContactPhone = () => {
 	const models = useSelector((state: RootState) => state.MODELS);
 	const postErrors = useSelector((state: RootState) => state.POSTERRORS);
-	const getLocalizedLabel = useLocalizedLabel();
+	const { getLocalizedLabel } = useLocalizationContext();
 	const contactMethods = models.contactMethods;
 	const phone =
 		contactMethods && typeof contactMethods === 'object' && 'contact_phone' in contactMethods

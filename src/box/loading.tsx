@@ -2,14 +2,14 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import logo from '../logo.svg';
 import RootReducer from '../reducer';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import { useLocalizationContext } from '../context/localization-context';
 
 type RootState = ReturnType<typeof RootReducer>;
 
 const Loading = () => {
 	const loadingData = useSelector((state: RootState) => state.loadingData);
 	const loadingImagesMessage = useSelector((state: RootState) => state.loadingImagesMessage);
-	const getLocalizedLabel = useLocalizedLabel();
+	const { getLocalizedLabel } = useLocalizationContext();
 
 	if (!loadingData.ISLOADINGDATA) {
 		return null;
@@ -21,18 +21,14 @@ const Loading = () => {
 		<section className='loading'>
 			<div className={className}>
 				<div>
-					{loadingData.HIDELOADINGTITLE ? null : (
+					{!loadingData.HIDELOADINGTITLE && (
 						<>
 							<div>{getLocalizedLabel('loading_data')}</div>
 							<div className='devider'></div>
 						</>
 					)}
 				</div>
-				{loadingImagesMessage ? (
-					<div>
-						{getLocalizedLabel('loading_large_image')}: {loadingImagesMessage}
-					</div>
-				) : null}
+				{loadingImagesMessage && `${getLocalizedLabel('loading_large_image')}: ${loadingImagesMessage}`}
 				<img className='rotate-on' alt='' src={logo} height='65' />
 			</div>
 		</section>

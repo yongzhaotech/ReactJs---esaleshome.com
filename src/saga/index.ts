@@ -8,7 +8,8 @@ import { smallImageSrc } from '../common/config';
 import { submitFormData } from '../common/form-process';
 import { ApiResponse, routes } from '../common/http-client';
 import { Cache } from '../common/cache';
-import { Engine } from '../common/engine';
+import { route } from '../utils';
+import { signOut } from '../hook/user-function-hook';
 
 type TypedSaga = Generator<unknown, void, any>;
 interface UserDataFetchArg {
@@ -192,7 +193,7 @@ function* sendFormData(action: AnyAction): TypedSaga {
 		const { data }: ApiResponse = yield call(submitFormData, formName, post);
 
 		if (data.sessionExpire) {
-			Engine.location('user-account');
+			route.location('user-account');
 		} else if (data.error) {
 			yield put(Action.messageCenter(Action.ADD_MESSAGE, data.error, true));
 		} else {
@@ -202,7 +203,7 @@ function* sendFormData(action: AnyAction): TypedSaga {
 				if (data.load) {
 					Cache.clear();
 					yield put(Action.messageCenter(Action.CLEAR_MESSAGE));
-					Engine.location(`ad-detail/${data.load}`);
+					route.location(`ad-detail/${data.load}`);
 				}
 			} else {
 				yield put(Action.setActionBox({ box: null }));
@@ -211,7 +212,7 @@ function* sendFormData(action: AnyAction): TypedSaga {
 					if (data.user) {
 						yield put(Action.fetchUserData([{ dataKey: 'profile' }]));
 					}
-					Engine.location(routes[formName]['page']);
+					route.location(routes[formName]['page']);
 				}
 			}
 
@@ -222,6 +223,20 @@ function* sendFormData(action: AnyAction): TypedSaga {
 	} catch (error) {
 		yield put(Action.messageCenter(Action.ADD_MESSAGE, error, true));
 		yield put(Action.loadingData());
+	}
+}
+
+function* signUserOut(): TypedSaga {
+	try {
+		const { data }: ApiResponse = yield call(signOut);
+		if (data.ok) {
+			yield put(Action.fetchUserDataSuccess([{ profile: null }, { ads: null }]));
+			yield put(Action.userSignedOut());
+		} else {
+			yield put(Action.messageCenter(Action.ADD_MESSAGE, data, true));
+		}
+	} catch (error) {
+		yield put(Action.messageCenter(Action.ADD_MESSAGE, error, true));
 	}
 }
 
@@ -240,5 +255,6 @@ export default function* RootSaga(): TypedSaga {
 		takeLatest(Action.VIEW_LARGE_IMAGES, viewLargeImages),
 		takeEvery(Action.FETCH_USER_DATA, fetchUserData),
 		takeEvery(Action.SEND_FORM_DATA, sendFormData),
+		takeEvery(Action.SIGN_OUT, signUserOut),
 	]);
 }

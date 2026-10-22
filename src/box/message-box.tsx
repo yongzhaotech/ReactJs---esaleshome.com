@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Pager } from 'react-bootstrap';
 import { Helper } from '../common/js-funcs';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import { useLocalizationContext } from '../context/localization-context';
 
 interface MessageCenter {
 	MESSAGEFLAG: string;
@@ -15,7 +15,7 @@ interface MessageBoxProps {
 
 const MessageBox = ({ messageCenter }: MessageBoxProps) => {
 	const closeButtonReference = useRef<HTMLDivElement | null>(null);
-	const getLocalizedLabel = useLocalizedLabel();
+	const { getLocalizedLabel } = useLocalizationContext();
 	const createReference = useCallback((element: HTMLDivElement | null) => {
 		Helper.setMessageBoxReference(element);
 	}, []);

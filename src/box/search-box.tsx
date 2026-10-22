@@ -1,10 +1,5 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import {
-	Button,
-	ButtonToolbar
-} from 'react-bootstrap';
-import { getLabel } from '../common/label';
+import React from 'react';
+import { Button, ButtonToolbar } from 'react-bootstrap';
 import { Helper } from '../common/js-funcs';
 import { Engine } from '../common/engine';
 import CategoryList from '../ad/category-list';
@@ -13,67 +8,49 @@ import ProvinceList from '../ad/province-list';
 import CityList from '../ad/city-list';
 import { changeAdKeyword, searchAdvertise } from '../action';
 import type { SearchMode } from '../types/ad';
+import { useSelector } from 'react-redux';
+import RootReducer from '../reducer';
+import { useLocalizationContext } from '../context/localization-context';
+import { useReferenceContext } from '../context/reference-context';
 
-interface SearchBoxProps {
-	BOXES: {
-		box: string;
-	};
-	MODELS: Record<string, any>;
-}
+type RootState = ReturnType<typeof RootReducer>;
 
-interface SearchBoxState {
-	MODELS: Record<string, any>;
-}
+const SearchBox = () => {
+	const MODELS = useSelector((state: RootState) => state.MODELS);
 
-const SearchBox = class extends Component<SearchBoxProps> {
-	private actionBoxReference: HTMLDivElement | null = null;
+	const { getLocalizedLabel } = useLocalizationContext();
+	const { createActionReference,  } = useReferenceContext();
 
-	private createReference = (element: HTMLDivElement | null): void => {
-		this.actionBoxReference = element;
-		Helper.setActionBoxReference(this.actionBoxReference);
-	};
+	const SEARCH: SearchMode = 'Search';
 
-    render() {
-		if(this.props.BOXES.box !== 'search') {
-			return null;
-		}
-		const SEARCH: SearchMode = 'Search';
-		let
-			MODELS = this.props.MODELS;
-
-		return (
-			<div id="search_box" className="ad_action_box box-in" ref = {this.createReference}>
-				<form name="search_advertise"> 
-					<div className="account_box_title">{getLabel('c_search_title')}</div>
-					<div className="account_box_field">
-						{Engine.component(CategoryList, {SEARCH})}
-					</div>
-					<div className="account_box_field">
-						{Engine.component(ItemList, {SEARCH})}
-					</div>
-					<div className="account_box_field">
-						{Engine.component(ProvinceList, {SEARCH})}
-					</div>
-					<div className="account_box_field">
-						{Engine.component(CityList, {SEARCH})}
-					</div>
-					<div className="account_box_field">
-						<input type="text" name="ad_keyword" defaultValue={MODELS['adKeyword']}
-							   onChange={(e) => Engine.dispatch(changeAdKeyword(e.target.value))}
-							   placeholder={getLabel('c_keyword_placeholder')} />
-					</div>
-					<div className="account_box_label">
-						<ButtonToolbar>
-							<Button bsStyle='success' bsSize='small' onClick={() => Engine.dispatch(searchAdvertise()) }>{getLabel('c_search_btn')}</Button>
-							{Helper.cancelButton()}
-						</ButtonToolbar>
-					</div>
-				</form>
-			</div>
-		);
-	};
+	return (
+		<div id='search_box' className='ad_action_box box-in' ref={createActionReference}>
+			<form name='search_advertise'>
+				<div className='account_box_title'>{getLocalizedLabel('c_search_title')}</div>
+				<div className='account_box_field'>{Engine.component(CategoryList, { SEARCH })}</div>
+				<div className='account_box_field'>{Engine.component(ItemList, { SEARCH })}</div>
+				<div className='account_box_field'>{Engine.component(ProvinceList, { SEARCH })}</div>
+				<div className='account_box_field'>{Engine.component(CityList, { SEARCH })}</div>
+				<div className='account_box_field'>
+					<input
+						type='text'
+						name='ad_keyword'
+						defaultValue={MODELS['adKeyword'] as string}
+						onChange={(e) => Engine.dispatch(changeAdKeyword(e.target.value))}
+						placeholder={getLocalizedLabel('c_keyword_placeholder')}
+					/>
+				</div>
+				<div className='account_box_label'>
+					<ButtonToolbar>
+						<Button bsStyle='success' bsSize='small' onClick={() => Engine.dispatch(searchAdvertise())}>
+							{getLocalizedLabel('c_search_btn')}
+						</Button>
+						{Helper.cancelButton()}
+					</ButtonToolbar>
+				</div>
+			</form>
+		</div>
+	);
 };
 
-export default connect((state: SearchBoxState) => ({
-	MODELS: state.MODELS
-}))(SearchBox);
+export default SearchBox;

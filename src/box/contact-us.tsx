@@ -1,31 +1,14 @@
-import React, { useCallback, useContext } from 'react';
-import { useSelector } from 'react-redux';
-import RootReducer from '../reducer';
-import { useLocalizedLabel } from '../hook/localization-hook';
+import React from 'react';
 import { InputLabel, SubmitButtons } from './form-fields';
-import { Context } from '../context/reference-context';
-
-type RootState = ReturnType<typeof RootReducer>;
+import { useReferenceContext } from '../context/reference-context';
+import { useLocalizationContext } from '../context/localization-context';
 
 const ContactUs = () => {
-	const { setActionBox } = useContext(Context);
-	const box = useSelector((state: RootState) => state.BOXES.box);
-	const getLocalizedLabel = useLocalizedLabel();
-	const createReference = useCallback(
-		(element: HTMLDivElement | null) => {
-			if (element) {
-				setActionBox(element);
-			}
-		},
-		[setActionBox]
-	);
-
-	if (box !== 'contact_us') {
-		return null;
-	}
+	const { getLocalizedLabel } = useLocalizationContext();
+	const { createActionReference } = useReferenceContext();
 
 	return (
-		<div id='contact_us_box' className='ad_action_box box-in' ref={createReference}>
+		<div id='contact_us_box' className='ad_action_box box-in' ref={createActionReference}>
 			<form name='contact_us_form'>
 				<div className='account_box_title'>{getLocalizedLabel('c_contact_us')}</div>
 				<div className='register_name_field'>
