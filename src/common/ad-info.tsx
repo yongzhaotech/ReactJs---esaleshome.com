@@ -16,9 +16,8 @@ import {
 	loadingLargeImageCount,
 	viewLargeImages,
 } from '../action';
-import { Cache } from './cache';
 import type { Identifier } from '../types/common';
-import { route } from '../utils'
+import { route, Cache } from '../utils'
 
 interface ImageItem {
 	i: Identifier;

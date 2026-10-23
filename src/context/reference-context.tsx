@@ -1,12 +1,13 @@
 import React, { createContext, useMemo, useCallback, useContext } from 'react';
 
+type CreateReference = (element: HTMLElement | null) => void;
+
 type ContextType = {
 	actionBox: HTMLElement | null;
 	menuBox: HTMLElement | null;
 	messageBox: HTMLElement | null;
-	createActionReference: (element: HTMLElement | null) => void;
-	setMenuBox: (element: HTMLElement | null) => void;
-	setMessageBox: (element: HTMLElement | null) => void;
+	createActionReference: CreateReference;
+	createMessageReference: CreateReference;
 	clearActionBox: () => void;
 	clearMenuBox: () => void;
 	clearMessageBox: () => void;
@@ -16,19 +17,7 @@ type ReferenceContextProviderProps = {
 	children: React.ReactNode;
 };
 
-const initialContext: ContextType = {
-	actionBox: null,
-	menuBox: null,
-	messageBox: null,
-	createActionReference: () => {},
-	setMenuBox: () => {},
-	setMessageBox: () => {},
-	clearActionBox: () => {},
-	clearMenuBox: () => {},
-	clearMessageBox: () => {},
-};
-
-export const Context = createContext<ContextType>(initialContext);
+export const Context = createContext<ContextType | null>(null);
 
 export const ReferenceContext = ({ children }: ReferenceContextProviderProps) => {
 	const [actionBox, setActionBox] = React.useState<HTMLElement | null>(null);
@@ -45,19 +34,33 @@ export const ReferenceContext = ({ children }: ReferenceContextProviderProps) =>
 		}
 	}, []);
 
+	const createMessageReference = useCallback((element: HTMLElement | null) => {
+		if (element) {
+			setMessageBox(element);
+		}
+	}, []);
+
 	const value = useMemo(
 		() => ({
 			actionBox,
 			menuBox,
 			messageBox,
 			createActionReference,
-			setMenuBox,
-			setMessageBox,
+			createMessageReference,
 			clearActionBox,
 			clearMenuBox,
 			clearMessageBox,
 		}),
-		[actionBox, menuBox, messageBox, clearActionBox, clearMenuBox, clearMessageBox, createActionReference]
+		[
+			actionBox,
+			menuBox,
+			messageBox,
+			clearActionBox,
+			clearMenuBox,
+			clearMessageBox,
+			createActionReference,
+			createMessageReference,
+		]
 	);
 
 	return <Context.Provider value={value}>{children}</Context.Provider>;
@@ -66,7 +69,7 @@ export const ReferenceContext = ({ children }: ReferenceContextProviderProps) =>
 export const useReferenceContext = () => {
 	const context = useContext(Context);
 	if (!context) {
-		throw new Error('useReferenceContext must be used within a SessionContextProvider');
+		throw new Error('useReferenceContext must be used within a ReferenceContext Provider');
 	}
 	return context;
 };

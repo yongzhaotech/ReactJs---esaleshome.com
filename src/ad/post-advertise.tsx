@@ -1,11 +1,10 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { AnyAction, Dispatch } from 'redux';
-import { Button	} from 'react-bootstrap';
-import { getLabel } from '../common/label';
-import { AdFuncs} from '../common/ad-funcs';
+import React, { useCallback, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import RootReducer from '../reducer';
+import { session, route } from '../utils';
+import { useLocalizationContext } from '../context/localization-context';
+import { AdFuncs } from '../common/ad-funcs';
 import { Helper } from '../common/js-funcs';
-import { Engine } from '../common/engine';
 import ImageList from './image-list';
 import ContactPhone from './contact-phone';
 import ContactEmail from './contact-email';
@@ -14,231 +13,322 @@ import CityList from './city-list';
 import CategoryList from './category-list';
 import ItemList from './item-list';
 import { clearStateModelData, clearPostErrors } from '../action';
+import { SubmitButton, ErrorLabel } from '../box/form-fields';
+import { useFunctions } from '../hook/ad-function-hook';
 
-interface PostAdvertiseProps {
-	POSTERRORS: Record<string, string | undefined>;
-	USERSIGNEDIN: boolean;
-	MODELS: Record<string, any>;
-	LANGUAGE: 'en' | 'cn';
-	dispatch: Dispatch<AnyAction>;
-}
+type RootState = ReturnType<typeof RootReducer>;
 
-interface PostAdvertiseState {
-	POSTERRORS: Record<string, string | undefined>;
-	MODELS: Record<string, any>;
-	language: 'en' | 'cn';
-}
+const PostAdvertise = () => {
+	const dispatch = useDispatch();
+	const POSTERRORS = useSelector((state: RootState) => state.POSTERRORS) as Record<string, string | undefined>;
+	const MODELS = useSelector((state: RootState) => state.MODELS) as Record<string, any>;
+	const { getLocalizedLabel: getLabel } = useLocalizationContext();
+	const {
+		itemIsFree,
+		itemIsNotFree,
+		setItemFree,
+		setItemNotFree,
+		setCurrency,
+		maximumImagesNumberReached,
+		addImage,
+	} = useFunctions();
 
-class PostAdvertise extends Component<PostAdvertiseProps> {
-	componentWillUnmount() {
-		this.props.dispatch(clearStateModelData());
-		this.props.dispatch(clearPostErrors());
-	}
-	
-	render() {
-		const { POSTERRORS, USERSIGNEDIN, MODELS } = this.props;
-		
-		Helper.title(getLabel('p_post_title'));
+	useEffect(() => {
+		dispatch(clearStateModelData());
+		dispatch(clearPostErrors());
+	}, [dispatch]);
 
-        return (
-			<form name="work_on_advertise" action="post-ad" encType="multipart/form-data">
-				<div className="ad_inline_block"><div className="ad_box_title">{getLabel('p_post_title')}<div className="ang_close icon_list" onClick={Helper.goBack}>&times;</div></div></div><div className="ad_inline_block_top"></div>
-				<div className="ad_inline_block">
-					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_cat_title')}</div></div>
-					<div className="ad_box_field">
-						{Helper.errorLabel(POSTERRORS.category)}
-						{Engine.component(CategoryList)}
+	const onClick = useCallback(() => {
+		route.goBack();
+	}, []);
+
+	Helper.title(getLabel('p_post_title'));
+
+	console.log(MODELS);
+
+	return (
+		<form name='work_on_advertise' action='post-ad' encType='multipart/form-data'>
+			<div className='ad_inline_block'>
+				<div className='ad_box_title'>
+					{getLabel('p_post_title')}
+					<div className='ang_close icon_list' onClick={onClick}>
+						&times;
 					</div>
-				</div><div className="ad_inline_block_top">
-					<div className="ad_box_field">
-						<div className="post_hints">
-							{getLabel('p_cat_hint')}
+				</div>
+			</div>
+			<div className='ad_inline_block_top'></div>
+			<div className='ad_inline_block'>
+				<div className='ad_box_field'>
+					<div className='ad_box_label'>{getLabel('p_cat_title')}</div>
+				</div>
+				<div className='ad_box_field'>
+					<ErrorLabel errorLabel={POSTERRORS.category} />
+					<CategoryList />
+				</div>
+			</div>
+			<div className='ad_inline_block_top'>
+				<div className='ad_box_field'>
+					<div className='post_hints'>{getLabel('p_cat_hint')}</div>
+				</div>
+			</div>
+			<div className='ad_inline_block'>
+				<div className='ad_box_field'>
+					<div className='ad_box_label'>{getLabel('p_sub_cat_title')}</div>
+				</div>
+				<div className='ad_box_field'>
+					<ErrorLabel errorLabel={POSTERRORS.item} />
+					<ItemList />
+				</div>
+			</div>
+			<div className='ad_inline_block_top'>
+				<div className='ad_box_field'>
+					<div className='post_hints'>{getLabel('p_sub_cat_hint')}</div>
+				</div>
+			</div>
+			<div className='ad_inline_block'>
+				<div className='ad_box_field'>
+					<div className='ad_box_label'>{getLabel('p_name_title')}</div>
+				</div>
+				<div className='ad_box_field'>
+					<ErrorLabel errorLabel={POSTERRORS.ad_name} />
+					<input type='text' name='ad_name' maxLength={100} placeholder={getLabel('p_ad_name_placeholder')} />
+				</div>
+			</div>
+			<div className='ad_inline_block_top'>
+				<div className='ad_box_field'>
+					<div className='post_hints'>{getLabel('p_ad_name_hint')}</div>
+				</div>
+			</div>
+			<div className='ad_inline_block'>
+				<div className='ad_box_field'>
+					<div className='ad_box_label'>{getLabel('p_free_title')}</div>
+				</div>
+				<div className='ad_box_field'>
+					<ErrorLabel errorLabel={POSTERRORS.is_free} />
+					<nav className='btn_list'>
+						<button className={`tab ${itemIsFree ? 'active' : ''}`} onClick={setItemFree}>
+							{getLabel('p_yes_title')}
+						</button>
+						<button className={`tab ${itemIsNotFree ? 'active' : ''}`} onClick={setItemNotFree}>
+							{getLabel('p_no_title')}
+						</button>
+					</nav>
+					<input type='hidden' name='is_free' defaultValue={MODELS['is_free']} />
+				</div>
+			</div>
+			<div className='ad_inline_block_top'>
+				<div className='ad_box_field'>
+					<div className='post_hints'></div>
+				</div>
+			</div>
+			{itemIsNotFree ? (
+				<div id='price_row'>
+					<div className='ad_inline_block'>
+						<div className='ad_box_field'>
+							<div className='ad_box_label'>{getLabel('p_currency_title')}</div>
+						</div>
+						<div className='ad_box_field'>
+							<ErrorLabel errorLabel={POSTERRORS.currency} />
+							<nav className='btn_list'>
+								<button
+									className={`tab ${MODELS['currency'] === 'c' ? 'active' : ''}`}
+									data-value='c'
+									onClick={setCurrency}
+								>
+									{getLabel('p_can_dollar')}
+								</button>
+								<button
+									className={`tab ${MODELS['currency'] === 'u' ? 'active' : ''}`}
+									data-value='u'
+									onClick={setCurrency}
+								>
+									{getLabel('p_us_dollar')}
+								</button>
+								<button
+									className={`tab ${MODELS['currency'] === 'r' ? 'active' : ''}`}
+									data-value='r'
+									onClick={setCurrency}
+								>
+									{getLabel('p_rmb_yuan')}
+								</button>
+							</nav>
+							<input type='hidden' name='currency' defaultValue={MODELS['currency']} />
+						</div>
+					</div>
+					<div className='ad_inline_block_top'>
+						<div className='ad_box_field'>
+							<div className='currency_hints'></div>
+						</div>
+					</div>
+					<div className='ad_inline_block'>
+						<div className='ad_box_field'>
+							<div className='ad_box_label'>{getLabel('p_price_title')}</div>
+						</div>
+						<div className='ad_box_field'>
+							<ErrorLabel errorLabel={POSTERRORS.price} />
+							<input type='text' name='price' maxLength={15} />
+						</div>
+					</div>
+					<div className='ad_inline_block_top'>
+						<div className='ad_box_field'>
+							<div className='post_hints'>{getLabel('p_price_hint')}</div>
 						</div>
 					</div>
 				</div>
-				<div className="ad_inline_block">
-					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_sub_cat_title')}</div></div>
-					<div className="ad_box_field">
-						{Helper.errorLabel(POSTERRORS.item)}
-						{Engine.component(ItemList)}
-					</div>
-				</div><div className="ad_inline_block_top">
-					<div className="ad_box_field">
-						<div className="post_hints">
-							{getLabel('p_sub_cat_hint')}
-						</div>
+			) : null}
+			<div className='ad_inline_block'>
+				<div className='ad_box_field'>
+					<div className='ad_box_label'>{getLabel('p_detail_title')}</div>
+				</div>
+				<div className='ad_box_field'>
+					<textarea
+						name='description'
+						rows={4}
+						cols={100}
+						placeholder={getLabel('p_detail_placeholder')}
+					></textarea>
+				</div>
+			</div>
+			<div className='ad_inline_block_top'>
+				<div className='ad_box_field'>
+					<div className='post_hints'>{getLabel('p_detail_hint')}</div>
+				</div>
+			</div>
+			<div className='ad_inline_block'>
+				<div className='ad_box_field'>
+					{maximumImagesNumberReached ? (
+						<button
+							className='tab inactive'
+							onClick={(e) => {
+								e.preventDefault();
+							}}
+						>
+							{getLabel('r_add_photos')}
+						</button>
+					) : (
+						<button className='tab' onClick={addImage}>
+							{getLabel('r_add_photos')}
+						</button>
+					)}
+				</div>
+				<ImageList />
+			</div>
+			<div className='ad_inline_block_top'>
+				<div className='ad_box_field'>
+					<div className='post_hints'>{getLabel('p_add_photo_hint')}</div>
+				</div>
+			</div>
+			<div>
+				<div className='ad_box_sub_title'>{getLabel('p_contact_title')}</div>
+			</div>
+			<div className='ad_inline_block'>
+				<div className='ad_box_field'>
+					<div className='ad_box_label'>{getLabel('p_contact_you_title')}</div>
+				</div>
+				<div className='ad_box_field_'>
+					<ErrorLabel errorLabel={POSTERRORS.contact_method} />
+					<nav className='btn_list'>
+						<button
+							className={`tab ${AdFuncs.isContactMethod('contact_phone') ? 'active' : ''}`}
+							onClick={(e) => {
+								e.preventDefault();
+								AdFuncs.setContactMethod('contact_phone');
+							}}
+						>
+							{getLabel('p_phone')}
+						</button>
+						{session.userSignedIn ? (
+							<button
+								className={`tab ${AdFuncs.isContactMethod('contact_email') ? 'active' : ''}`}
+								aria-label='contact-email-tab'
+								onClick={(e) => {
+									e.preventDefault();
+									AdFuncs.setContactMethod('contact_email');
+								}}
+							>
+								{getLabel('p_email')}
+							</button>
+						) : (
+							<button
+								className={`tab ${AdFuncs.isContactMethod('email') ? 'active' : ''}`}
+								aria-label='email-tab'
+								onClick={(e) => {
+									e.preventDefault();
+									AdFuncs.setContactMethod('email');
+								}}
+							>
+								{getLabel('p_email')}
+							</button>
+						)}
+					</nav>
+					<input type='hidden' name='contact_method' value={AdFuncs.contactMethod()} />
+				</div>
+			</div>
+			<div className='ad_inline_block_top'>
+				<div className='ad_box_field'>
+					<div className='post_hints'>
+						{getLabel('p_select_phone_hint')}.
+						{session.userSignedIn ? (
+							<section>{getLabel('p_contact_you_hint_1')}</section>
+						) : (
+							<section>{getLabel('p_contact_you_hint_2')}</section>
+						)}
 					</div>
 				</div>
-				<div className="ad_inline_block">
-					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_name_title')}</div></div>
-					<div className="ad_box_field">
-						{Helper.errorLabel(POSTERRORS.ad_name)}
-						<input type="text" name="ad_name" maxLength={100} placeholder={getLabel('p_ad_name_placeholder')} />
-					</div>
-				</div><div className="ad_inline_block_top">
-					<div className="ad_box_field">
-						<div className="post_hints">
-							{getLabel('p_ad_name_hint')}	
-						</div>
-					</div>
-				</div>
-				<div className="ad_inline_block">
-					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_free_title')}</div></div>
-					<div className="ad_box_field">
-						{Helper.errorLabel(POSTERRORS.is_free)}
-						<nav className="btn_list">
-							<button className={`tab ${AdFuncs.itemIsFree() ? 'active' : ''}`} onClick={e => {e.preventDefault(); AdFuncs.adIsFree()}}>{getLabel('p_yes_title')}</button>
-							<button className={`tab ${AdFuncs.itemIsNotFree() ? 'active' : ''}`} onClick={e => {e.preventDefault(); AdFuncs.adNotFree()}}>{getLabel('p_no_title')}</button>
-						</nav>
-						<input type="hidden" name="is_free" defaultValue={MODELS['is_free']} />
-					</div>
-				</div><div className="ad_inline_block_top">
-					<div className="ad_box_field">
-						<div className="post_hints">
-						</div>
-					</div>
-				</div>
-				{AdFuncs.itemIsNotFree() ?
-					(<div id="price_row">
-						<div className="ad_inline_block">
-							<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_currency_title')}</div></div>
-							<div className="ad_box_field">
-								{Helper.errorLabel(POSTERRORS.currency)}
-								<nav className="btn_list">
-									<button className={`tab ${MODELS['currency'] === 'c' ? 'active' : ''}`} onClick={(e) => {e.preventDefault(); AdFuncs.setCurrency('c')}}>{getLabel('p_can_dollar')}</button>
-									<button className={`tab ${MODELS['currency'] === 'u' ? 'active' : ''}`} onClick={(e) => {e.preventDefault(); AdFuncs.setCurrency('u')}}>{getLabel('p_us_dollar')}</button>
-									<button className={`tab ${MODELS['currency'] === 'r' ? 'active' : ''}`} onClick={(e) => {e.preventDefault(); AdFuncs.setCurrency('r')}}>{getLabel('p_rmb_yuan')}</button>
-								</nav>
-								<input type="hidden" name="currency" defaultValue={MODELS['currency']} />
-							</div>
-						</div><div className="ad_inline_block_top">
-							<div className="ad_box_field">
-								<div className="currency_hints">
-								</div>
-							</div>
-						</div>
-						<div className="ad_inline_block">
-							<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_price_title')}</div></div>
-							<div className="ad_box_field">
-								{Helper.errorLabel(POSTERRORS.price)}
-								<input type="text" name="price" maxLength={15} />
-							</div>
-						</div><div className="ad_inline_block_top">
-							<div className="ad_box_field">
-								<div className="post_hints">
-									{getLabel('p_price_hint')}
-								</div>
-							</div>
-						</div>
-					</div>) : null}
-				<div className="ad_inline_block">
-					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_detail_title')}</div></div>
-					<div className="ad_box_field"><textarea name="description" rows={4} cols={100} placeholder={getLabel('p_detail_placeholder')}></textarea></div>
-				</div><div className="ad_inline_block_top">
-					<div className="ad_box_field">
-						<div className="post_hints">
-							{getLabel('p_detail_hint')}
-						</div>
-					</div>
-				</div>
-				<div className="ad_inline_block">
-					<div className="ad_box_field">
-					{
-						AdFuncs.adImageFull() ? 
-						(<button className="tab inactive" onClick={e => {e.preventDefault()}}>{getLabel('r_add_photos')}</button>) :
-						(<button className="tab" onClick={e => {e.preventDefault(); AdFuncs.addAdImage()}}>{getLabel('r_add_photos')}</button>)
-					}
-					</div>
-					{Engine.component(ImageList)}
-				</div><div className="ad_inline_block_top">
-					<div className="ad_box_field">
-						<div className="post_hints">
-							{getLabel('p_add_photo_hint')}
-						</div>
-					</div>
-				</div>
-			<div><div className="ad_box_sub_title">{getLabel('p_contact_title')}</div></div>
-				<div className="ad_inline_block">
-					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_contact_you_title')}</div></div>
-					<div className="ad_box_field_">
-						{Helper.errorLabel(POSTERRORS.contact_method)}
-						<nav className="btn_list">
-							<button className={`tab ${AdFuncs.isContactMethod('contact_phone') ? 'active' : ''}`} onClick={(e) => {e.preventDefault(); AdFuncs.setContactMethod('contact_phone')}}>{getLabel('p_phone')}</button>
-							{
-								USERSIGNEDIN ? 
-								(<button className={`tab ${AdFuncs.isContactMethod('contact_email') ? 'active' : ''}`} aria-label="contact-email-tab" onClick={(e) => {e.preventDefault(); AdFuncs.setContactMethod('contact_email')}}>{getLabel('p_email')}</button>) :
-								(<button className={`tab ${AdFuncs.isContactMethod('email') ? 'active' : ''}`} aria-label="email-tab" onClick={(e) => {e.preventDefault(); AdFuncs.setContactMethod('email')}}>{getLabel('p_email')}</button>)
-							}
-						</nav>
-						<input type="hidden" name="contact_method" value={AdFuncs.contactMethod()} />
-					</div>
-				</div><div className="ad_inline_block_top">
-					<div className="ad_box_field">
-						<div className="post_hints">
-							{getLabel('p_select_phone_hint')}.
-							{
-								USERSIGNEDIN ? 
-								(<section>{getLabel('p_contact_you_hint_1')}</section>) : 
-								(<section>{getLabel('p_contact_you_hint_2')}</section>)
-							}
-						</div>
-					</div>
-				</div>
+			</div>
 			<ContactPhone />
-			<div className="ad_inline_block_top"></div>
-			<ContactEmail USERSIGNEDIN={USERSIGNEDIN} />
-			<div><div className="ad_box_sub_title">{getLabel('p_loc_title')}</div></div>
-				<div className="ad_inline_block">
-					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_province_title')}</div></div>
-					<div className="ad_box_field">
-						{Helper.errorLabel(POSTERRORS.province)}
-						{Engine.component(ProvinceList)}
-					</div>
-				</div><div className="ad_inline_block_top">
-					<div className="ad_box_field">
-						<div className="post_hints">
-							{getLabel('p_province_hint')}
-						</div>
-					</div>
+			<div className='ad_inline_block_top'></div>
+			<ContactEmail USERSIGNEDIN={session.userSignedIn} />
+			<div>
+				<div className='ad_box_sub_title'>{getLabel('p_loc_title')}</div>
+			</div>
+			<div className='ad_inline_block'>
+				<div className='ad_box_field'>
+					<div className='ad_box_label'>{getLabel('p_province_title')}</div>
 				</div>
-				<div className="ad_inline_block">
-					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_city_title')}</div></div>
-					<div className="ad_box_field">
-						{Helper.errorLabel(POSTERRORS.city)}
-						{Engine.component(CityList)}
-					</div>
-				</div><div className="ad_inline_block_top">
-					<div className="ad_box_field">
-						<div className="post_hints">
-							{getLabel('p_city_hint')}
-						</div>
-					</div>
+				<div className='ad_box_field'>
+					<ErrorLabel errorLabel={POSTERRORS.province} />
+					<ProvinceList />
 				</div>
-				<div className="ad_inline_block">
-					<div className="ad_box_field"><div className="ad_box_label">{getLabel('p_add_title')}</div></div>
-					<div className="ad_box_field"><input type="text" name="address" maxLength={100} placeholder={getLabel('p_add_placeholder')} /></div>
-				</div><div className="ad_inline_block_top">
-					<div className="ad_box_field">
-						<div className="post_hints">
-							{getLabel('p_add_hint')}
-						</div>
-					</div>
+			</div>
+			<div className='ad_inline_block_top'>
+				<div className='ad_box_field'>
+					<div className='post_hints'>{getLabel('p_province_hint')}</div>
 				</div>
-				<div className="ad_box_field"><div className="ad_box_label"></div>
-					<Button bsStyle={Object.keys(POSTERRORS).length ? 'danger' : 'success'} bsSize='small' onClick={() => Helper.submitForm('work_on_advertise', true)}>{getLabel('p_post_it')}</Button>
+			</div>
+			<div className='ad_inline_block'>
+				<div className='ad_box_field'>
+					<div className='ad_box_label'>{getLabel('p_city_title')}</div>
 				</div>
-			</form>
-		);
-	};
-}
+				<div className='ad_box_field'>
+					<ErrorLabel errorLabel={POSTERRORS.city} />
+					<CityList />
+				</div>
+			</div>
+			<div className='ad_inline_block_top'>
+				<div className='ad_box_field'>
+					<div className='post_hints'>{getLabel('p_city_hint')}</div>
+				</div>
+			</div>
+			<div className='ad_inline_block'>
+				<div className='ad_box_field'>
+					<div className='ad_box_label'>{getLabel('p_add_title')}</div>
+				</div>
+				<div className='ad_box_field'>
+					<input type='text' name='address' maxLength={100} placeholder={getLabel('p_add_placeholder')} />
+				</div>
+			</div>
+			<div className='ad_inline_block_top'>
+				<div className='ad_box_field'>
+					<div className='post_hints'>{getLabel('p_add_hint')}</div>
+				</div>
+			</div>
+			<div className='ad_box_field'>
+				<div className='ad_box_label'></div>
+				<SubmitButton label='p_post_it' name='work_on_advertise' post />
+			</div>
+		</form>
+	);
+};
 
-const mapStateToProps = (state: PostAdvertiseState) => ({
-	POSTERRORS: state.POSTERRORS,
-	MODELS: state.MODELS,
-	LANGUAGE: state.language,
-	USERSIGNEDIN: Engine.userSignedIn()
-});
-
-export default connect(
-	mapStateToProps
-)(PostAdvertise);
+export default PostAdvertise;

@@ -7,7 +7,7 @@ import {
 	updateStateModelData,
 	fetchUserDataSuccess
 } from '../action';
-import { Cache } from '../common/cache';
+import { Cache } from '../utils';
 import type { Identifier } from '../types/common';
 
 type DataKey = 'profile' | 'ads' | 'siteUsers' | 'siteAds' | 'visitorHits' | 'files' | 'categories' | 'subCategories';

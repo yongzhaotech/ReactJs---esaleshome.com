@@ -7,8 +7,7 @@ import { UserFunction } from '../user/user-function';
 import { smallImageSrc } from '../common/config';
 import { submitFormData } from '../common/form-process';
 import { ApiResponse, routes } from '../common/http-client';
-import { Cache } from '../common/cache';
-import { route } from '../utils';
+import { route, Cache } from '../utils';
 import { signOut } from '../hook/user-function-hook';
 
 type TypedSaga = Generator<unknown, void, any>;

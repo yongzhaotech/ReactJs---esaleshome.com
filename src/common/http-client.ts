@@ -1,6 +1,6 @@
 import { Helper } from './js-funcs';
 import { getLabel } from './label';
-import { Cache } from './cache';
+import { Cache, route } from '../utils';
 import { Engine } from './engine';
 import { host } from './config';
 import { fetchUserData, loadingData } from '../action';
@@ -62,8 +62,6 @@ export const routes: Record<string, Route> = {
 	},
 };
 
-const pathName = (): string => Engine.pathName();
-
 const endPoint = (script: string): string => script.split('/').pop() || '';
 
 const sendRequest = (data: string[], script: string, cache: CacheOptions = {}): Promise<ApiResponse> => {
@@ -121,7 +119,7 @@ const ServerRequest = (script: string, requestData: RequestData, cache: CacheOpt
 };
 
 const trackHit = (page?: string | null) => {
-	ServerRequest('request', { action: 'hits', uri: page ? page : pathName() })
+	ServerRequest('request', { action: 'hits', uri: page ? page : route.pathName() })
 		.then(() => {})
 		.catch(() => {});
 };

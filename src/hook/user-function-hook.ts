@@ -4,9 +4,8 @@ import { Http } from '../common/http-client';
 import { useSelector, useDispatch } from 'react-redux';
 import RootReducer from '../reducer';
 import { signOut as signUserOut, fetchUserDataSuccess } from '../action';
-import { Cache } from '../common/cache';
 import type { Identifier } from '../types/common';
-import { route } from '../utils';
+import { route, Cache } from '../utils';
 
 type DataKey = 'profile' | 'ads' | 'siteUsers' | 'siteAds' | 'visitorHits' | 'files' | 'categories' | 'subCategories';
 

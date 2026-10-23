@@ -11,17 +11,17 @@ import type { UserAdvertiseItem } from '../types/user';
 
 type RootState = ReturnType<typeof RootReducer>;
 
-type UserProps = {
+type UserState = {
 	profile?: Record<string, unknown>;
 	ads?: UserAdvertiseItem[];
 };
 
-type ExpandProps = { EXPANDEDADS: Record<string, number> };
+type ExpandState = { EXPANDEDADS: Record<string, number> };
 
 const UserAdvertiseSnippets = () => {
 	const dispatch = useDispatch();
-	const { EXPANDEDADS = {} } = useSelector((state: RootState) => state.OBJECTS) as ExpandProps;
-	const { profile, ads } = useSelector((state: RootState) => state.USER) as UserProps;
+	const { EXPANDEDADS = {} } = useSelector((state: RootState) => state.OBJECTS) as ExpandState;
+	const { profile, ads } = useSelector((state: RootState) => state.USER) as UserState;
 	const { getLocalizedLabel: getLabel } = useLocalizationContext();
 	const { deleteAd } = useServerFunctions();
 	const { userPage } = useUserFunctions();

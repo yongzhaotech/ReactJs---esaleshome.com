@@ -1,75 +1,60 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, { useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import { StaticVars } from '../static/static-vars';
 import { LangMessages } from '../static/langs';
-import { getLabel } from '../common/label';
-import { Helper } from '../common/js-funcs';
-import { Engine } from '../common/engine';
+import { useLocalizationContext, Label } from '../context/localization-context';
+import { session, route } from '../utils';
+import RootReducer from '../reducer';
+import { useFunctions } from '../hook/js-function-hook';
 
-type MenuLabel = Parameters<typeof getLabel>[0];
+type RootState = ReturnType<typeof RootReducer>;
 
-const isMenuLabel = (label: string): label is MenuLabel => label in LangMessages;
+const Menus = () => {
+	const MENUS = useSelector((state: RootState) => state.MENUS);
+	const { getLocalizedLabel } = useLocalizationContext();
+	const { launchMenu, clearScreen } = useFunctions();
 
-const getMenuLabel = (label: string): string => {
-	if (!isMenuLabel(label)) {
-		throw new Error(`Unknown menu label: ${label}`);
-	}
+	const getMenuLabel = useCallback(
+		(name: string) => {
+			const label = name as Label;
+			if (LangMessages[label] === undefined) {
+				throw new Error(`Unknown menu label: ${label}`);
+			}
+			return getLocalizedLabel(label);
+		},
+		[getLocalizedLabel]
+	);
 
-	return getLabel(label);
+	return (
+		<div
+			className='dp_menu'
+			aria-expanded={MENUS}
+		>
+			{StaticVars.menus.map((menu) =>
+				menu.b ? (
+					<div key={menu.a} className='menu' onClick={() => launchMenu(menu.a)} role='menuitem'>
+						{getMenuLabel(menu.n)}
+					</div>
+				) : menu.n === 'c_account' && !session.userSignedIn ? (
+					<div key={menu.a} className='menu' onClick={() => launchMenu('login')} role='menuitem'>
+						{getMenuLabel(menu.n)}
+					</div>
+				) : (
+					<div
+						key={menu.a}
+						className='menu'
+						onClick={() => {
+							clearScreen();
+							route.location(menu.a);
+						}}
+						role='menuitem'
+					>
+						{getMenuLabel(menu.n)}
+					</div>
+				)
+			)}
+		</div>
+	);
 };
 
-interface MenusProps {
-	USERSIGNEDIN: boolean;
-	MENUS: boolean;
-}
-
-interface MenusState {
-	language: string;
-	MENUS: boolean;
-}
-
-class Menus extends Component<MenusProps> {
-	private menuBoxReference: HTMLDivElement | null = null;
-
-	private createReference = (element: HTMLDivElement | null): void => {
-		this.menuBoxReference = element;
-		Helper.setMenuBoxReference(element);
-	};
-
-	render() {
-		const { USERSIGNEDIN, MENUS } = this.props;
-
-		return (
-			<div
-				className="dp_menu"
-				ref={this.createReference}
-				aria-expanded={MENUS}
-				onBlur={Engine.dropMenuBlur}
-				onFocus={Engine.dropMenuFocus}
-			>
-				{StaticVars.menus.map(menu => (
-					menu.b ? (
-						<div key={menu.a} className="menu" onClick={() => Helper.launchMenu(menu.a)} role="menuitem">
-							{getMenuLabel(menu.n)}
-						</div>
-					) : menu.n === 'c_account' && !USERSIGNEDIN ? (
-						<div key={menu.a} className="menu" onClick={() => Helper.launchMenu('login')} role="menuitem">
-							{getMenuLabel(menu.n)}
-						</div>
-					) : (
-						<div key={menu.a} className="menu" onClick={() => { Helper.clearScreen(); Helper.location(menu.a); }} role="menuitem">
-							{getMenuLabel(menu.n)}
-						</div>
-					)
-				))}
-			</div>
-		);
-	}
-}
-
-const mapStateToProps = (state: MenusState): MenusProps => ({
-	USERSIGNEDIN: Engine.userSignedIn(),
-	MENUS: state.MENUS
-});
-
-export default connect(mapStateToProps)(Menus);
+export default Menus;
