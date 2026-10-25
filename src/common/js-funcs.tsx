@@ -76,7 +76,6 @@ const buttonClass = (): ButtonStyle => {
 	removeErrors = (): void => {
 		Engine.dispatch(addErrorsAction());
 	},
-	path = (): string => Engine.path(),
 	attachActionBox = (boxName: string, adInfo: Record<string, unknown> = {}): void => {
 		if (Engine.store().BOXES.box && Engine.store().BOXES.box === boxName) {
 			return;
@@ -100,7 +99,7 @@ const buttonClass = (): ButtonStyle => {
 		}, 1001);
 	},
 	launchMenu = (a: string): void => {
-		if (a === 'find_visitor_ad' && path() === '/ads/visitor-ad/edit') {
+		if (a === 'find_visitor_ad' && route.path === '/ads/visitor-ad/edit') {
 			return;
 		}
 		setDropDownMenus();

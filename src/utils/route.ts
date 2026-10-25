@@ -26,6 +26,13 @@ class Route {
 		this.#_history = history;
 	}
 
+	get path() {
+		if (!this.#_history) {
+			throw new Error('Router history has not been registered');
+		}
+		return this.#_history.location.pathname;
+	}
+
 	param(param: string) {
 		return this.#_params ? this.#_params[param] : '';
 	}
@@ -44,13 +51,6 @@ class Route {
 			throw new Error('Router history has not been registered');
 		}
 		this.#_history.goBack();
-	}
-
-	path() {
-		if (!this.#_history) {
-			throw new Error('Router history has not been registered');
-		}
-		return this.#_history.location.pathname;
 	}
 
 	pathName() {

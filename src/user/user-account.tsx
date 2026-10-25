@@ -1,56 +1,37 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Engine } from '../common/engine';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import UserTabs from './user-tabs';
 import UserProfile from './user-profile';
 import { fetchUserData } from '../action';
+import { session } from '../utils';
+import RootReducer from '../reducer';
 
-interface UserProfileData {
-	first_name?: string;
-	last_name?: string;
-	email?: string;
-}
+type RootState = ReturnType<typeof RootReducer>;
 
-interface UserAccountProps {
-	USERSIGNEDIN: boolean;
-	profile?: UserProfileData;
-}
-
-interface UserAccountState {
-	language: string;
-	USER: {
-		profile?: UserProfileData;
+interface UserProfileState {
+	profile?: {
+		first_name?: string;
+		last_name?: string;
+		email?: string;
 	};
 }
 
-const UserAccount = class extends React.Component<UserAccountProps> {
-	/*
-	 * @description user is already signed in and is now on the account page, he/she presses the F5 key
-	 */
-	componentDidMount() {
-		if (this.props.USERSIGNEDIN && !this.props.profile) {
-			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }]));
+const UserAccount = () => {
+	const { profile } = useSelector((state: RootState) => state.USER) as UserProfileState;
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		if (session.userSignedIn && !profile) {
+			dispatch(fetchUserData([{ dataKey: 'profile' }]));
 		}
-	}
+	}, [dispatch, profile]);
 
-	render() {
-		const { profile } = this.props;
-
-		return (
-			<section>
-				<UserTabs />
-				{Engine.component(UserProfile, { profile, USERSIGNEDIN: this.props.USERSIGNEDIN })}
-			</section>
-		);
-	};
+	return (
+		<>
+			<UserTabs />
+			<UserProfile />
+		</>
+	);
 };
 
-const mapStateToProps = (state: UserAccountState) => ({
-	LANGUAGE: state.language,
-	USERSIGNEDIN: Engine.userSignedIn(),
-	profile: state.USER.profile
-});
-
-export default connect(
-	mapStateToProps
-)(UserAccount);
+export default UserAccount;

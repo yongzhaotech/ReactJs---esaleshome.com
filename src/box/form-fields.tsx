@@ -59,9 +59,9 @@ export const ErrorLabel = ({ errorLabel }: ErrorLabelProps) => {
 	return null;
 };
 
-const SubmitButton = ({ label, name, post = false }: ButtonsProps) => {
+export const SubmitButton = ({ label, name, post = false }: ButtonsProps) => {
 	const { submitForm } = useForm();
-	const errors = useSelector((state: RootState) => state.ERRORS);
+	const errors = useSelector((state: RootState) => post ? state.POSTERRORS : state.ERRORS);
 	const buttonClass = Object.keys(errors).length > 0 ? 'danger' : 'success';
 	const { getLocalizedLabel: getLabel } = useLocalizationContext();
 	const submit = React.useCallback(() => {
@@ -83,12 +83,12 @@ const CancelButton = () => {
 
 	const closeActionBox = React.useCallback(() => {
 		if (actionBox) {
-			// actionBox.className = actionBox.className.replace(/box-in/, 'box-out');
+			actionBox.className = actionBox.className.replace(/box-in/, 'box-out');
 			clearActionBox();
 			setTimeout(() => {
 				dispatch(setActionBox({ box: null }));
 				dispatch(addErrors());
-			}, 0);
+			}, 1001);
 		}
 	}, [clearActionBox, actionBox, dispatch]);
 

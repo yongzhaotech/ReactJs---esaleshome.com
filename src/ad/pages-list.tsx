@@ -1,9 +1,9 @@
 import React from 'react';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 import { AdInfo } from '../common/ad-info';
-import { getLabel } from '../common/label';
 import type { Identifier } from '../types/common';
 import type { Advertise } from '../types/ad';
+import { useLocalizationContext } from '../context/localization-context';
 
 interface Page {
 	i: number;
@@ -18,6 +18,7 @@ interface PagesListProps {
 }
 
 const PagesList = ({ pages, searchAd, currentPage, ads }: PagesListProps) => {
+	const { getLocalizedLabel: getLabel } = useLocalizationContext();
 	const functionRef = searchAd ? AdInfo.selectSearchPage : AdInfo.selectHomePage;
 	const adsCount = ads.length;
 	const currentPageObject = pages.find(page => +page.i === +currentPage);

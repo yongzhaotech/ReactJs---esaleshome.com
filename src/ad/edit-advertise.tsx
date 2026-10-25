@@ -53,8 +53,6 @@ class EditAdvertise extends Component<EditAdvertiseProps> {
 	componentDidMount() {
 		const advertiseId = route.param('advertiseId') || null;
 
-		console.log('advertiseId===', advertiseId)
-
 		AdFuncs.initOtherItems();
 
 		Engine.dispatch(fetchUserData([{ dataKey: 'profile' }]));

@@ -1,11 +1,13 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { getLabel } from '../common/label';
-import { Helper } from '../common/js-funcs';
-import { Engine } from '../common/engine';
+import React from 'react';
+import { useSelector } from 'react-redux';
+import RootReducer from '../reducer';
+import { session } from '../utils';
+import { useLocalizationContext } from '../context/localization-context';
+import { InputLabel, SubmitButton } from '../box/form-fields';
 
-interface UserProfileProps {
-	USERSIGNEDIN: boolean;
+type RootState = ReturnType<typeof RootReducer>;
+
+interface UserProfileState {
 	profile?: {
 		first_name?: string;
 		last_name?: string;
@@ -13,64 +15,59 @@ interface UserProfileProps {
 	};
 }
 
-interface UserProfileState {
-	language: string;
-}
+const UserProfile = () => {
+	const { profile } = useSelector((state: RootState) => state.USER) as UserProfileState;
+	const { getLocalizedLabel: getLabel } = useLocalizationContext();
 
-const UserProfile = class extends Component<UserProfileProps> {
-	render() {
-		const {profile, USERSIGNEDIN} = this.props;
+	if (!session.userSignedIn) {
+		return null;
+	}
 
-        if(!USERSIGNEDIN) {
-            return null;
-        }
-
-		return profile ? (
-			<div id="user_account_box">
-				<form name="change_user_profile" action="/adb/change_user_profile.pl">
-					<div className="ad_inline_block">
-						<div className="account_box_title">{getLabel('c_basic_info')}</div>
-					</div><div className="ad_inline_block_top"></div>
-					<div className="ad_inline_block">
-                        {Helper.inputLable('c_first_name', 'first_name')}
-					</div><div className="ad_inline_block_top">
-					<div className="account_box_field">
-						<input type="text" name="first_name" maxLength={30} defaultValue={profile.first_name} />
+	return profile ? (
+		<div id='user_account_box'>
+			<form name='change_user_profile'>
+				<div className='ad_inline_block'>
+					<div className='account_box_title'>{getLabel('c_basic_info')}</div>
+				</div>
+				<div className='ad_inline_block_top'></div>
+				<div className='ad_inline_block'>
+					<InputLabel fieldLabel='c_first_name' fieldName='first_name' />
+				</div>
+				<div className='ad_inline_block_top'>
+					<div className='account_box_field'>
+						<input type='text' name='first_name' maxLength={30} defaultValue={profile.first_name} />
 					</div>
 				</div>
-					<div className="ad_inline_block">
-                        {Helper.inputLable('c_last_name', 'last_name')}
-					</div><div className="ad_inline_block_top">
-					<div className="account_box_field">
-						<input type="text" name="last_name" maxLength={30} defaultValue={profile.last_name} />
+				<div className='ad_inline_block'>
+					<InputLabel fieldLabel='c_last_name' fieldName='last_name' />
+				</div>
+				<div className='ad_inline_block_top'>
+					<div className='account_box_field'>
+						<input type='text' name='last_name' maxLength={30} defaultValue={profile.last_name} />
 					</div>
 				</div>
-					<div className="ad_inline_block">
-						<div className="account_box_label">{getLabel('c_eml_addr')}</div>
-					</div><div className="ad_inline_block_top">
-					<div className="account_box_field"><span style={{fontWeight: 'bold'}}>{profile.email}</span></div>
+				<div className='ad_inline_block'>
+					<div className='account_box_label'>{getLabel('c_eml_addr')}</div>
 				</div>
-					<div className="ad_inline_block">
-                       {Helper.inputLable('c_passwd', 'password')}
-					</div><div className="ad_inline_block_top">
-					<div className="account_box_field">
-						<input type="password" name="password" maxLength={40} />
+				<div className='ad_inline_block_top'>
+					<div className='account_box_field'>
+						<span style={{ fontWeight: 'bold' }}>{profile.email}</span>
 					</div>
 				</div>
-					<div className="account_box_label">
-                        {Helper.submitButton('c_upt_profile', 'change_user_profile')}
+				<div className='ad_inline_block'>
+					<InputLabel fieldLabel='c_passwd' fieldName='password' />
+				</div>
+				<div className='ad_inline_block_top'>
+					<div className='account_box_field'>
+						<input type='password' name='password' maxLength={40} />
 					</div>
-				</form>
-			</div>
-		) : null;
-	};
+				</div>
+				<div className='account_box_label'>
+					<SubmitButton label='c_upt_profile' name='change_user_profile' />
+				</div>
+			</form>
+		</div>
+	) : null;
 };
 
-const mapStateToProps = (state: UserProfileState) => ({
-	LANGUAGE: state.language,
-	USERSIGNEDIN: Engine.userSignedIn()
-});
-
-export default connect(
-	mapStateToProps
-)(UserProfile);
+export default UserProfile;

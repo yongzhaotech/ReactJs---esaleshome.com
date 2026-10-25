@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Helper } from '../common/js-funcs';
 import { Engine } from '../common/engine';
 import { AdInfo } from '../common/ad-info';
 import { useLocalizationContext } from '../context/localization-context';
@@ -8,6 +7,7 @@ import { keyWordSearch } from '../action';
 import RootReducer from '../reducer';
 import { Boxes } from './boxes';
 import { route } from '../utils';
+import { useFunctions } from '../hook/js-function-hook';
 
 type RootState = ReturnType<typeof RootReducer>;
 
@@ -18,6 +18,7 @@ const ActionBox = () => {
 	const menusOpen = useSelector((state: RootState) => state.MENUS);
 	const dispatch = useDispatch();
 	const { toggleLang, getLocalizedLabel } = useLocalizationContext();
+	const { openMenu } = useFunctions();
 
 	useEffect(() => {
 		Engine.registerMenuItems();
@@ -35,7 +36,7 @@ const ActionBox = () => {
 					id='menu_launcher'
 					className={`nav_btn ${menusOpen ? 'menu_title_active' : ''}`}
 					aria-haspopup='true'
-					onClick={Helper.setDropDownMenus}
+					onClick={openMenu}
 				>
 					{getLocalizedLabel('c_menu')}
 				</div>

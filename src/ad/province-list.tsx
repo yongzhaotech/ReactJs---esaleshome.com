@@ -1,66 +1,62 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { AdFuncs} from '../common/ad-funcs';
+import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import RootReducer from '../reducer';
 import type { SearchMode } from '../types/ad';
 import { optionHeight } from '../common/config';
 import { Engine } from '../common/engine';
+import { useLocalizationContext } from '../context/localization-context';
+import { useProvinceFunctions } from '../hook/dropdown-hook';
+import { PageVars } from '../static/static-vars';
 
 interface ProvinceListProps {
 	SEARCH?: SearchMode;
-	MODELS: Record<string, any>;
-	LANGUAGE: 'en' | 'cn';
 }
 
-interface ProvinceListState {
-	MODELS: Record<string, any>;
-	language: 'en' | 'cn';
-}
+type RootState = ReturnType<typeof RootReducer>;
 
-const ProvinceList = class extends Component<ProvinceListProps> {
-	componentDidMount() {
-		Engine.keyboardCategoryList(this.props.SEARCH ? 'province-for-search' : 'province-not-search');
-	}
+const ProvinceList = ({ SEARCH: search = '' }: ProvinceListProps) => {
+	const MODELS = useSelector((state: RootState) => state.MODELS) as Record<string, any>;
+	const { selectProv, provSelected, showProv } = useProvinceFunctions();
+	const { lang } = useLocalizationContext();
 
-	render() {
-		let MODELS = this.props.MODELS,
-			LANGUAGE = this.props.LANGUAGE,
-			search: SearchMode = this.props.SEARCH || '',
-			list = AdFuncs.province().map(prov => (
-					<button
-						key={prov.i}
-						className={`dp_option ${AdFuncs.provSelected(prov, search) ? 'selected' : ''} ${!MODELS[`expandProv${search}`] ? 'option_hint' : ''}`}
-						aria-label={`${AdFuncs.showProv(prov, search) ? 'show' : 'hide'}`}
-						onClick={(e) => {e.preventDefault(); AdFuncs.selectProv(prov, search)}}
-					>
-						{prov.n[LANGUAGE]}
-					</button>
-				));
+	useEffect(() => {
+		Engine.keyboardCategoryList(search ? 'province-for-search' : 'province-not-search');
+	}, [search]);
 
-		return (
-			<fieldset style={{position: 'relative', height: optionHeight}}>
-				<div className="dp_wrapper" style={{zIndex: '98'}}>
-					<div className="dp_list" aria-label={`${search ? 'province-for-search' : 'province-not-search'}`}>
-						{(MODELS[`expandProv${search}`] && MODELS[`provId${search}`]) ? (
-							<button
-								onClick={(e) => {e.preventDefault(); AdFuncs.selectProv(MODELS[`provObj${search}`], search)}}
-								className="option_title"
-								aria-label={'show'}
-							>
-								{MODELS[`provObj${search}`].n[LANGUAGE]}
-							</button>
-						) : null}
-						{list}
-					</div>
+	return (
+		<fieldset style={{ position: 'relative', height: optionHeight }}>
+			<div className='dp_wrapper' style={{ zIndex: '98' }}>
+				<div className='dp_list' aria-label={`${search ? 'province-for-search' : 'province-not-search'}`}>
+					{MODELS[`expandProv${search}`] && MODELS[`provId${search}`] ? (
+						<button
+							onClick={(e) => {
+								e.preventDefault();
+								selectProv(MODELS[`provObj${search}`], search);
+							}}
+							className='option_title'
+							aria-label={'show'}
+						>
+							{MODELS[`provObj${search}`].n[lang]}
+						</button>
+					) : null}
+					{PageVars.province.map((prov) => (
+						<button
+							key={prov.i}
+							className={`dp_option ${provSelected(prov, search) ? 'selected' : ''} ${!MODELS[`expandProv${search}`] ? 'option_hint' : ''}`}
+							aria-label={`${showProv(prov, search) ? 'show' : 'hide'}`}
+							onClick={(e) => {
+								e.preventDefault();
+								selectProv(prov, search);
+							}}
+						>
+							{prov.n[lang]}
+						</button>
+					))}
 				</div>
-				<input type="hidden" name="province" defaultValue={MODELS[`provId${search}`]} />
-			</fieldset>
-		);
-	};
+			</div>
+			<input type='hidden' name='province' defaultValue={MODELS[`provId${search}`]} />
+		</fieldset>
+	);
 };
 
-const mapStateToProps = (state: ProvinceListState) => ({
-	MODELS: state.MODELS,
-	LANGUAGE: state.language
-});
-
-export default connect(mapStateToProps)(ProvinceList);
+export default ProvinceList;
