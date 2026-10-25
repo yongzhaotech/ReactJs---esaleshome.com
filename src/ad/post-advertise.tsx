@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import RootReducer from '../reducer';
 import { session, route } from '../utils';
 import { useLocalizationContext } from '../context/localization-context';
-import { AdFuncs } from '../common/ad-funcs';
 import { Helper } from '../common/js-funcs';
 import ImageList from './image-list';
 import ContactPhone from './contact-phone';
@@ -31,6 +30,8 @@ const PostAdvertise = () => {
 		setCurrency,
 		maximumImagesNumberReached,
 		addImage,
+		setContactMethod,
+		selectedContactMethods,
 	} = useFunctions();
 
 	useEffect(() => {
@@ -229,39 +230,33 @@ const PostAdvertise = () => {
 					<ErrorLabel errorLabel={POSTERRORS.contact_method} />
 					<nav className='btn_list'>
 						<button
-							className={`tab ${AdFuncs.isContactMethod('contact_phone') ? 'active' : ''}`}
-							onClick={(e) => {
-								e.preventDefault();
-								AdFuncs.setContactMethod('contact_phone');
-							}}
+							data-value='contact_phone'
+							className={`tab ${selectedContactMethods['contact_phone'] !== undefined ? 'active' : ''}`}
+							onClick={setContactMethod}
 						>
 							{getLabel('p_phone')}
 						</button>
 						{session.userSignedIn ? (
 							<button
-								className={`tab ${AdFuncs.isContactMethod('contact_email') ? 'active' : ''}`}
+								data-value='contact_email'
+								className={`tab ${selectedContactMethods['contact_email'] !== undefined ? 'active' : ''}`}
 								aria-label='contact-email-tab'
-								onClick={(e) => {
-									e.preventDefault();
-									AdFuncs.setContactMethod('contact_email');
-								}}
+								onClick={setContactMethod}
 							>
 								{getLabel('p_email')}
 							</button>
 						) : (
 							<button
-								className={`tab ${AdFuncs.isContactMethod('email') ? 'active' : ''}`}
+								data-value='email'
+								className={`tab ${selectedContactMethods['email'] !== undefined ? 'active' : ''}`}
 								aria-label='email-tab'
-								onClick={(e) => {
-									e.preventDefault();
-									AdFuncs.setContactMethod('email');
-								}}
+								onClick={setContactMethod}
 							>
 								{getLabel('p_email')}
 							</button>
 						)}
 					</nav>
-					<input type='hidden' name='contact_method' value={AdFuncs.contactMethod()} />
+					<input type='hidden' name='contact_method' value={Object.keys(selectedContactMethods).join(',')} />
 				</div>
 			</div>
 			<div className='ad_inline_block_top'>
@@ -278,7 +273,7 @@ const PostAdvertise = () => {
 			</div>
 			<ContactPhone />
 			<div className='ad_inline_block_top'></div>
-			<ContactEmail USERSIGNEDIN={session.userSignedIn} />
+			<ContactEmail />
 			<div>
 				<div className='ad_box_sub_title'>{getLabel('p_loc_title')}</div>
 			</div>

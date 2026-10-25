@@ -1,11 +1,9 @@
 import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import { Cookies } from 'react-cookie';
-import { LangMessages } from '../static/langs';
-
-type Lang = 'en' | 'cn';
+import { LangMessages, Language } from '../static/langs';
 
 type SessionContextType = {
-	lang: Lang;
+	lang: Language;
 	toggleLang: () => void;
 	getLocalizedLabel: (label: Label) => string;
 };
@@ -26,7 +24,7 @@ const initialContext: SessionContextType = {
 export const Context = createContext<SessionContextType>(initialContext);
 
 export const LocalizationContext = ({ cookies, children }: SessionContextProviderProps) => {
-	const lang = (cookies.get('lang') ?? 'en') as Lang;
+	const lang = (cookies.get('lang') ?? 'en') as Language;
 	const setCookie = useCallback(
 		(name: string, value: string, options = { path: '/' }) => {
 			cookies.set(name, value, options);
