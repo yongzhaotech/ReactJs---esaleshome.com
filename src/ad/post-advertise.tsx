@@ -45,8 +45,6 @@ const PostAdvertise = () => {
 
 	Helper.title(getLabel('p_post_title'));
 
-	console.log(MODELS)
-
 	return (
 		<form name='work_on_advertise' action='post-ad' encType='multipart/form-data'>
 			<div className='ad_inline_block'>
