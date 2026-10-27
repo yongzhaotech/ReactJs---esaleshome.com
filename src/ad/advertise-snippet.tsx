@@ -7,6 +7,7 @@ import { smallImageSrc } from '../common/config';
 import Glyphicon from './ad-glyphicon';
 import type { Advertise } from '../types/ad';
 import { useLocalizationContext } from '../context/localization-context';
+import { useAdvertiseFunctions } from '../hook/advertise-hook';
 
 interface AdvertiseSnippetProps {
 	ad: Advertise;
@@ -27,6 +28,7 @@ const AdvertiseSnippet = ({ ad }: AdvertiseSnippetProps) => {
 		image = !!IMAGES[ad.picture_id] ? ad.picture_id : '0';
 
 	const { lang: LANGUAGE, getLocalizedLabel: getLabel } = useLocalizationContext();
+	const { viewImages, flagDetail } = useAdvertiseFunctions();
 
 	return (
 		<Col xs={6} sm={4} md={3}>
@@ -36,7 +38,7 @@ const AdvertiseSnippet = ({ ad }: AdvertiseSnippetProps) => {
 						type='button'
 						className='action-button'
 						aria-label='View larger image'
-						onClick={() => AdInfo.largeImageOnList(ad)}
+						onClick={() => viewImages(ad)}
 					>
 						<Image src={`${smallImageSrc}${image}.jpg`} thumbnail className='ad_image' alt={ad.name} />
 					</button>
@@ -74,7 +76,7 @@ const AdvertiseSnippet = ({ ad }: AdvertiseSnippetProps) => {
 						</span>
 					</div>
 					{AdInfo.safeHtml(ad.description)}
-					<div className='ang_close icon_list' onClick={() => AdInfo.flagDetail(ad)}>
+					<div className='ang_close icon_list' onClick={() => flagDetail(ad)}>
 						&times;
 					</div>
 				</div>

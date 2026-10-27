@@ -16,7 +16,7 @@ type ContactMethods = Record<string, 1 | ''>;
 
 type RootState = ReturnType<typeof RootReducer>;
 
-type ButtonEvent = React.MouseEvent<HTMLButtonElement, MouseEvent>;
+type ButtonEvent = React.MouseEvent<HTMLButtonElement, MouseEvent> | React.MouseEvent<HTMLElement, MouseEvent>;
 
 export type MODELSState = {
 	images?: ImageNumber[];

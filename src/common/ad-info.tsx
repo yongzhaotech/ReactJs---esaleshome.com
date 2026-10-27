@@ -1,39 +1,16 @@
 import React from 'react';
 import { Http } from './http-client';
 import { Helper } from './js-funcs';
-import { AdFuncs } from './ad-funcs';
 import { getLabel } from './label';
 import { Engine } from './engine';
-import { largeImageSrc } from './config';
-import {
-	fetchAdvertises as fetchAdvertisesAction,
-	searchAdvertise as searchAdvertiseAction,
-	updateStateModelData,
-	changeColumnNumber,
-	performSearch,
-	saveStateObjects,
-	loadingData,
-	loadingLargeImageCount,
-	viewLargeImages,
-} from '../action';
+import { fetchAdvertises as fetchAdvertisesAction, searchAdvertise as searchAdvertiseAction } from '../action';
 import type { Identifier } from '../types/common';
-import { route, Cache } from '../utils'
+import { route, Cache } from '../utils';
+import { PageVars } from '../static/static-vars';
+import { initCity, initItem } from '../hook/dropdown-hook';
 
 interface ImageItem {
 	i: Identifier;
-}
-
-interface ListAdvertise {
-	id: Identifier;
-	picture_ids: Identifier[];
-	main_picture_id?: Identifier;
-	picture_id?: Identifier;
-	contact_method?: string;
-}
-
-interface DetailAdvertise {
-	picture_ids: ImageItem[];
-	contact_method?: string;
 }
 
 interface SearchTerm {
@@ -46,7 +23,6 @@ type EditableAdvertise = Record<string, any> & {
 	contact_method: string;
 };
 
-let timeOutId: ReturnType<typeof setTimeout> | null = null;
 const searchSequence = {
 		province: 1,
 		city: 2,
@@ -63,61 +39,6 @@ const searchSequence = {
 		start: 'start',
 		searchByKeyword: 'searchByKeyword',
 	},
-	loadImages = (imgs: ImageItem[], imageCount: number, count: number): Promise<boolean>[] => {
-		let init = 0;
-		return imgs.map((imageObject) => {
-			return new Promise((res, rej) => {
-				let img = new Image();
-				timeOutId = setTimeout(() => {
-					img.src = `${largeImageSrc}${imageObject.i}.jpg`;
-				}, 250 * ++init);
-				img.onload = () => {
-					Engine.dispatch(loadingLargeImageCount(`${++count} / ${imageCount}`));
-					res(true);
-				};
-				img.onerror = () => {
-					rej(false);
-				};
-			});
-		});
-	},
-	viewImages = (n: Identifier) => {
-		let images = Engine.store().MODELS['listImages'] || [],
-			imageCount = images.length,
-			count = 0;
-		if (imageCount) {
-			Engine.dispatch(loadingData(true, false, true));
-			Engine.dispatch(loadingLargeImageCount(`${++count} / ${imageCount}`));
-			Promise.all(loadImages(images, imageCount, count))
-				.then(() => {
-					if (timeOutId) {
-						clearTimeout(timeOutId);
-						timeOutId = null;
-					}
-					Engine.dispatch(loadingData());
-					Engine.dispatch(loadingLargeImageCount());
-					Engine.dispatch(
-						updateStateModelData({
-							currentImage: n,
-							largeImageFlag: true,
-						})
-					);
-				})
-				.catch((e) => {
-					Engine.dispatch(loadingLargeImageCount());
-				});
-		}
-	},
-	imageIndex = (listImages: ImageItem[], currentImage: Identifier) => {
-		let len = listImages.length;
-
-		for (let i = 0; i < len; i++) {
-			if (+currentImage === +listImages[i]['i']) {
-				return i;
-			}
-		}
-		return 0;
-	},
 	searchAdvertise = (requestData: Record<string, any>) => {
 		let data: Record<string, any> = {},
 			criteria: Record<string, string> = { ...swapper };
@@ -129,7 +50,6 @@ const searchSequence = {
 		return Http.Fetch('search-advertise', data)
 			.then((promise) => {
 				if (promise.data.angular_ads) {
-					Engine.dispatch(performSearch());
 					Helper.detachActionBox();
 					route.location('');
 					return {
@@ -170,13 +90,13 @@ const searchSequence = {
 	fetchAdvertise = (advertiseId: Identifier) => {
 		return Http.Fetch('advertise-detail', { advertise_id: advertiseId })
 			.then((promise) => {
-				let provObj = AdFuncs.province().find((prov) => +prov.i === +promise.data.item.pr),
+				let provObj = PageVars.province.find((prov) => +prov.i === +promise.data.item.pr),
 					cityObj = ((provObj && provObj.c) || []).find((city) => +city.i === +promise.data.item.ct),
-					catObj = AdFuncs.category().find((cat) => +cat.i === +promise.data.item.ca),
+					catObj = PageVars.category.find((cat) => +cat.i === +promise.data.item.ca),
 					itemObj = ((catObj && catObj.c) || []).find((item) => +item.i === +promise.data.item.it);
 
-				AdFuncs.initCity(promise.data.item.ct, true);
-				AdFuncs.initItem(promise.data.item.it, true);
+				initCity(promise.data.item.ct, true);
+				initItem(promise.data.item.it, true);
 
 				return promise.data
 					? {
@@ -200,8 +120,8 @@ const searchSequence = {
 			.catch((reason) => reason.error);
 	},
 	createUserAdvertiseSet = (ad: EditableAdvertise) => {
-		const provObj = AdFuncs.province().find((prov) => +prov.i === +ad.province_id),
-			catObj = AdFuncs.category().find((cat) => +cat.i === +ad.category_id),
+		const provObj = PageVars.province.find((prov) => +prov.i === +ad.province_id),
+			catObj = PageVars.category.find((cat) => +cat.i === +ad.category_id),
 			cityObj = ((provObj && provObj.c) || []).find((city) => +city.i === +ad.city_id),
 			itemObj = ((catObj && catObj.c) || []).find((item) => +item.i === +ad.item_id),
 			userAdvertiseSet = {
@@ -275,79 +195,6 @@ const searchSequence = {
 			return ad && ad.contact_method && ad.contact_method.match(/\bcontact_phone\b/) ? true : false;
 		},
 
-		largeImageOnList: (ad: ListAdvertise) => {
-			if (!ad.picture_ids.length) {
-				return;
-			}
-			Engine.dispatch(
-				updateStateModelData({
-					listImages: ad.picture_ids.map((p) => ({ i: p })),
-				})
-			);
-			setTimeout(() => {
-				Engine.dispatch(viewLargeImages(ad.main_picture_id || ad.picture_id));
-			}, 0);
-		},
-
-		largeImageOnDetail: (ad: DetailAdvertise, p: ImageItem) => {
-			if (!ad.picture_ids.length) {
-				return;
-			}
-			Engine.dispatch(
-				updateStateModelData({
-					listImages: ad.picture_ids,
-				})
-			);
-			setTimeout(() => {
-				Engine.dispatch(viewLargeImages(p.i));
-			}, 0);
-		},
-
-		clearLargeImage: (currentImageRef: HTMLElement | null = null) => {
-			if (currentImageRef) {
-				currentImageRef.className = 'fade-out';
-			}
-			setTimeout(() => {
-				Engine.dispatch(
-					updateStateModelData({
-						currentImage: null,
-						largeImageFlag: null,
-						listImages: null,
-					})
-				);
-			}, 1201);
-		},
-
-		hasNextImage: (listImages: ImageItem[], currentImage: Identifier) => {
-			return imageIndex(listImages, currentImage) < listImages.length - 1;
-		},
-
-		hasPrevImage: (listImages: ImageItem[], currentImage: Identifier) => {
-			return imageIndex(listImages, currentImage) > 0;
-		},
-
-		nextImage: (listImages: ImageItem[], currentImage: Identifier, currentImageRef: HTMLElement) => {
-			currentImageRef.className = 'fade-out';
-			setTimeout(() => {
-				Engine.dispatch(
-					updateStateModelData({
-						currentImage: listImages[imageIndex(listImages, currentImage) + 1]['i'],
-					})
-				);
-			}, 1201);
-		},
-
-		prevImage: (listImages: ImageItem[], currentImage: Identifier, currentImageRef: HTMLElement) => {
-			currentImageRef.className = 'fade-out';
-			setTimeout(() => {
-				Engine.dispatch(
-					updateStateModelData({
-						currentImage: listImages[imageIndex(listImages, currentImage) - 1]['i'],
-					})
-				);
-			}, 1201);
-		},
-
 		getSearchSequence: () => {
 			return searchSequence;
 		},
@@ -376,22 +223,22 @@ const searchSequence = {
 			searchTerms.forEach((thisTerm) => {
 				if (thisTerm.key === 'province') {
 					searchData.provIdSearch = thisTerm.id.toString();
-					searchData.provObjSearch = AdFuncs.province().find((prov) => +prov.i === +thisTerm.id);
+					searchData.provObjSearch = PageVars.province.find((prov) => +prov.i === +thisTerm.id);
 				} else if (thisTerm.key === 'city') {
 					searchData.cityIdSearch = thisTerm.id.toString();
 					searchData.cityObjSearch = ((searchData.provObjSearch && searchData.provObjSearch.c) || []).find(
 						(city: ImageItem) => +city.i === +thisTerm.id
 					);
-					AdFuncs.initCity(thisTerm.id.toString(), true);
+					initCity(thisTerm.id.toString(), true);
 				} else if (thisTerm.key === 'category') {
 					searchData.catIdSearch = thisTerm.id.toString();
-					searchData.catObjSearch = AdFuncs.category().find((cat) => +cat.i === +thisTerm.id);
+					searchData.catObjSearch = PageVars.category.find((cat) => +cat.i === +thisTerm.id);
 				} else if (thisTerm.key === 'item') {
 					searchData.itemIdSearch = thisTerm.id.toString();
 					searchData.itemObjSearch = ((searchData.catObjSearch && searchData.catObjSearch.c) || []).find(
 						(item: ImageItem) => +item.i === +thisTerm.id
 					);
-					AdFuncs.initItem(thisTerm.id.toString(), true);
+					initItem(thisTerm.id.toString(), true);
 				}
 			});
 
@@ -436,31 +283,6 @@ const searchSequence = {
 			});
 		},
 
-		flagDetail: (ad: { id: Identifier }) => {
-			let flag: Identifier | '' = '',
-				open = Engine.store().OBJECTS['OPENFLAG'];
-			if (open && open === ad.id) {
-				open = '';
-			} else {
-				flag = ad.id;
-				open = ad.id;
-			}
-			Engine.dispatch(
-				saveStateObjects({
-					DETAILFLAG: flag,
-					OPENFLAG: open,
-				})
-			);
-		},
-
-		toPreviousColumn: () => {
-			Engine.dispatch(changeColumnNumber(-1));
-		},
-
-		toNextColumn: () => {
-			Engine.dispatch(changeColumnNumber(1));
-		},
-
 		searchAdvertise: searchAdvertise,
 
 		fetchAdvertises: fetchAdvertises,
@@ -468,8 +290,6 @@ const searchSequence = {
 		fetchAdvertise: fetchAdvertise,
 
 		listAdvertise: listAdvertise,
-
-		viewImages: viewImages,
 	};
 
 export { AdInfo };

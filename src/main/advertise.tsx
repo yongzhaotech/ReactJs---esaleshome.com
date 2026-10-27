@@ -18,11 +18,6 @@ const Advertise = ({ cookies }: AdvertiseProps) => {
 
 	useEffect(() => {
 		if (cookies) {
-			Engine.cookie({
-				get: (name) => cookies.get(name),
-				set: (name, value, options) => cookies.set(name, value, options),
-			});
-
 			session.cookies = cookies;
 		}
 	}, [cookies]);

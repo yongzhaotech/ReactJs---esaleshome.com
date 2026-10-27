@@ -3,7 +3,7 @@ import { clearStateModelData, addPostErrors, setDropDownMenus, setActionBox, add
 import { useDispatch, useSelector } from 'react-redux';
 import RootReducer from '../reducer';
 import { route } from '../utils';
-import { AdFuncs } from '../common/ad-funcs';
+import { clearScreen as clearScreenData } from '../hook/dropdown-hook';
 
 type Callback = (() => void) | null | undefined;
 
@@ -56,7 +56,7 @@ export const useFunctions = () => {
 		dispatch(addErrors());
 		dispatch(addPostErrors());
 		dispatch(clearStateModelData());
-		AdFuncs.clearScreen();
+		clearScreenData();
 	}, [dispatch]);
 
 	return { launchMenu, clearScreen, openMenu };
