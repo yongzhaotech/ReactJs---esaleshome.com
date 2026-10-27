@@ -3,7 +3,7 @@ import { messageCenter, ADD_MESSAGE } from '../action';
 import { Http } from '../common/http-client';
 import { useSelector, useDispatch } from 'react-redux';
 import RootReducer from '../reducer';
-import { signOut as signUserOut, fetchUserDataSuccess } from '../action';
+import { signOut as signUserOut, fetchUserDataSuccess, updateStateModelData } from '../action';
 import type { Identifier } from '../types/common';
 import { route, Cache } from '../utils';
 
@@ -136,5 +136,35 @@ export const useServerFunctions = () => {
 		[remove, dispatch]
 	);
 
-	return { deleteAd };
+	const deleteVisitorAdd = useCallback(() => {
+		Http.ServerRequest('delete-visitor-advertise', { action: 'delete_visitor_advertise' }).then((promise) => {
+			if (promise.data.ok) {
+				Cache.clear();
+				route.location('home');
+			} else {
+				dispatch(messageCenter(ADD_MESSAGE, promise.data.error, true));
+			}
+		});
+	}, [dispatch]);
+
+	const validateAccCode = useCallback(
+		(accCode: string) => {
+			Http.ServerRequest('request', { action: 'validate_acc_code', acc_code: accCode })
+				.then((promise: ServerResponse) => {
+					if (promise.data.ok) {
+						dispatch(
+							updateStateModelData({
+								accCode,
+							})
+						);
+					}
+				})
+				.catch(() => {
+					dispatch(messageCenter(ADD_MESSAGE, 'Error processing your request', true));
+				});
+		},
+		[dispatch]
+	);
+
+	return { deleteAd, deleteVisitorAdd, validateAccCode };
 };

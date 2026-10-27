@@ -1,3 +1,4 @@
+// TODO: refactor to remove all redux store, dispatch logics, etc. and put them in custom hooks
 import React from 'react';
 import { Helper } from './js-funcs';
 import { expandCity, expandProv, expandItem, expandCat } from '../action';

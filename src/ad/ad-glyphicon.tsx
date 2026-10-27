@@ -3,6 +3,7 @@ import { Glyphicon } from 'react-bootstrap';
 import { AdInfo } from '../common/ad-info';
 import { Helper } from '../common/js-funcs';
 import type { Advertise } from '../types/ad';
+import { useAdvertiseFunctions } from '../hook/advertise-hook';
 
 interface AdGlyphiconProps {
 	ad: Pick<Advertise, 'id' | 'name' | 'contact_phone' | 'contact_method'>;
@@ -12,22 +13,33 @@ interface AdGlyphiconProps {
 }
 
 const AdGlyphicon = ({ ad, OBJECTS }: AdGlyphiconProps) => {
+	const { flagDetail } = useAdvertiseFunctions();
 	return (
-		<div className="glyphicon-group">
+		<div className='glyphicon-group'>
 			{AdInfo.byMail(ad) ? (
-				<button type="button" className="action-button" aria-label="email the poster" onClick={() => Helper.attachActionBox('ask_poster', { id: ad.id, name: ad.name })}>
-					<Glyphicon glyph="envelope" />
+				<button
+					type='button'
+					className='action-button'
+					aria-label='email the poster'
+					onClick={() => Helper.attachActionBox('ask_poster', { id: ad.id, name: ad.name })}
+				>
+					<Glyphicon glyph='envelope' />
 				</button>
 			) : null}
 			{AdInfo.byPhone(ad) ? (
-				<a href={`tel:${ad.contact_phone}`} aria-label="use your cell to call the poster">
-					<Glyphicon glyph="phone" />
+				<a href={`tel:${ad.contact_phone}`} aria-label='use your cell to call the poster'>
+					<Glyphicon glyph='phone' />
 				</a>
 			) : null}
-			<button type="button" className="action-button" aria-label="send the ad to your friend" onClick={() => Helper.attachActionBox('email_friend', { id: ad.id, name: ad.name })}>
-				<Glyphicon glyph="share" />
+			<button
+				type='button'
+				className='action-button'
+				aria-label='send the ad to your friend'
+				onClick={() => Helper.attachActionBox('email_friend', { id: ad.id, name: ad.name })}
+			>
+				<Glyphicon glyph='share' />
 			</button>
-			<button type="button" className="action-button" aria-label="ad details" onClick={() => AdInfo.flagDetail(ad)}>
+			<button type='button' className='action-button' aria-label='ad details' onClick={() => flagDetail(ad)}>
 				<Glyphicon glyph={OBJECTS.DETAILFLAG === ad.id ? 'check' : 'unchecked'} />
 			</button>
 		</div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, ButtonToolbar, Glyphicon } from 'react-bootstrap';
 import { getLabel, Label } from './label';
-import { AdFuncs } from './ad-funcs';
+// import { AdFuncs } from './ad-funcs';
 import { Engine } from './engine';
 import { formValidator } from './form-process';
 import { title } from './config';
@@ -238,7 +238,7 @@ const buttonClass = (): ButtonStyle => {
 			detachActionBox();
 			Engine.dispatch(addPostErrorsAction());
 			Engine.dispatch(clearStateModelData());
-			AdFuncs.clearScreen();
+			// AdFuncs.clearScreen();
 		},
 
 		title: (name: string | null = null) => {

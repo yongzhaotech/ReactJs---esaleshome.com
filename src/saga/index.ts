@@ -57,6 +57,7 @@ function* searchAdvertise(action: AnyAction): TypedSaga {
 		} else {
 			yield put(Action.fetchAdvertisesSuccess(dataSet.resultSets));
 			yield put(Action.searchTerms(Action.ADD_SEARCHTERMS, dataSet.searchTerms));
+			yield put(Action.performSearch());
 			yield fork(nonBlockingLoadImages, dataSet.resultSets.ads);
 		}
 		yield put(Action.loadingData());
@@ -81,6 +82,7 @@ function* keyWordSearch(action: AnyAction): TypedSaga {
 		} else {
 			yield put(Action.fetchAdvertisesSuccess(dataSet.resultSets));
 			yield put(Action.messageCenter(Action.CLEAR_MESSAGE));
+			yield put(Action.performSearch());
 			yield fork(nonBlockingLoadImages, dataSet.resultSets.ads);
 		}
 		yield put(Action.loadingData());
@@ -102,6 +104,7 @@ function* selectSearchTerm(action: AnyAction): TypedSaga {
 			yield put(Action.messageCenter(Action.ADD_MESSAGE, dataSet.error, true));
 		} else {
 			yield put(Action.fetchAdvertisesSuccess(dataSet.resultSets));
+			yield put(Action.performSearch());
 			yield fork(nonBlockingLoadImages, dataSet.resultSets.ads);
 		}
 		yield put(Action.loadingData());
@@ -157,10 +160,6 @@ function* fetchUserData(action: AnyAction): TypedSaga {
 	} catch (error) {
 		yield put(Action.messageCenter(Action.ADD_MESSAGE, error, true));
 	}
-}
-
-function* viewLargeImages(action: AnyAction): TypedSaga {
-	yield fork(AdInfo.viewImages, action.currentImageId);
 }
 
 function* nonBlockingLoadImages(ads: { picture_id: string | number }[]): TypedSaga {
@@ -251,7 +250,6 @@ export default function* RootSaga(): TypedSaga {
 		takeLatest(Action.FETCH_USER_ADVERTISE, fetchUserAdvertise),
 		takeLatest(Action.FETCH_VISITOR_ADVERTISE, fetchVisitorAdvertise),
 		takeLatest(Action.KEY_WORD_SEARCH, keyWordSearch),
-		takeLatest(Action.VIEW_LARGE_IMAGES, viewLargeImages),
 		takeEvery(Action.FETCH_USER_DATA, fetchUserData),
 		takeEvery(Action.SEND_FORM_DATA, sendFormData),
 		takeEvery(Action.SIGN_OUT, signUserOut),

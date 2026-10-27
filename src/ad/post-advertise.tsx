@@ -45,7 +45,7 @@ const PostAdvertise = () => {
 
 	Helper.title(getLabel('p_post_title'));
 
-	console.log(MODELS);
+	console.log(MODELS)
 
 	return (
 		<form name='work_on_advertise' action='post-ad' encType='multipart/form-data'>
@@ -122,7 +122,7 @@ const PostAdvertise = () => {
 					<div className='post_hints'></div>
 				</div>
 			</div>
-			{itemIsNotFree ? (
+			{itemIsNotFree && (
 				<div id='price_row'>
 					<div className='ad_inline_block'>
 						<div className='ad_box_field'>
@@ -167,7 +167,7 @@ const PostAdvertise = () => {
 						</div>
 						<div className='ad_box_field'>
 							<ErrorLabel errorLabel={POSTERRORS.price} />
-							<input type='text' name='price' maxLength={15} />
+							<input type='text' name='price' defaultValue={MODELS['price']} maxLength={15} />
 						</div>
 					</div>
 					<div className='ad_inline_block_top'>
@@ -176,7 +176,7 @@ const PostAdvertise = () => {
 						</div>
 					</div>
 				</div>
-			) : null}
+			)}
 			<div className='ad_inline_block'>
 				<div className='ad_box_field'>
 					<div className='ad_box_label'>{getLabel('p_detail_title')}</div>

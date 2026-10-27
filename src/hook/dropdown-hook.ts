@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Language } from '../static/langs';
 import type { Identifier } from '../types/common';
@@ -14,11 +14,7 @@ import {
 	expandItem as expandItemAction,
 	expandCat as expandCatAction,
 	updateStateModelData,
-	saveStateObjects,
 } from '../action';
-import { PageVars, StaticVars } from '../static/static-vars';
-import { route } from '../utils';
-
 export interface Option {
 	i: Identifier;
 	n: Record<Language, string>;
@@ -154,4 +150,119 @@ export const useCityFunctions = () => {
 	);
 
 	return { selectCity, citySelected, showCity };
+};
+
+export const useCategoryFunctions = () => {
+	const dispatch = useDispatch();
+	const MODELS = useSelector((state: RootState) => state.MODELS) as MODELSState;
+
+	const selectCat = useCallback(
+		(c: Option, Search: SearchMode = '') => {
+			const expandCat = !MODELS[`expandCat${Search}`];
+			dispatch(expandCatAction(expandCat, Search));
+			if (expandCat) {
+				dispatch(updateStateModelData(getCollapsePayload(`cat${Search}`)));
+			}
+			if (Search) {
+				if (catIdSearch === c.i) {
+					return;
+				}
+				[catIdSearch, catObjSearch, itemIdSearch] = [c.i, c, ''];
+			} else {
+				if (catId === c.i) {
+					return;
+				}
+				[catId, catObj, itemId] = [c.i, c, ''];
+			}
+			dispatch(selectCatAction(Search ? catIdSearch : catId, Search ? catObjSearch : catObj, Search));
+		},
+		[MODELS, dispatch]
+	);
+
+	const catSelected = useCallback((c: Option, Search: SearchMode = '') => MODELS[`catId${Search}`] === c.i, [MODELS]);
+
+	const showCat = useCallback(
+		(c: Option, Search: SearchMode = '') => {
+			const [catId, expandCat] = [MODELS[`catId${Search}`], MODELS[`expandCat${Search}`]];
+			return !!expandCat || (!c.i && !catId) || catId === c.i;
+		},
+		[MODELS]
+	);
+
+	return { selectCat, catSelected, showCat };
+};
+
+export const useItemFunctions = () => {
+	const dispatch = useDispatch();
+	const MODELS = useSelector((state: RootState) => state.MODELS) as MODELSState;
+	const selectItem = useCallback(
+		(i: Option, Search: SearchMode = '') => {
+			const expandItem = !MODELS[`expandItem${Search}`];
+			dispatch(expandItemAction(expandItem, Search));
+			if (expandItem) {
+				dispatch(updateStateModelData(getCollapsePayload(`item${Search}`)));
+			}
+			if (Search) {
+				if (itemIdSearch === i.i) {
+					return;
+				}
+				[itemIdSearch, itemObjSearch] = [i.i, i];
+			} else {
+				if (itemId === i.i) {
+					return;
+				}
+				[itemId, itemObj] = [i.i, i];
+			}
+			dispatch(selectItemAction(Search ? itemIdSearch : itemId, Search ? itemObjSearch : itemObj, Search));
+		},
+		[MODELS, dispatch]
+	);
+
+	const itemSelected = useCallback(
+		(i: Option, Search: SearchMode = '') => MODELS[`itemId${Search}`] === i.i,
+		[MODELS]
+	);
+	const showItem = useCallback(
+		(i: Option, Search: SearchMode = '') => {
+			const [expandItem, itemId] = [MODELS[`expandItem${Search}`], MODELS[`itemId${Search}`]];
+			return !!expandItem || (!i.i && !itemId) || itemId === i.i;
+		},
+		[MODELS]
+	);
+	return { selectItem, itemSelected, showItem };
+};
+
+export const clearScreen = () => {
+	provId = '';
+	provObj = null;
+	cityId = '';
+	cityObj = null;
+	catId = '';
+	catObj = null;
+	itemId = '';
+	itemObj = null;
+	cityIdSearch = '';
+	provIdSearch = '';
+	provObjSearch = null;
+	cityObjSearch = null;
+	catIdSearch = '';
+	catObjSearch = null;
+	itemIdSearch = '';
+	itemObjSearch = null;
+};
+
+export const initCity = (value: Identifier | '', search: boolean = false) => {
+	if (search) {
+		cityIdSearch = value;
+	} else {
+		cityId = value;
+	}
+};
+
+export const initItem = (value: Identifier | '', search: boolean = false) => {
+	if (search) {
+		itemIdSearch = value;
+	} else {
+		itemId = value;
+	}
 };
