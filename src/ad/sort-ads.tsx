@@ -1,5 +1,5 @@
 import React from 'react';
-import { DropdownButton, MenuItem } from 'react-bootstrap';
+import Dropdown from '../common/dropdown';
 import { useLocalizationContext } from '../context/localization-context';
 
 const menuData = {
@@ -20,21 +20,15 @@ const SortAds = ({ onSort, sort }: SortAdsProps) => {
 	const { getLocalizedLabel: getLabel } = useLocalizationContext();
 	return (
 		<div className='sort-dropdown'>
-			<DropdownButton
-				bsSize='small'
+			<Dropdown
 				title={`${getLabel('sort_by')}: ${getLabel(menuData[sort])}`}
-				pullRight
 				id='split-button-pull-right'
-				noCaret
-			>
-				{(Object.keys(menuData) as SortKey[])
+				pullRight
+				options={(Object.keys(menuData) as SortKey[])
 					.filter((key) => key !== sort)
-					.map((key) => (
-						<MenuItem eventKey={key} key={key} onSelect={() => onSort(key)}>
-							{getLabel(menuData[key])}
-						</MenuItem>
-					))}
-			</DropdownButton>
+					.map((key) => ({ key, label: getLabel(menuData[key]) }))}
+				onSelect={onSort}
+			/>
 		</div>
 	);
 };

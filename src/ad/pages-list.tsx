@@ -1,6 +1,6 @@
 import React from 'react';
-import { DropdownButton, MenuItem } from 'react-bootstrap';
 import { AdInfo } from '../common/ad-info';
+import Dropdown from '../common/dropdown';
 import type { Identifier } from '../types/common';
 import type { Advertise } from '../types/ad';
 import { useLocalizationContext } from '../context/localization-context';
@@ -35,15 +35,22 @@ const PagesList = ({ pages, searchAd, currentPage, ads }: PagesListProps) => {
 
 	return (
 		<div className="page-dropdown">
-			<DropdownButton bsSize="small" title={title} id="split-button-pull-left" noCaret>
-				{pages
+			<Dropdown
+				title={title}
+				id="split-button-pull-left"
+				options={pages
 					.filter(page => +page.i !== +currentPage)
-					.map(page => (
-						<MenuItem key={page.i} onSelect={() => functionRef(+currentPage, page)}>
-							{`${getLabel('jump_page')} ${page.n}`}
-						</MenuItem>
-					))}
-			</DropdownButton>
+					.map(page => ({
+						key: String(page.i),
+						label: `${getLabel('jump_page')} ${page.n}`,
+					}))}
+				onSelect={key => {
+					const page = pages.find(item => String(item.i) === key);
+					if (page) {
+						functionRef(+currentPage, page);
+					}
+				}}
+			/>
 			<div style={{ marginLeft: '5px' }}>
 				{adsCount} {getLabel(adsCount === 1 ? 'ad_found' : 'ads_found')}
 			</div>
