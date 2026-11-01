@@ -4,7 +4,8 @@ type CacheEntry = {
 };
 
 class _Cache {
-	#_milliSeconds = 1800000;
+	#_timeToLive = 1800000;
+	#_maxEntries = 100;
 	#_store: Map<string, CacheEntry>;
 
 	constructor() {
@@ -15,26 +16,37 @@ class _Cache {
 		const entry = this.#_store.get(key);
 
 		if (entry) {
-			const diff = Date.now() - entry.time;
-
-			return diff > this.#_milliSeconds ? null : (entry.data as T);
+			if (Date.now() - entry.time >= this.#_timeToLive) {
+				this.#_store.delete(key);
+				return null;
+			}
+			return this.#_clone(entry.data) as T;
 		}
 
 		return null;
 	}
 
 	key(script: string, data: Record<string, unknown> = {}): string {
-		return Object.entries(data).reduce(
-			(accumulation, [paramKey, paramValue]) => `${accumulation}&${paramKey}=${String(paramValue)}`,
-			script
-		);
+		const params = Object.keys(data)
+			.sort()
+			.map(paramKey => [paramKey, typeof data[paramKey], data[paramKey]]);
+		return JSON.stringify([script, params]);
 	}
 
 	add<T>(key: string, data: T): void {
+		this.#_removeExpired();
+		this.#_store.delete(key);
 		this.#_store.set(key, {
 			time: Date.now(),
-			data,
+			data: this.#_clone(data),
 		});
+		while (this.#_store.size > this.#_maxEntries) {
+			const oldestKey = this.#_store.keys().next().value;
+			if (oldestKey === undefined) {
+				break;
+			}
+			this.#_store.delete(oldestKey);
+		}
 	}
 
 	clear(): void {
@@ -42,7 +54,27 @@ class _Cache {
 	}
 
 	size(): number {
+		this.#_removeExpired();
 		return this.#_store.size;
+	}
+
+	#_removeExpired(): void {
+		const now = Date.now();
+		this.#_store.forEach((entry, key) => {
+			if (now - entry.time >= this.#_timeToLive) {
+				this.#_store.delete(key);
+			}
+		});
+	}
+
+	#_clone<T>(value: T): T {
+		if (value === null || typeof value !== 'object') {
+			return value;
+		}
+		if (typeof structuredClone === 'function') {
+			return structuredClone(value);
+		}
+		return JSON.parse(JSON.stringify(value)) as T;
 	}
 }
 

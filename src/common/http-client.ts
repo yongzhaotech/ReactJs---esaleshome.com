@@ -63,6 +63,7 @@ export const routes: Record<string, Route> = {
 };
 
 const endPoint = (script: string): string => script.split('/').pop() || '';
+const cacheableScripts = new Set(['search-advertise', 'advertise', 'advertise-detail']);
 
 const sendRequest = (data: string[], script: string, cache: CacheOptions = {}): Promise<ApiResponse> => {
 	let cacheKey: string | undefined,
@@ -80,12 +81,12 @@ const sendRequest = (data: string[], script: string, cache: CacheOptions = {}): 
 		const xhr = new XMLHttpRequest();
 		xhr.onload = () => {
 			if (xhr.status === 200) {
+				const response: ApiResponse = { data: xhr.response as ApiData };
 				if (cache.requireCache) {
-					if (cacheKey) {
-						Cache.add(cacheKey, { data: xhr.response as ApiData });
+					if (cacheKey && response.data && response.data.error === undefined && !response.data.sessionExpire) {
+						Cache.add(cacheKey, response);
 					}
 				}
-				const response: ApiResponse = { data: xhr.response as ApiData };
 				res(response);
 				if (response.data.sessionExpire) {
 					Helper.location('user-account');
@@ -262,7 +263,10 @@ const Http = {
 	},
 
 	Fetch: (script: string, requestData: RequestData): Promise<ApiResponse> =>
-		ServerRequest(script, requestData, { requireCache: true, requestData: requestData }),
+		ServerRequest(script, requestData, {
+			requireCache: cacheableScripts.has(script),
+			requestData: requestData,
+		}),
 
 	/**
 	 * @description when the promise is fullfilled, do something interactively

@@ -71,7 +71,13 @@ const dataFetchInfo: Record<DataKey, DataFetchInfo> = {
 
 type RootState = ReturnType<typeof RootReducer>;
 
-export const signOut = () => Http.ServerRequest('sign-out', { action: 'sign_out' });
+export const signOut = () =>
+	Http.ServerRequest('sign-out', { action: 'sign_out' }).then(response => {
+		if (response.data.ok) {
+			Cache.clear();
+		}
+		return response;
+	});
 
 export const fetchUserDataFromServer = ({ dataKey, page }: UserDataFetchArg) => {
 	const info = dataFetchInfo[dataKey],

@@ -101,6 +101,7 @@ const UserFunction = {
 			() => {
 				Http.ServerRequest('sign-out', {action: 'sign_out'}).then((promise: ServerResponse) => {
 					if(promise.data.ok) {
+						Cache.clear();
 						signOutUser();
 					}else {
 						Helper.addMessage(promise.data, true);

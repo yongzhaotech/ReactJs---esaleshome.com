@@ -6,6 +6,7 @@ import { Helper } from '../../common/js-funcs';
 import { getLabel } from '../../common/label';
 import { fetchUserDataSuccess } from '../../action';
 import type { Identifier } from '../../types/common';
+import { Cache } from '../../utils';
 
 interface AdminCategoryItem {
 	i: Identifier;
@@ -57,6 +58,7 @@ AdminFunction = {
             if(promise.data.error) {
                 Helper.addMessage(promise.data.error, true);
             }else {
+				Cache.clear();
                 Helper.addMessage(promise.data.message);
             }
         });
@@ -70,6 +72,7 @@ AdminFunction = {
 					if(promise.data.error) {
 						Helper.addMessage(promise.data.error, true);
 					}else {
+						Cache.clear();
 						removeAdRow(ad);
 						Helper.location('admin-ads');
 					}
