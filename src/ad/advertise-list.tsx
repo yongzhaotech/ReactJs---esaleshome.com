@@ -1,4 +1,5 @@
 import React, { Suspense, use, useEffect, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useSelector } from 'react-redux';
 import { AdInfo } from '../common/ad-info';
 import SearchTerms from './search-terms';
@@ -6,7 +7,7 @@ import PagesList from './pages-list';
 import AdvertiseSnippets from './advertise-snippets';
 import SortAds from './sort-ads';
 import ReactLoader from './react-loader';
-
+import { useLocalizationContext } from '../context/localization-context';
 import type { Advertise } from '../types/ad';
 
 type SortKey = 'create_date,asc' | 'create_date,des' | 'price,asc' | 'price,des';
@@ -29,30 +30,30 @@ interface AdvertiseListState {
 }
 
 const applySorting = (sorting: SortKey) => (a: Advertise, b: Advertise) => {
-		if (!sorting) {
-			return 0;
+	if (!sorting) {
+		return 0;
+	}
+	const [by, type] = sorting.split(',') as ['create_date' | 'price', 'asc' | 'des'],
+		[A, B] = by === 'price' ? [a.price, b.price] : [a.create_date, b.create_date];
+	if (type === 'asc') {
+		if (A < B) {
+			return -1;
 		}
-		const [by, type] = sorting.split(',') as ['create_date' | 'price', 'asc' | 'des'],
-			[A, B] = by === 'price' ? [a.price, b.price] : [a.create_date, b.create_date];
-		if (type === 'asc') {
-			if (A < B) {
-				return -1;
-			}
-			if (A > B) {
-				return 1;
-			}
-			return 0;
-		} else if (type === 'des') {
-			if (A < B) {
-				return 1;
-			}
-			if (A > B) {
-				return -1;
-			}
-			return 0;
+		if (A > B) {
+			return 1;
 		}
 		return 0;
-	};
+	} else if (type === 'des') {
+		if (A < B) {
+			return 1;
+		}
+		if (A > B) {
+			return -1;
+		}
+		return 0;
+	}
+	return 0;
+};
 
 interface AdvertiseResultsProps {
 	pages: Page[];
@@ -129,6 +130,7 @@ const AdvertiseList = () => {
 	const [sorting, setSorting] = useState<SortKey>('create_date,des');
 	const [start, setStart] = useState(0);
 	const performSearch = useSelector((state: AdvertiseListState) => state.performSearch);
+	const { getLocalizedLabel: getLabel } = useLocalizationContext();
 
 	useEffect(() => {
 		if (performSearch) {
@@ -137,13 +139,15 @@ const AdvertiseList = () => {
 	}, [performSearch]);
 
 	return (
-		<Suspense fallback={<ReactLoader />}>
-			{performSearch ? (
-				<SearchAdvertiseList sorting={sorting} onSort={setSorting} />
-			) : (
-				<HomeAdvertiseList sorting={sorting} start={start} onPageChange={setStart} onSort={setSorting} />
-			)}
-		</Suspense>
+		<ErrorBoundary fallback={<strong>{getLabel('unknown_error')}</strong>}>
+			<Suspense fallback={<ReactLoader />}>
+				{performSearch ? (
+					<SearchAdvertiseList sorting={sorting} onSort={setSorting} />
+				) : (
+					<HomeAdvertiseList sorting={sorting} start={start} onPageChange={setStart} onSort={setSorting} />
+				)}
+			</Suspense>
+		</ErrorBoundary>
 	);
 };
 

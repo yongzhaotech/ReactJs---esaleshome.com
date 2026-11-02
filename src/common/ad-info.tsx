@@ -292,28 +292,28 @@ const searchSequence = {
 			}
 
 			const request = Http.Fetch('advertise', data)
-					.then((promise) => {
-						if (promise.data.error) {
-							throw promise.data.error;
-						}
-						if (promise.data.ads) {
-							return {
-								ads: promise.data.ads.angular_ads,
-								pages: promise.data.ads.angular_ad_pages.p,
-								currentPage: promise.data.ads.angular_ad_pages.c,
-								searchAd: false,
-							};
-						} else {
-							return {};
-						}
-					})
-					.catch((reason: unknown) => {
-						const error =
-							reason && typeof reason === 'object' && 'error' in reason
-								? reason.error
-								: reason;
-						return { error: typeof error === 'string' ? error : getLabel('unknown_error') };
-					});
+				.then((promise) => {
+					if (promise.data.error) {
+						throw promise.data.error;
+					}
+					if (promise.data.ads) {
+						return {
+							ads: promise.data.ads.angular_ads,
+							pages: promise.data.ads.angular_ad_pages.p,
+							currentPage: promise.data.ads.angular_ad_pages.c,
+							searchAd: false,
+						};
+					} else {
+						return {};
+					}
+				})
+				.catch((reason: unknown) => {
+					const error =
+						reason && typeof reason === 'object' && 'error' in reason
+							? reason.error
+							: reason;
+					return Promise.reject(typeof error === 'string' ? error : getLabel('unknown_error'));
+				});
 			Cache.add(cacheKey, request);
 			return request;
 		},
