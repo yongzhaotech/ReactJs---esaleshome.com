@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Pager } from 'react-bootstrap';
 import { Helper } from '../common/js-funcs';
 import { useLocalizationContext } from '../context/localization-context';
 
@@ -57,11 +56,21 @@ const MessageBox = ({ messageCenter }: MessageBoxProps) => {
 				))}
 			</div>
 			{messageCenter.functionFlag ? (
-				<Pager>
+				<>
 					<div className='devider'></div>
-					<Pager.Item onClick={Helper.executeFunc}>{getLocalizedLabel('r_ok_btn')}</Pager.Item>{' '}
-					<Pager.Item onClick={() => Helper.clearMessage()}>{getLocalizedLabel('r_cancel_btn')}</Pager.Item>
-				</Pager>
+					<ul className='pager'>
+						<li>
+							<button type='button' className='pager-button' onClick={Helper.executeFunc}>
+								{getLocalizedLabel('r_ok_btn')}
+							</button>
+						</li>
+						<li>
+							<button type='button' className='pager-button' onClick={() => Helper.clearMessage()}>
+								{getLocalizedLabel('r_cancel_btn')}
+							</button>
+						</li>
+					</ul>
+				</>
 			) : null}
 		</div>
 	);

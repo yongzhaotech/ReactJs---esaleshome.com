@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, type Root } from 'react-dom/client';
 import { Http } from '../../common/http-client';
 import { Engine } from '../../common/engine';
 import { Helper } from '../../common/js-funcs';
@@ -33,6 +33,7 @@ interface AdminAd {
 
 let admPageVars: Record<string, Record<string, AdminCategoryItem[]>> = {},
 	ipListsViewed: Record<string, HTMLTableRowElement> = {},
+	detailRoots = new WeakMap<HTMLElement, Root>(),
 	table: HTMLElement | null = null;
 
 const statuses: Record<string, string> = {0: 'inactive', 1: 'active'},
@@ -157,6 +158,10 @@ AdminFunction = {
 	clearHits: (): void => {
 		for(const e of Object.keys(ipListsViewed)) {
 			if(table && document.getElementById('ip_' + e)) {
+				const detailCell = ipListsViewed[e].querySelector('td');
+				if (detailCell) {
+					detailRoots.get(detailCell)?.unmount();
+				}
 				table.removeChild(ipListsViewed[e]);
 			}
 		}
@@ -176,6 +181,10 @@ AdminFunction = {
 		}
 		
         if(ipListsViewed[visitorIp] && document.getElementById('detail_' + visitorIp)) {
+			const detailCell = ipListsViewed[visitorIp].querySelector('td');
+			if (detailCell) {
+				detailRoots.get(detailCell)?.unmount();
+			}
             tb.removeChild(ipListsViewed[visitorIp]);
             delete ipListsViewed[visitorIp];
         }else {
@@ -236,7 +245,14 @@ AdminFunction = {
 						);
 					}
 
-					ReactDOM.render(html, td);
+					if (td.isConnected) {
+						let root = detailRoots.get(td);
+						if (!root) {
+							root = createRoot(td);
+							detailRoots.set(td, root);
+						}
+						root.render(html);
+					}
                 }
             });
 

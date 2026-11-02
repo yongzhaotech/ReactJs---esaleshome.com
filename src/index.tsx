@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { createStore, applyMiddleware, compose } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { Provider } from 'react-redux';
@@ -37,7 +37,12 @@ Engine.register(store);
 
 sagaMiddleware.run(RootSaga);
 
-ReactDOM.render((
+const rootElement = document.getElementById('esaleshome-root');
+if (!rootElement) {
+	throw new Error('Application root element was not found');
+}
+
+createRoot(rootElement).render((
 	<Provider store={store}>
 		<CookiesProvider>
 			<PersistGate loading={null} persistor={persistStore(store)}>
@@ -45,6 +50,5 @@ ReactDOM.render((
 			</PersistGate>
 		</CookiesProvider>
 	</Provider>
-), document.getElementById('esaleshome-root')
-);
+));
 registerServiceWorker();

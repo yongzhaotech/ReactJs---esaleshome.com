@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, ButtonToolbar } from 'react-bootstrap';
 import { Helper } from '../common/js-funcs';
 import { fetchVisitorAdvertise, clearStateModelData } from '../action';
 import RootReducer from '../reducer';
@@ -331,12 +330,12 @@ const VisitorAdvertise = () => {
 			</div>
 			<div className='ad_box_field'>
 				<div className='ad_box_label'></div>
-				<ButtonToolbar>
+				<div className='btn-toolbar' role='toolbar'>
 					<SubmitButton label='p_upt_post' name='work_on_advertise' post />
-					<Button bsStyle='success' bsSize='small' onClick={deleteVisitorAdd}>
+					<button type='button' className='btn btn-success btn-sm' onClick={deleteVisitorAdd}>
 						{getLabel('p_del_post')}
-					</Button>
-				</ButtonToolbar>
+					</button>
+				</div>
 			</div>
 		</form>
 	);

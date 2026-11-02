@@ -1,6 +1,5 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Button } from 'react-bootstrap';
 import browser from '../image/gui/search-icon.svg';
 import { Engine } from '../common/engine';
 import { Helper } from '../common/js-funcs';
@@ -13,7 +12,7 @@ import { useUserFunctions } from '../hook/user-function-hook';
 
 type RootState = ReturnType<typeof RootReducer>;
 
-interface MessageCenter {
+type MessageCenter = {
 	MESSAGEFLAG: string;
 	MESSAGE: string[];
 	functionFlag?: boolean;
@@ -21,29 +20,24 @@ interface MessageCenter {
 
 const Footer = () => {
 	const boxes = useSelector((state: RootState) => state.BOXES);
-	const messageCenter = useSelector((state: RootState): MessageCenter => ({
-		MESSAGEFLAG: typeof state.messageCenter.MESSAGEFLAG === 'string' ? state.messageCenter.MESSAGEFLAG : '',
-		MESSAGE: Array.isArray(state.messageCenter.MESSAGE)
-			? state.messageCenter.MESSAGE.filter((message): message is string => typeof message === 'string')
-			: [],
-		functionFlag: state.messageCenter.functionFlag === true,
-	}));
+	const { MESSAGEFLAG = '', MESSAGE = [], functionFlag = false } = useSelector((state: RootState) => state.messageCenter) as MessageCenter;
+
 	const { getLocalizedLabel } = useLocalizationContext();
 	const { signOut } = useUserFunctions();
 	const off = boxes.box === 'search' ? 'off' : '';
-	const siteMsg = messageCenter.MESSAGEFLAG ? 'site_msg_active' : 'site_msg';
+	const siteMsg = MESSAGEFLAG ? 'site_msg_active' : 'site_msg';
 
 	return (
 		<footer>
 			<div className='footer'>
 				{Engine.userSignedIn() ? (
-					<Button bsSize='small' className='custom-button-white' onClick={signOut}>
+					<button type='button' className='custom-button-white btn btn-default btn-sm' onClick={signOut}>
 						{getLocalizedLabel('c_sign_out')}
-					</Button>
+					</button>
 				) : (
-					<Button bsSize='small' className='custom-button-white' onClick={() => Helper.launchMenu('login')}>
+					<button type='button' className='custom-button-white btn btn-default btn-sm' onClick={() => Helper.launchMenu('login')}>
 						{getLocalizedLabel('c_sign_in')}
-					</Button>
+					</button>
 				)}
 				<button
 					type='button'
@@ -63,7 +57,7 @@ const Footer = () => {
 				></div>
 			</div>
 			<section className={siteMsg}>
-				<MessageBox messageCenter={messageCenter} />
+				<MessageBox messageCenter={{ MESSAGEFLAG, MESSAGE, functionFlag }} />
 			</section>
 			<Menus />
 			<LargeImages />

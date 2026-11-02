@@ -53,6 +53,10 @@ class _Cache {
 		this.#_store.clear();
 	}
 
+	delete(key: string): void {
+		this.#_store.delete(key);
+	}
+
 	size(): number {
 		this.#_removeExpired();
 		return this.#_store.size;
@@ -69,6 +73,9 @@ class _Cache {
 
 	#_clone<T>(value: T): T {
 		if (value === null || typeof value !== 'object') {
+			return value;
+		}
+		if ('then' in value && typeof value.then === 'function') {
 			return value;
 		}
 		if (typeof structuredClone === 'function') {

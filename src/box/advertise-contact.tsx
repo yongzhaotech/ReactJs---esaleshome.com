@@ -12,7 +12,8 @@ const AdvertiseContact = () => {
 	const { getLocalizedLabel } = useLocalizationContext();
 	const { createActionReference } = useReferenceContext();
 
-	const advertiseId = typeof id === 'string' || typeof id === 'number' ? id : undefined;
+	const advertiseId = typeof id === 'string' || typeof id === 'number' ? id : undefined,
+		advertiseName = typeof name === 'string' || typeof name === 'number' ? name : '';
 
 	return (
 		<div id='ask_poster_box' className='ad_action_box box-in' ref={createActionReference}>
@@ -22,7 +23,7 @@ const AdvertiseContact = () => {
 						style={{ height: '19px', fontStyle: 'oblique', fontWeight: 'bold', color: '#1b0af9' }}
 						id='advertise_name'
 					>
-						{name}
+						{advertiseName}
 					</div>
 					<div className='account_box_title'>{getLocalizedLabel('c_contact_poster_title')}</div>
 					<div>

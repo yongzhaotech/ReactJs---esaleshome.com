@@ -15,9 +15,10 @@ interface PagesListProps {
 	searchAd: boolean;
 	currentPage: Identifier;
 	ads: Advertise[];
+	onHomePageChange?: (page: number) => void;
 }
 
-const PagesList = ({ pages, searchAd, currentPage, ads }: PagesListProps) => {
+const PagesList = ({ pages, searchAd, currentPage, ads, onHomePageChange }: PagesListProps) => {
 	const { getLocalizedLabel: getLabel } = useLocalizationContext();
 	const functionRef = searchAd ? AdInfo.selectSearchPage : AdInfo.selectHomePage;
 	const adsCount = ads.length;
@@ -47,7 +48,11 @@ const PagesList = ({ pages, searchAd, currentPage, ads }: PagesListProps) => {
 				onSelect={key => {
 					const page = pages.find(item => String(item.i) === key);
 					if (page) {
-						functionRef(+currentPage, page);
+						if (!searchAd && onHomePageChange) {
+							onHomePageChange(page.i);
+						} else {
+							functionRef(+currentPage, page);
+						}
 					}
 				}}
 			/>

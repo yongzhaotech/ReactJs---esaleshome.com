@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button } from 'react-bootstrap';
 import { fetchAdvertise } from '../action';
 import SearchTerms from './search-terms';
 import ReactLoader from './react-loader';
@@ -74,28 +73,28 @@ const AdvertiseDetail = () => {
 					<div className='devider'></div>
 					{AdInfo.byMail(advertise) && (
 						<div>
-							<Button
-								bsStyle='primary'
-								bsSize='small'
+							<button
+								type='button'
+								className='btn btn-primary btn-sm'
 								onClick={() =>
 									Helper.attachActionBox('ask_poster', { id: advertise.id, name: advertise.name })
 								}
 							>
 								{getLabel('c_contact_poster_link')}
-							</Button>
+							</button>
 						</div>
 					)}
 					<div className='devider'></div>
 					<div>
-						<Button
-							bsStyle='primary'
-							bsSize='small'
+						<button
+							type='button'
+							className='btn btn-primary btn-sm'
 							onClick={() =>
 								Helper.attachActionBox('email_friend', { id: advertise.id, name: advertise.name })
 							}
 						>
 							{getLabel('c_email_friend_link')}
-						</Button>
+						</button>
 					</div>
 				</div>
 			</div>

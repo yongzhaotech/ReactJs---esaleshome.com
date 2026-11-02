@@ -1,5 +1,4 @@
 import React from 'react';
-import { Alert } from 'react-bootstrap';
 import { Helper } from '../common/js-funcs';
 import AdminTabs from './admin/admin-tabs';
 import { session } from '../utils';
@@ -51,12 +50,12 @@ const UserTabs = () => {
 
 	return (
 		<section className='not-signed-in'>
-			<Alert bsStyle='warning'>
+			<div className='alert alert-warning'>
 				<strong>{getLabel('not_sign_in')}</strong>.{' '}
 				<button type='button' className='action-button' onClick={() => Helper.launchMenu('login')}>
 					{getLabel('c_sign_in')}
 				</button>
-			</Alert>
+			</div>
 		</section>
 	);
 };

@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Badge, Image, Col } from 'react-bootstrap';
 import { AdInfo } from '../common/ad-info';
 import { smallImageSrc } from '../common/config';
 import Glyphicon from './ad-glyphicon';
@@ -18,20 +17,19 @@ interface AdvertiseSnippetState {
 	OBJECTS: {
 		DETAILFLAG?: string | number;
 	};
-	IMAGES: Record<string, boolean>;
 }
 
 const AdvertiseSnippet = ({ ad }: AdvertiseSnippetProps) => {
 	const OBJECTS = useSelector((state: AdvertiseSnippetState) => state.OBJECTS),
-		IMAGES = useSelector((state: AdvertiseSnippetState) => state.IMAGES),
+		[failedImageId, setFailedImageId] = useState<Advertise['picture_id'] | null>(null),
 		photo = +ad.picture_id ? 'photo' : '',
-		image = !!IMAGES[ad.picture_id] ? ad.picture_id : '0';
+		image = +ad.picture_id && failedImageId !== ad.picture_id ? ad.picture_id : '0';
 
 	const { lang: LANGUAGE, getLocalizedLabel: getLabel } = useLocalizationContext();
 	const { viewImages, flagDetail } = useAdvertiseFunctions();
 
 	return (
-		<Col xs={6} sm={4} md={3}>
+		<div className='col-xs-6 col-sm-4 col-md-3'>
 			<div className={`ad_block ${OBJECTS.DETAILFLAG === ad.id ? 'dtl_bk' : ''}`}>
 				<div className={`block_icon ${photo}`}>
 					<button
@@ -40,12 +38,21 @@ const AdvertiseSnippet = ({ ad }: AdvertiseSnippetProps) => {
 						aria-label='View larger image'
 						onClick={() => viewImages(ad)}
 					>
-						<Image src={`${smallImageSrc}${image}.jpg`} thumbnail className='ad_image' alt={ad.name} />
+						<img
+							src={`${smallImageSrc}${image}.jpg`}
+							className='img-thumbnail ad_image'
+							alt={ad.name}
+							onError={() => {
+								if (image !== '0') {
+									setFailedImageId(ad.picture_id);
+								}
+							}}
+						/>
 					</button>
 				</div>
 				<div className='block_spacer'></div>
 				<div className='block_price'>
-					<Badge>{ad.price_display[LANGUAGE]}</Badge>
+					<span className='badge'>{ad.price_display[LANGUAGE]}</span>
 				</div>
 				<div className='block_price'>
 					{getLabel('r_ad_listed')}: {ad.create_date}
@@ -82,7 +89,7 @@ const AdvertiseSnippet = ({ ad }: AdvertiseSnippetProps) => {
 				</div>
 			</div>
 			<div className='block_spacer'></div>
-		</Col>
+		</div>
 	);
 };
 

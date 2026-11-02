@@ -8,7 +8,7 @@ import LoginBox from './login-box';
 import Register from './register';
 import SearchBox from './search-box';
 
-export const Boxes: Record<string, () => JSX.Element> = {
+export const Boxes: Record<string, () => React.ReactElement> = {
 	ask_poster: () => <AdvertiseContact />,
 	contact_us: () => <ContactUs />,
 	email_friend: () => <EmailFriendBox />,

@@ -1,6 +1,6 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchAdvertises } from '../action';
+import React, { Suspense, use, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { AdInfo } from '../common/ad-info';
 import SearchTerms from './search-terms';
 import PagesList from './pages-list';
 import AdvertiseSnippets from './advertise-snippets';
@@ -52,43 +52,98 @@ const applySorting = (sorting: SortKey) => (a: Advertise, b: Advertise) => {
 			return 0;
 		}
 		return 0;
-	},
-	sortAds = (setState: React.Dispatch<React.SetStateAction<SortKey>>) => (eventKey: SortKey) => {
-		setState(eventKey);
 	};
 
-/**
- * @description shared by search and list screens
- * before page mounts checkResultSets is called once, when page re-mounts checkResultSets is called once too
- * re-mounts happens when the user clicks on the "Home" button or search returns a result set
- */
-const AdvertiseList = () => {
-	const [sorting, setSorting] = React.useState<SortKey>('create_date,des'),
-		dispatch = useDispatch(),
-		performSearch = useSelector((state: AdvertiseListState) => state.performSearch),
-		resultSets = useSelector((state: AdvertiseListState) => state.advertiseList.resultSets || {}),
-		pages = resultSets.pages || [],
-		currentPage = resultSets.currentPage || 0,
-		searchAd = resultSets.searchAd || false,
-		ads = React.useMemo(() => resultSets.ads?.sort(applySorting(sorting)), [resultSets.ads, sorting]);
+interface AdvertiseResultsProps {
+	pages: Page[];
+	currentPage: number;
+	searchAd: boolean;
+	ads: Advertise[];
+	sorting: SortKey;
+	onHomePageChange?: (page: number) => void;
+	onSort: (key: SortKey) => void;
+}
 
-	React.useEffect(() => {
-		if (!performSearch) {
-			dispatch(fetchAdvertises());
-		}
-	}, [dispatch, performSearch]);
+const AdvertiseResults = ({ pages, currentPage, searchAd, ads: unsortedAds, sorting, onHomePageChange, onSort }: AdvertiseResultsProps) => {
+	const ads = useMemo(() => unsortedAds.slice().sort(applySorting(sorting)), [unsortedAds, sorting]);
 
 	return (
-		(ads?.length && (
+		(ads.length && (
 			<React.Fragment>
 				<SearchTerms />
 				<div className='page-list'>
-					<PagesList {...{ pages, searchAd, currentPage, ads }} />
-					{ads.length > 1 ? <SortAds onSort={sortAds(setSorting)} sort={sorting} /> : null}
+					<PagesList {...{ pages, searchAd, currentPage, ads, onHomePageChange }} />
+					{ads.length > 1 ? <SortAds onSort={onSort} sort={sorting} /> : null}
 				</div>
-				<AdvertiseSnippets ads={[...ads]} />
+				<AdvertiseSnippets ads={ads} />
 			</React.Fragment>
 		)) || <ReactLoader />
+	);
+};
+
+const SearchAdvertiseList = ({ sorting, onSort }: { sorting: SortKey; onSort: (key: SortKey) => void }) => {
+	const resultSets = useSelector((state: AdvertiseListState) => state.advertiseList.resultSets || {});
+	return resultSets.ads?.length ? (
+		<AdvertiseResults
+			pages={resultSets.pages || []}
+			currentPage={resultSets.currentPage || 0}
+			searchAd={resultSets.searchAd || false}
+			ads={resultSets.ads}
+			sorting={sorting}
+			onSort={onSort}
+		/>
+	) : <ReactLoader />;
+};
+
+const HomeAdvertiseList = ({ sorting, start, onPageChange, onSort }: {
+	sorting: SortKey;
+	start: number;
+	onPageChange: (page: number) => void;
+	onSort: (key: SortKey) => void;
+}) => {
+	const result = use(AdInfo.listAdvertises(start));
+	if (result.error) {
+		return <div role='alert'>{result.error}</div>;
+	}
+	if (!result.ads?.length) {
+		return <ReactLoader />;
+	}
+	return (
+		<AdvertiseResults
+			pages={result.pages || []}
+			currentPage={result.currentPage || 0}
+			searchAd={false}
+			ads={result.ads}
+			sorting={sorting}
+			onHomePageChange={onPageChange}
+			onSort={onSort}
+		/>
+	);
+};
+
+/**
+ * Search results stay in Redux; home pages are loaded through a cached promise
+ * so React can suspend while the requested page is fetched.
+ */
+const AdvertiseList = () => {
+	const [sorting, setSorting] = useState<SortKey>('create_date,des');
+	const [start, setStart] = useState(0);
+	const performSearch = useSelector((state: AdvertiseListState) => state.performSearch);
+
+	useEffect(() => {
+		if (performSearch) {
+			setStart(0);
+		}
+	}, [performSearch]);
+
+	return (
+		<Suspense fallback={<ReactLoader />}>
+			{performSearch ? (
+				<SearchAdvertiseList sorting={sorting} onSort={setSorting} />
+			) : (
+				<HomeAdvertiseList sorting={sorting} start={start} onPageChange={setStart} onSort={setSorting} />
+			)}
+		</Suspense>
 	);
 };
 

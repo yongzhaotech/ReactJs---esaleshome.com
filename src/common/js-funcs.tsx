@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button, ButtonToolbar, Glyphicon } from 'react-bootstrap';
 import { getLabel, Label } from './label';
 // import { AdFuncs } from './ad-funcs';
 import { Engine } from './engine';
@@ -112,14 +111,14 @@ const buttonClass = (): ButtonStyle => {
 		Engine.dispatch(messageCenter(ADD_MESSAGE, message, error));
 	},
 	submitButton = (label: string, name: string, post: boolean = false) => (
-		<Button bsStyle={buttonClass()} bsSize='small' onClick={() => submitForm(name, post)}>
+		<button type='button' className={`btn btn-${buttonClass()} btn-sm`} onClick={() => submitForm(name, post)}>
 			{getLabel(label as Label)}
-		</Button>
+		</button>
 	),
 	cancelButton = () => (
-		<Button bsStyle='success' bsSize='small' onClick={closeActionBox}>
+		<button type='button' className='btn btn-success btn-sm' onClick={closeActionBox}>
 			{getLabel('c_cancel')}
-		</Button>
+		</button>
 	),
 	Helper = {
 		/**
@@ -130,7 +129,7 @@ const buttonClass = (): ButtonStyle => {
 		inputLable: (lable: string, name: string) => {
 			return Engine.store().ERRORS[name] ? (
 				<div className='account_box_label' aria-label='error'>
-					<Glyphicon glyph='exclamation-sign' />
+					<span className='glyphicon glyphicon-exclamation-sign' aria-hidden='true' />
 					{getLabel(Engine.store().ERRORS[name] as Label)}
 				</div>
 			) : (
@@ -143,7 +142,7 @@ const buttonClass = (): ButtonStyle => {
 		errorLabel: (errorItem?: string | null) =>
 			errorItem ? (
 				<div aria-label='error'>
-					<Glyphicon glyph='exclamation-sign' />
+					<span className='glyphicon glyphicon-exclamation-sign' aria-hidden='true' />
 					{getLabel(errorItem as Label)}
 				</div>
 			) : null,
@@ -175,10 +174,10 @@ const buttonClass = (): ButtonStyle => {
 		 */
 		submitButtons: (label: string, name: string, post: boolean = false) => {
 			return (
-				<ButtonToolbar>
+				<div className='btn-toolbar' role='toolbar'>
 					{submitButton(label, name, post)}
 					{cancelButton()}
-				</ButtonToolbar>
+				</div>
 			);
 		},
 

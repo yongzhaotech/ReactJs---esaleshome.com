@@ -26,7 +26,7 @@ class Session {
 	}
 
 	get userSignedIn() {
-		return this.#_cookies?.get('user_is_signed_in') === '1';
+		return String(this.#_cookies?.get('user_is_signed_in') ?? '') === '1';
 	}
 
 	signOut() {

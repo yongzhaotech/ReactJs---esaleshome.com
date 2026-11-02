@@ -1,4 +1,3 @@
-import { Button } from 'react-bootstrap';
 import React from 'react';
 import { Helper } from '../common/js-funcs';
 import { useLocalizationContext } from '../context/localization-context';
@@ -38,19 +37,19 @@ const LoginBox = () => {
 				<div className='devider'></div>
 				<div>
 					<div className='devider'></div>
-					<Button
-						bsSize='small'
-						className='custom-button'
+					<button
+						type='button'
+						className='custom-button btn btn-default btn-sm'
 						onClick={() => Helper.launchMenu('forget_password')}
 					>
 						{getLocalizedLabel('c_fgt_passwd')}
-					</Button>
+					</button>
 				</div>
 				<div>
 					<div className='devider'></div>
-					<Button bsSize='small' className='custom-button' onClick={() => Helper.launchMenu('register')}>
+					<button type='button' className='custom-button btn btn-default btn-sm' onClick={() => Helper.launchMenu('register')}>
 						{getLocalizedLabel('c_gen_account')}
-					</Button>
+					</button>
 				</div>
 			</form>
 		</div>

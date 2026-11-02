@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import RootReducer from '../reducer';
 import { useLocalizationContext, Label } from '../context/localization-context';
 import { useForm } from '../hook/form-hook';
-import { Button, ButtonToolbar, Glyphicon } from 'react-bootstrap';
 import { useReferenceContext } from '../context/reference-context';
 import { addErrors, setActionBox } from '../action';
 
@@ -32,7 +31,7 @@ export const InputLabel = ({ fieldLabel, fieldName }: InputLabelProps) => {
 	if (errorLabel) {
 		return (
 			<div className='account_box_label' aria-label='error'>
-				<Glyphicon glyph='exclamation-sign' />
+				<span className='glyphicon glyphicon-exclamation-sign' aria-hidden='true' />
 				{getLocalizedLabel(errorLabel)}
 			</div>
 		);
@@ -50,7 +49,7 @@ export const ErrorLabel = ({ errorLabel }: ErrorLabelProps) => {
 	if (errorLabel) {
 		return (
 			<div aria-label='error'>
-				<Glyphicon glyph='exclamation-sign' />
+				<span className='glyphicon glyphicon-exclamation-sign' aria-hidden='true' />
 				{getLocalizedLabel(errorLabel as Label)}
 			</div>
 		);
@@ -69,9 +68,9 @@ export const SubmitButton = ({ label, name, post = false }: ButtonsProps) => {
 	}, [name, post, submitForm]);
 
 	return (
-		<Button bsStyle={buttonClass} bsSize='small' onClick={submit}>
+		<button type='button' className={`btn btn-${buttonClass} btn-sm`} onClick={submit}>
 			{getLabel(label as Label)}
-		</Button>
+		</button>
 	);
 };
 
@@ -93,15 +92,15 @@ const CancelButton = () => {
 	}, [clearActionBox, actionBox, dispatch]);
 
 	return (
-		<Button bsStyle='success' bsSize='small' onClick={closeActionBox}>
+		<button type='button' className='btn btn-success btn-sm' onClick={closeActionBox}>
 			{getLabel('c_cancel')}
-		</Button>
+		</button>
 	);
 };
 
 export const SubmitButtons = ({ label, name, post = false }: ButtonsProps) => (
-	<ButtonToolbar>
+	<div className='btn-toolbar' role='toolbar'>
 		<SubmitButton label={label} name={name} post={post} />
 		<CancelButton />
-	</ButtonToolbar>
+	</div>
 );

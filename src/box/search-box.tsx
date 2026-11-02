@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button, ButtonToolbar } from 'react-bootstrap';
 import { Helper } from '../common/js-funcs';
 import { Engine } from '../common/engine';
 import CategoryList from '../ad/category-list';
@@ -41,12 +40,12 @@ const SearchBox = () => {
 					/>
 				</div>
 				<div className='account_box_label'>
-					<ButtonToolbar>
-						<Button bsStyle='success' bsSize='small' onClick={() => Engine.dispatch(searchAdvertise())}>
+					<div className='btn-toolbar' role='toolbar'>
+						<button type='button' className='btn btn-success btn-sm' onClick={() => Engine.dispatch(searchAdvertise())}>
 							{getLocalizedLabel('c_search_btn')}
-						</Button>
+						</button>
 						{Helper.cancelButton()}
-					</ButtonToolbar>
+					</div>
 				</div>
 			</form>
 		</div>

@@ -24,12 +24,12 @@ type EditableAdvertise = Record<string, any> & {
 };
 
 const searchSequence = {
-		province: 1,
-		city: 2,
-		category: 3,
-		item: 4,
-		ad_keyword: 5,
-	},
+	province: 1,
+	city: 2,
+	category: 3,
+	item: 4,
+	ad_keyword: 5,
+},
 	swapper = {
 		province: 'provIdSearch',
 		city: 'cityIdSearch',
@@ -100,21 +100,21 @@ const searchSequence = {
 
 				return promise.data
 					? {
-							searchData: {
-								provIdSearch: promise.data.item.pr,
-								provObjSearch: provObj,
-								cityObjSearch: cityObj,
-								cityIdSearch: promise.data.item.ct,
-								catIdSearch: promise.data.item.ca,
-								catObjSearch: catObj,
-								itemObjSearch: itemObj,
-								itemIdSearch: promise.data.item.it,
-								adKeyword: promise.data.item.kw,
-								start: 0,
-							},
-							searchTerms: promise.data.search_terms,
-							advertiseDetail: promise.data,
-						}
+						searchData: {
+							provIdSearch: promise.data.item.pr,
+							provObjSearch: provObj,
+							cityObjSearch: cityObj,
+							cityIdSearch: promise.data.item.ct,
+							catIdSearch: promise.data.item.ca,
+							catObjSearch: catObj,
+							itemObjSearch: itemObj,
+							itemIdSearch: promise.data.item.it,
+							adKeyword: promise.data.item.kw,
+							start: 0,
+						},
+						searchTerms: promise.data.search_terms,
+						advertiseDetail: promise.data,
+					}
 					: null;
 			})
 			.catch((reason) => reason.error);
@@ -281,6 +281,41 @@ const searchSequence = {
 					}
 				);
 			});
+		},
+		// cache promise for later use of suspense boundary
+		listAdvertises: (start: Identifier): Promise<Record<string, any>> => {
+			const data = { start };
+			const cacheKey = Cache.key('advertise_list_promise', data);
+			const cachedPromise = Cache.get<Promise<Record<string, any>>>(cacheKey);
+			if (cachedPromise) {
+				return cachedPromise;
+			}
+
+			const request = Http.Fetch('advertise', data)
+					.then((promise) => {
+						if (promise.data.error) {
+							throw promise.data.error;
+						}
+						if (promise.data.ads) {
+							return {
+								ads: promise.data.ads.angular_ads,
+								pages: promise.data.ads.angular_ad_pages.p,
+								currentPage: promise.data.ads.angular_ad_pages.c,
+								searchAd: false,
+							};
+						} else {
+							return {};
+						}
+					})
+					.catch((reason: unknown) => {
+						const error =
+							reason && typeof reason === 'object' && 'error' in reason
+								? reason.error
+								: reason;
+						return { error: typeof error === 'string' ? error : getLabel('unknown_error') };
+					});
+			Cache.add(cacheKey, request);
+			return request;
 		},
 
 		searchAdvertise: searchAdvertise,
