@@ -43,7 +43,8 @@ const UserAdvertiseSnippets = () => {
 	);
 
 	if (!session.userSignedIn || !profile || !ads) {
-		return null;
+		// let the ErrorBoundary shows the error fallback
+		throw new Error('error');
 	}
 
 	return (

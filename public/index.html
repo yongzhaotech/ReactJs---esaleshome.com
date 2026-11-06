@@ -6,6 +6,15 @@
 	<meta name="google-site-verification" content="nYcCLtraHrjy7q-36JEwXtLaH2EdoZ07q9adK1WAZZc" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<meta name="theme-color" content="#000000">
+	<meta http-equiv="Content-Security-Policy" content="
+      default-src 'self'; 
+      script-src 'self' 'unsafe-inline' http://connect.facebook.net; 
+      connect-src 'self' http://localhost:88 https://maxcdn.bootstrapcdn.com; 
+      img-src 'self' data: http://localhost:88; 
+      style-src 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com; 
+      font-src 'self' https://maxcdn.bootstrapcdn.com data:; 
+      frame-src 'none'; 
+      object-src 'none';" />
 	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
 	<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"

@@ -92,7 +92,7 @@ const sendRequest = (data: string[], script: string, cache: CacheOptions = {}): 
 					Helper.location('user-account');
 				}
 			} else {
-				rej({ error: getLabel('backend_error') } as ApiError);
+				rej({ error: `${xhr.status}: ${xhr.statusText}` } as ApiError);
 			}
 		};
 		xhr.onerror = () => {
@@ -121,8 +121,8 @@ const ServerRequest = (script: string, requestData: RequestData, cache: CacheOpt
 
 const trackHit = (page?: string | null) => {
 	ServerRequest('request', { action: 'hits', uri: page ? page : route.pathName() })
-		.then(() => {})
-		.catch(() => {});
+		.then(() => { })
+		.catch(() => { });
 };
 
 const submit = (data: {

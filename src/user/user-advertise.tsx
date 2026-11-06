@@ -1,9 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useDispatch } from 'react-redux';
 import UserTabs from './user-tabs';
-import UserAdvertiseSnippets from './user-advertise-snippets';
 import { fetchUserData } from '../action';
 import { session } from '../utils';
+import ReactLoader from '../ad/react-loader';
+
+const Snippets = lazy(() => import('./user-advertise-snippets'));
 
 const UserAdvertise = () => {
 	const dispatch = useDispatch();
@@ -17,7 +20,11 @@ const UserAdvertise = () => {
 	return (
 		<>
 			<UserTabs />
-			<UserAdvertiseSnippets />
+			<Suspense fallback={<ReactLoader />}>
+				<ErrorBoundary fallback={<strong>Could not load ad snippets.</strong>}>
+					<Snippets />
+				</ErrorBoundary>
+			</Suspense>
 		</>
 	);
 };

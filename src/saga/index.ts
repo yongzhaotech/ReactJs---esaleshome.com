@@ -218,8 +218,8 @@ function* sendFormData(action: AnyAction): TypedSaga {
 				yield put(Action.messageCenter(Action.ADD_MESSAGE, data.message));
 			}
 		}
-	} catch (error) {
-		yield put(Action.messageCenter(Action.ADD_MESSAGE, error, true));
+	} catch (error: any) {
+		yield put(Action.messageCenter(Action.ADD_MESSAGE, error.error, true));
 		yield put(Action.loadingData());
 	}
 }
@@ -229,10 +229,10 @@ function* signUserOut(): TypedSaga {
 		const { data }: ApiResponse = yield call(signOut);
 		if (data.ok) {
 			yield put(Action.fetchUserDataSuccess([{ profile: null }, { ads: null }]));
-			yield put(Action.userSignedOut());
 		} else {
-			yield put(Action.messageCenter(Action.ADD_MESSAGE, data, true));
+			yield put(Action.messageCenter(Action.ADD_MESSAGE, data.error, true));
 		}
+		route.location('/ads')
 	} catch (error) {
 		yield put(Action.messageCenter(Action.ADD_MESSAGE, error, true));
 	}

@@ -3,7 +3,6 @@ import { Helper } from '../common/js-funcs';
 import { getLabel } from '../common/label';
 import { Engine } from '../common/engine';
 import {
-	userSignedOut,
 	updateStateModelData,
 	fetchUserDataSuccess
 } from '../action';
@@ -76,11 +75,6 @@ const dataFetchInfo: Record<DataKey, DataFetchInfo> = {
 	}	
 };
 
-const signOutUser = (): void => {
-	Engine.dispatch(fetchUserDataSuccess([{profile: null}, {ads: null}]));
-	Engine.dispatch(userSignedOut());
-};
-
 const remove = (ad: UserAd): void => {
 	const currentAds = Engine.store().USER['ads'] as UserAd[] | undefined,
 		ads = [...currentAds || []],
@@ -102,7 +96,6 @@ const UserFunction = {
 				Http.ServerRequest('sign-out', {action: 'sign_out'}).then((promise: ServerResponse) => {
 					if(promise.data.ok) {
 						Cache.clear();
-						signOutUser();
 					}else {
 						Helper.addMessage(promise.data, true);
 					}

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import browser from '../image/gui/search-icon.svg';
-import { Engine } from '../common/engine';
 import { Helper } from '../common/js-funcs';
 import { useLocalizationContext } from '../context/localization-context';
 import Menus from './menus';
@@ -9,6 +8,7 @@ import MessageBox from './message-box';
 import LargeImages from './large-images';
 import RootReducer from '../reducer';
 import { useUserFunctions } from '../hook/user-function-hook';
+import { session } from '../utils';
 
 type RootState = ReturnType<typeof RootReducer>;
 
@@ -30,7 +30,7 @@ const Footer = () => {
 	return (
 		<footer>
 			<div className='footer'>
-				{Engine.userSignedIn() ? (
+				{session.userSignedIn ? (
 					<button type='button' className='custom-button-white btn btn-default btn-sm' onClick={signOut}>
 						{getLocalizedLabel('c_sign_out')}
 					</button>

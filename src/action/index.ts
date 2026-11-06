@@ -25,7 +25,6 @@ export const ADD_ERRORS = 'ADD_ERRORS';
 export const ADD_POSTERRORS = 'ADD_POSTERRORS';
 export const CLEAR_POSTERRORS = 'CLEAR_POSTERRORS';
 export const USER_SIGNED_IN = 'USER_SIGNED_IN';
-export const USER_SIGNED_OUT = 'USER_SIGNED_OUT';
 export const FETCH_USER_DATA = 'FETCH_USER_DATA';
 export const FETCH_USER_DATA_SUCCESS = 'FETCH_USER_DATA_SUCCESS';
 export const FETCH_USER_ADVERTISE = 'FETCH_USER_ADVERTISE';
@@ -233,10 +232,6 @@ export const clearPostErrors = () => ({
 
 export const userSignedIn = () => ({
 	type: USER_SIGNED_IN,
-});
-
-export const userSignedOut = () => ({
-	type: USER_SIGNED_OUT,
 });
 
 export const fetchUserAdvertise = (advertiseId: Identifier) => ({
