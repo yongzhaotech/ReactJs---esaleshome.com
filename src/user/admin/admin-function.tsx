@@ -1,10 +1,8 @@
 import React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { Http } from '../../common/http-client';
-import { Engine } from '../../common/engine';
 import { Helper } from '../../common/js-funcs';
 import { getLabel } from '../../common/label';
-import { fetchUserDataSuccess } from '../../action';
 import type { Identifier } from '../../types/common';
 import { Cache } from '../../utils';
 
@@ -39,14 +37,6 @@ let admPageVars: Record<string, Record<string, AdminCategoryItem[]>> = {},
 const statuses: Record<string, string> = {0: 'inactive', 1: 'active'},
 actions: Record<string, string> = {0: 'deactivate_ad', 1: 'activate_ad'},
 getParent = (dom: HTMLElement | null): HTMLElement | null => dom ? dom.parentElement : null,
-removeAdRow = (ad: AdminAd): void => {
-	let ads = [...Engine.store().USER['siteAds']],
-		index = ads.indexOf(ad);
-	if(index >= 0) {
-		ads.splice(index, 1);
-		Engine.dispatch(fetchUserDataSuccess([{siteAds: ads}]));
-	}
-},
 AdminFunction = {
     setStatus: (s_a: string, ad: AdminAd, c: number, s: string): void => {
 		const form = document.forms.namedItem(s_a),
@@ -65,7 +55,7 @@ AdminFunction = {
         });
     },
 
-    removeAd: (ad: AdminAd): void => {
+	removeAd: (ad: AdminAd, onDeleted?: () => void): void => {
         Helper.confirm(
         	getLabel('r_sure_delete'),
 			() => {
@@ -74,7 +64,7 @@ AdminFunction = {
 						Helper.addMessage(promise.data.error, true);
 					}else {
 						Cache.clear();
-						removeAdRow(ad);
+						onDeleted?.();
 						Helper.location('admin-ads');
 					}
 				});

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { AdminFunction } from './admin-function';
 import { Helper } from '../../common/js-funcs';
-import { Engine } from '../../common/engine';
+import { session } from '../../utils';
 
 export interface SubCategoryOption {
 	id: string | number;
@@ -148,7 +148,7 @@ class SubCategories extends Component<SubCategoriesProps> {
 
 const mapStateToProps = (state: SubCategoriesState) => ({
 	POSTERRORS: state.POSTERRORS,
-	USERSIGNEDIN: Engine.userSignedIn()
+	USERSIGNEDIN: session.userSignedIn
 });
 
 export default connect(

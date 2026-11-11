@@ -1,9 +1,9 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Engine } from '../../common/engine';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { session } from '../../utils';
+import { fetchUserData } from '../../action';
 import UserTabs from '../user-tabs';
 import Categories from './categories';
-import { fetchUserData } from '../../action';
 
 interface Category {
 	id: string | number;
@@ -11,47 +11,30 @@ interface Category {
 	name_cn: string;
 }
 
-interface SaveCategoryProps {
-	USERSIGNEDIN: boolean;
-	profile?: {
-		access_level?: string | number;
-	};
-	categories?: Category[];
-}
-
 interface SaveCategoryState {
 	USER: {
-		profile?: SaveCategoryProps['profile'];
+		profile?: { access_level?: string | number };
 		categories?: Category[];
 	};
 }
 
-class SaveCategory extends React.Component<SaveCategoryProps> {
-	componentDidMount() {
-		if (this.props.USERSIGNEDIN) {
-			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'categories' }]));
+const SaveCategory = () => {
+	const dispatch = useDispatch();
+	const userSignedIn = session.userSignedIn;
+	const { profile, categories = [] } = useSelector((state: SaveCategoryState) => state.USER);
+
+	useEffect(() => {
+		if (userSignedIn) {
+			dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'categories' }]));
 		}
-	}
+	}, [dispatch, userSignedIn]);
 
-	render() {
-		let { profile, categories } = this.props;
-		categories = categories || [];
-
-		return (
-			<section>
-				{Engine.component(UserTabs, { profile })}
-				{Engine.component(Categories, { profile, categories })}
-			</section>
-		);
-	};
+	return (
+		<section>
+			<UserTabs />
+			<Categories profile={profile} categories={categories} />
+		</section>
+	);
 };
 
-const mapStateToProps = (state: SaveCategoryState) => ({
-	profile: state.USER.profile,
-	categories: state.USER.categories,
-	USERSIGNEDIN: Engine.userSignedIn()
-});
-
-export default connect(
-	mapStateToProps
-)(SaveCategory);
+export default SaveCategory;

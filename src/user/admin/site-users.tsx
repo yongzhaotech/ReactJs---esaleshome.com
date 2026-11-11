@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { UserFunction } from "../user-function";
-import { Engine } from '../../common/engine';
+import { session } from '../../utils';
 
 interface SiteUser {
 	email: string;
@@ -66,7 +66,7 @@ const SiteUsers = class extends Component<SiteUsersProps> {
 };
 
 const mapStateToProps = () => ({
-	USERSIGNEDIN: Engine.userSignedIn()
+	USERSIGNEDIN: session.userSignedIn
 });
 
 export default connect(

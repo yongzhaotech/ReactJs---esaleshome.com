@@ -2,20 +2,11 @@ import React from 'react';
 import { Helper } from '../common/js-funcs';
 import AdminTabs from './admin/admin-tabs';
 import { session } from '../utils';
-import { useSelector } from 'react-redux';
 import { useLocalizationContext } from '../context/localization-context';
-import RootReducer from '../reducer';
 import { useUserFunctions } from '../hook/user-function-hook';
-
-type RootState = ReturnType<typeof RootReducer>;
-
-type Profile = {
-	profile?: {access_level?: string | number;}
-}
 
 const UserTabs = () => {
 	const { getLocalizedLabel: getLabel } = useLocalizationContext();
-	const { profile }: Profile = useSelector((state: RootState) =>state.USER);
 	const { signOut, userPage } = useUserFunctions();
 
 	if (session.userSignedIn) {
@@ -43,7 +34,7 @@ const UserTabs = () => {
 				>
 					{getLabel('c_my_post')}
 				</span>
-				<AdminTabs profile={profile} />
+				<AdminTabs />
 			</section>
 		);
 	}

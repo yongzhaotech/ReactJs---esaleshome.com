@@ -138,7 +138,7 @@ const submit = (data: {
 		const xhr = new XMLHttpRequest();
 
 		xhr.onload = () => {
-			if (xhr.status === 200) {
+			if (xhr.status === 200 || (xhr.response && typeof xhr.response === 'object' && 'error' in xhr.response)) {
 				res({ data: xhr.response as ApiData });
 			} else {
 				rej({ error: getLabel('backend_error') } as ApiError);
@@ -184,7 +184,7 @@ const Http = {
 				formControlTypes.has(element.type.toLowerCase())
 		)) {
 			if (!formData) {
-				data.requestData.push(elem.name + '=' + elem.value);
+				data.requestData.push(`${encodeURIComponent(elem.name)}=${encodeURIComponent(elem.value)}`);
 			}
 		}
 
@@ -236,7 +236,7 @@ const Http = {
 				formControlTypes.has(element.type.toLowerCase())
 		)) {
 			if (!formData) {
-				data.requestData.push(`${name}=${value}`);
+				data.requestData.push(`${encodeURIComponent(name)}=${encodeURIComponent(value)}`);
 			}
 		}
 

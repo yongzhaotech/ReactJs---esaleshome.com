@@ -1,9 +1,9 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Engine } from '../../common/engine';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { session } from '../../utils';
+import { fetchUserData } from '../../action';
 import UserTabs from '../user-tabs';
 import SiteUsers from './site-users';
-import { fetchUserData } from '../../action';
 
 interface SiteUser {
 	email: string;
@@ -14,47 +14,30 @@ interface SiteUser {
 	signin_count: number;
 }
 
-interface AdminUsersProps {
-	USERSIGNEDIN: boolean;
-	profile?: {
-		access_level?: string | number;
-	};
-	users?: SiteUser[];
-}
-
 interface AdminUsersState {
 	USER: {
-		profile?: AdminUsersProps['profile'];
+		profile?: { access_level?: string | number };
 		siteUsers?: SiteUser[];
 	};
 }
 
-const AdminUsers = class extends React.Component<AdminUsersProps> {
-	componentDidMount() {
-		if (this.props.USERSIGNEDIN) {
-			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'siteUsers' }]));
+const AdminUsers = () => {
+	const dispatch = useDispatch();
+	const userSignedIn = session.userSignedIn;
+	const { profile, siteUsers = [] } = useSelector((state: AdminUsersState) => state.USER);
+
+	useEffect(() => {
+		if (userSignedIn) {
+			dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'siteUsers' }]));
 		}
-	}
+	}, [dispatch, userSignedIn]);
 
-	render() {
-		let { profile, users } = this.props;
-		users = users || [];
-
-		return (
-			<section>
-				{Engine.component(UserTabs, { profile })}
-				{Engine.component(SiteUsers, { profile, users })}
-			</section>
-		);
-	};
+	return (
+		<section>
+			<UserTabs />
+			<SiteUsers profile={profile} users={siteUsers} />
+		</section>
+	);
 };
 
-const mapStateToProps = (state: AdminUsersState) => ({
-	USERSIGNEDIN: Engine.userSignedIn(),
-	profile: state.USER.profile,
-	users: state.USER.siteUsers
-});
-
-export default connect(
-	mapStateToProps
-)(AdminUsers);
+export default AdminUsers;

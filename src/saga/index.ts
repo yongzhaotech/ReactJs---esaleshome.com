@@ -67,7 +67,7 @@ function* searchAdvertise(action: AnyAction): TypedSaga {
 }
 
 function* keyWordSearch(action: AnyAction): TypedSaga {
-	if (action.keyWord.length < 3 || action.keyWord.match(/^ *$/)) {
+	if (action.keyWord.match(/^ *$/)) {
 		return;
 	}
 	action.keyWord = action.keyWord.replace(/ {2,}/g, ' ');
@@ -197,11 +197,18 @@ function* sendFormData(action: AnyAction): TypedSaga {
 		} else {
 			if (post) {
 				yield put(Action.loadingData()); // turn off spinner for post form submission
+				if (data.refresh === 'categories') {
+					yield put(Action.fetchUserData([{ dataKey: 'profile' }, { dataKey: 'categories' }]));
+				} else if (data.refresh === 'subCategories') {
+					yield put(Action.fetchUserData([{ dataKey: 'profile' }, { dataKey: 'subCategories' }]));
+				}
 
 				if (data.load) {
 					Cache.clear();
 					yield put(Action.messageCenter(Action.CLEAR_MESSAGE));
 					route.location(`ad-detail/${data.load}`);
+				} else if (data.page === 'save-category' || data.page === 'save-subcategory') {
+					route.location(data.page);
 				}
 			} else {
 				yield put(Action.setActionBox({ box: null }));

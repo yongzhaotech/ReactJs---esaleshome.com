@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { AdminFunction } from './admin-function';
 import { Helper } from '../../common/js-funcs';
-import { Engine } from '../../common/engine';
+import { session } from '../../utils';
 
 interface Category {
 	id: string | number;
@@ -100,7 +100,7 @@ class Categories extends Component<CategoriesProps> {
 
 const mapStateToProps = (state: { POSTERRORS: Record<string, string> }) => ({
 	POSTERRORS: state.POSTERRORS,
-	USERSIGNEDIN: Engine.userSignedIn()
+	USERSIGNEDIN: session.userSignedIn
 });
 
 export default connect(

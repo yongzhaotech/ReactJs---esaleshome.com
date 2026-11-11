@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Engine } from '../common/engine';
 import { AdInfo } from '../common/ad-info';
@@ -8,6 +8,7 @@ import RootReducer from '../reducer';
 import { Boxes } from './boxes';
 import { route } from '../utils';
 import { useFunctions } from '../hook/js-function-hook';
+import { useDebounce } from '../hook/debounce';
 
 type RootState = ReturnType<typeof RootReducer>;
 
@@ -19,6 +20,17 @@ const ActionBox = () => {
 	const dispatch = useDispatch();
 	const { toggleLang, getLocalizedLabel } = useLocalizationContext();
 	const { openMenu } = useFunctions();
+	const [word, setWord] = useState('');
+	const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setWord(event.target.value);
+	};
+	const search = useCallback(()=>{
+		if(word){
+			dispatch(keyWordSearch(word));
+		}
+	}, [word, dispatch]);
+
+	useDebounce(search);
 
 	useEffect(() => {
 		Engine.registerMenuItems();
@@ -54,9 +66,7 @@ const ActionBox = () => {
 					id='keyWordSearch'
 					className='key-word-search'
 					placeholder={getLocalizedLabel('c_key_search')}
-					onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-						dispatch(keyWordSearch(event.target.value))
-					}
+					onChange={onChange}
 				/>
 				{Box && (
 					<div className='ad_action_box_wrapper'>

@@ -1,6 +1,6 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Engine } from '../../common/engine';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { session } from '../../utils';
 import UserTabs from '../user-tabs';
 import SiteAds, { SiteAd, SiteAdsPage } from './site-ads';
 import { fetchUserData } from '../../action';
@@ -13,51 +13,36 @@ interface SiteAdsData {
 	};
 }
 
-interface AdminAdsProps {
-	USERSIGNEDIN: boolean;
-	profile?: {
-		access_level?: string | number;
-	};
-	siteAds?: SiteAdsData;
-}
-
 interface AdminAdsState {
-	language: string;
 	USER: {
-		profile?: AdminAdsProps['profile'];
+		profile?: {
+			access_level?: string | number;
+		};
 		siteAds?: SiteAdsData;
 	};
 }
 
-const AdminAds = class extends React.Component<AdminAdsProps> {
-	componentDidMount() {
-		if (this.props.USERSIGNEDIN) {
-			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'siteAds' }]));
+const AdminAds = () => {
+	const dispatch = useDispatch();
+	const userSignedIn = session.userSignedIn;
+	const { profile, siteAds } = useSelector((state: AdminAdsState) => state.USER);
+
+	useEffect(() => {
+		if (userSignedIn) {
+			dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'siteAds' }]));
 		}
-	}
+	}, [dispatch, userSignedIn]);
 
-	render() {
-		const { profile, siteAds, USERSIGNEDIN } = this.props,
-			ads = (siteAds && siteAds.ads) || [],
-			pages = (siteAds && siteAds.pages && siteAds.pages.p) || [],
-			currentPage = (siteAds && siteAds.pages && siteAds.pages.c) || 0;
+	const ads = siteAds?.ads || [];
+	const pages = siteAds?.pages?.p || [];
+	const currentPage = siteAds?.pages?.c || 0;
 
-		return (
-			<section>
-				{Engine.component(UserTabs, { profile })}
-				{Engine.component(SiteAds, { profile, ads, pages, currentPage, USERSIGNEDIN })}
-			</section>
-		);
-	};
+	return (
+		<section>
+			<UserTabs />
+			<SiteAds profile={profile} ads={ads} pages={pages} currentPage={currentPage} USERSIGNEDIN={userSignedIn} />
+		</section>
+	);
 };
 
-const mapStateToProps = (state: AdminAdsState) => ({
-	LANGUAGE: state.language,
-	USERSIGNEDIN: Engine.userSignedIn(),
-	profile: state.USER.profile,
-	siteAds: state.USER.siteAds
-});
-
-export default connect(
-	mapStateToProps
-)(AdminAds);
+export default AdminAds;

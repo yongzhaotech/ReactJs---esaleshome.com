@@ -1,9 +1,9 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Engine } from '../../common/engine';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { session } from '../../utils';
+import { fetchUserData } from '../../action';
 import UserTabs from '../user-tabs';
 import VisitorHits from './visitor-hits';
-import { fetchUserData } from '../../action';
 
 interface VisitorHit {
 	ip: string;
@@ -24,50 +24,34 @@ interface VisitorHitsData {
 	};
 }
 
-interface AdminVisitorHitsProps {
-	USERSIGNEDIN: boolean;
-	profile?: {
-		access_level?: string | number;
-	};
-	visitorHits?: VisitorHitsData;
-}
-
 interface AdminVisitorHitsState {
 	USER: {
-		profile?: AdminVisitorHitsProps['profile'];
+		profile?: { access_level?: string | number };
 		visitorHits?: VisitorHitsData;
 	};
 }
 
-const AdminVisitorHits = class extends React.Component<AdminVisitorHitsProps> {
-	componentDidMount() {
-		if (this.props.USERSIGNEDIN) {
-			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'visitorHits' }]));
+const AdminVisitorHits = () => {
+	const dispatch = useDispatch();
+	const userSignedIn = session.userSignedIn;
+	const { profile, visitorHits } = useSelector((state: AdminVisitorHitsState) => state.USER);
+
+	useEffect(() => {
+		if (userSignedIn) {
+			dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'visitorHits' }]));
 		}
-	}
+	}, [dispatch, userSignedIn]);
 
-	render() {
-		let { profile, visitorHits } = this.props;
-		visitorHits = visitorHits || {};
-		let hits = visitorHits.hits || [],
-			pages = (visitorHits.pages && visitorHits.pages.p) || [],
-			currentPage = (visitorHits.pages && visitorHits.pages.c) || 0;
+	const hits = visitorHits?.hits || [];
+	const pages = visitorHits?.pages?.p || [];
+	const currentPage = visitorHits?.pages?.c || 0;
 
-		return (
-			<section>
-				{Engine.component(UserTabs, { profile })}
-				{Engine.component(VisitorHits, { profile, hits, pages, currentPage })}
-			</section>
-		);
-	};
+	return (
+		<section>
+			<UserTabs />
+			<VisitorHits profile={profile} hits={hits} pages={pages} currentPage={currentPage} USERSIGNEDIN={userSignedIn} />
+		</section>
+	);
 };
 
-const mapStateToProps = (state: AdminVisitorHitsState) => ({
-	USERSIGNEDIN: Engine.userSignedIn(),
-	profile: state.USER.profile,
-	visitorHits: state.USER.visitorHits
-});
-
-export default connect(
-	mapStateToProps
-)(AdminVisitorHits);
+export default AdminVisitorHits;

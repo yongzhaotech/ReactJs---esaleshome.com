@@ -1,9 +1,9 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Engine } from '../../common/engine';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { session } from '../../utils';
+import { fetchUserData } from '../../action';
 import UserTabs from '../user-tabs';
 import Permission from './permission';
-import { fetchUserData } from '../../action';
 
 interface PermissionFile {
 	page: string;
@@ -11,47 +11,30 @@ interface PermissionFile {
 	check_ad: string | number;
 }
 
-interface AdminPermProps {
-	USERSIGNEDIN: boolean;
-	profile?: {
-		access_level?: string | number;
-	};
-	files?: PermissionFile[];
-}
-
 interface AdminPermState {
 	USER: {
-		profile?: AdminPermProps['profile'];
+		profile?: { access_level?: string | number };
 		files?: PermissionFile[];
 	};
 }
 
-const AdminPerm = class extends React.Component<AdminPermProps> {
-	componentDidMount() {
-		if (this.props.USERSIGNEDIN) {
-			Engine.dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'files' }]));
+const AdminPerm = () => {
+	const dispatch = useDispatch();
+	const userSignedIn = session.userSignedIn;
+	const { profile, files = [] } = useSelector((state: AdminPermState) => state.USER);
+
+	useEffect(() => {
+		if (userSignedIn) {
+			dispatch(fetchUserData([{ dataKey: 'profile' }, { dataKey: 'files' }]));
 		}
-	}
+	}, [dispatch, userSignedIn]);
 
-	render() {
-		let { profile, files, USERSIGNEDIN } = this.props;
-		files = files || [];
-
-		return (
-			<section>
-				{Engine.component(UserTabs, { profile })}
-				{Engine.component(Permission, { profile, files, USERSIGNEDIN })}
-			</section>
-		);
-	};
+	return (
+		<section>
+			<UserTabs />
+			<Permission profile={profile} files={files} USERSIGNEDIN={userSignedIn} />
+		</section>
+	);
 };
 
-const mapStateToProps = (state: AdminPermState) => ({
-	USERSIGNEDIN: Engine.userSignedIn(),
-	profile: state.USER.profile,
-	files: state.USER.files
-});
-
-export default connect(
-	mapStateToProps
-)(AdminPerm);
+export default AdminPerm;

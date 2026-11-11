@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 import { UserFunction } from '../user-function';
 import { AdminFunction } from './admin-function';
-import { Engine } from '../../common/engine';
 import { fetchUserData } from '../../action';
 
 export interface SiteAd {
@@ -30,13 +30,12 @@ interface SiteAdsProps {
 	USERSIGNEDIN: boolean;
 }
 
-class SiteAds extends Component<SiteAdsProps> {
-	render() {
-		const {profile, ads, pages, currentPage, USERSIGNEDIN} = this.props;
+const SiteAds = ({ profile, ads, pages, currentPage, USERSIGNEDIN }: SiteAdsProps) => {
+	const dispatch = useDispatch();
 
-        if(!USERSIGNEDIN || !profile || Number(profile.access_level) < 2 || !ads.length) {
-            return null;
-        }
+    if(!USERSIGNEDIN || !profile || Number(profile.access_level) < 2 || !ads.length) {
+        return null;
+    }
 
 		let pagesList = pages.length ? (	
 				<nav className="btn_list">
@@ -44,7 +43,7 @@ class SiteAds extends Component<SiteAdsProps> {
 					pages.map(page => { 
 						let className = +currentPage === +page.i ? "page current_page" : "page";
 						return (
-							<div className={className} onClick={() => {Engine.dispatch(fetchUserData([{dataKey: 'siteAds', page}]))}} key={page.i}>
+							<div className={className} onClick={() => {dispatch(fetchUserData([{dataKey: 'siteAds', page}]))}} key={page.i}>
 								{page.n}
 							</div>
 						)
@@ -93,7 +92,7 @@ class SiteAds extends Component<SiteAdsProps> {
 								<td>
 									<input type='button' onClick={() => {AdminFunction.setStatus('set_advertise', ad, index, '1')}} value='activate' />
 									<input type='button' onClick={() => {AdminFunction.setStatus('set_advertise', ad, index, '0')}} value='deactivate' />
-									<input type='button' onClick={() => {AdminFunction.removeAd(ad)}} value='delete' />
+									<input type='button' onClick={() => {AdminFunction.removeAd(ad, () => dispatch(fetchUserData([{dataKey: 'siteAds'}])))}} value='delete' />
 								</td>
 							</tr>
 							)
@@ -112,7 +111,6 @@ class SiteAds extends Component<SiteAdsProps> {
 				</form>
 			</section>
 		);
-	};
-}
+};
 
 export default SiteAds;
