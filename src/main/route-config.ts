@@ -1,4 +1,5 @@
 import React from 'react';
+import { Dashboard } from '../box/dashboard';
 import AdvertiseList from '../ad/advertise-list';
 import AdvertiseDetail from '../ad/advertise-detail';
 import PostAdvertise from '../ad/post-advertise';
@@ -31,6 +32,10 @@ const Config: RouteDefinition[] = [
 	{
 		path: '/ads/ad-detail/:advertiseId',
 		comp: AdvertiseDetail
+	},
+	{
+		path: '/ads/dashboard',
+		comp: Dashboard
 	},
 	{
 		path: '/ads/post-ad',
